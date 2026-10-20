@@ -52,3 +52,8 @@ Ergebnisse:
 - Eigenschaftstests (hypothesis): keine Tour über Nutzlast oder Paletten, jede gültige Sendung genau einer Tour, der Bahn oder dem Einzelversand mit mehreren Fahrzeugen zugeordnet, Summe der Zuordnung gleich Tourwert, Rangregel monoton.
 Technischer Befund: macOS markiert die `.pth`-Datei der Editable-Installation im Ordner Desktop als versteckt; Python 3.12 überspringt sie. Lösung: `PYTHONPATH=src` im Makefile und `pythonpath` in der pytest-Konfiguration.
 Gates G3, G4, G5: bestanden.
+
+## S12 Design-System
+Ergebnis: `ui/theme.py` (Farbtokens 7.2, Kartenlinien, Status-Chip, Szenario-Umschalter, CSS mit `tk-card`, `tk-label`, `tk-kpi`, Fokus-Ring, 150 ms Übergänge, Kachelfilter), `ui/format.py` (deutsches Zahlenformat mit schmalem Leerzeichen und echtem Minuszeichen), `ui/components.py` (Kennzahlenkachel, Zustände leer, lädt, Fehler, Erfolg, Hinweis), `ui/preview.py` (Seite `/vorschau`), Schrift Inter 4.1 lokal (Regular, Medium, SemiBold; Lizenz SIL OFL 1.1 beigelegt; Quelle: GitHub-Release rsms/inter v4.1).
+Prüfung: `tests/test_contrast.py` rechnet alle Text-Hintergrund-Paare (mindestens 4,5 : 1), alle Status-Chips und die Kartenlinien gegen eine entsättigte Kachelfläche `#E5E5E5` und gegen Weiß (mindestens 3 : 1). Die in 7.2 genannten Kontrastwerte sind nachgerechnet und stimmen. `tests/test_no_placeholders.py` sucht `Lorem`, `TODO`, `xxx` und das alleinstehende Wort "Beispiel" (das Wort "Beispieldaten" bleibt erlaubt, weil es der Dateiname der Excel ist).
+Gate G6 (Teil): bestanden.
