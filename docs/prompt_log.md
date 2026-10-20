@@ -84,3 +84,30 @@ Prüfung: Round Trip CSV und XLSX (Export, Import, Neuberechnung) ergibt identis
 Befund: Der XLSX-Export hieß zuerst "Input" und wurde beim Wiedereinlesen wie die Modellmappe ab Zeile 14 gelesen; jetzt Blatt "Sendungen", die Modellmappe wird am Blatt "Assumptions" erkannt.
 Nicht automatisierbar: Neuberechnung der Testkopie in Microsoft Excel (openpyxl rechnet keine Formeln). Manueller Schritt: Kopie in Excel öffnen, neu berechnen, Overview C10:L12 mit der App vergleichen.
 Gate G7: bestanden mit den genannten Einschränkungen (kein Live-Gemini, Excel-Neuberechnung manuell).
+
+## S17 Dokumentation und Prompt-Log
+Ergebnis: `README.md` (Start in fünf Schritten, Befehle ohne make, Assistent, Aufbau, Abnahme, Lizenzen), `docs/Annahmen.md` (alle Parameter mit Wert, Einheit, Beleg und Quelle aus Assumptions; Formeln in LaTeX; Systemgrenze; Verifikationsstatus; unsichere Quellen als **unbelegt** oder **Sekundärquelle** markiert), `THIRD_PARTY.md` final, dieses Log.
+
+## Übersicht der Werkzeuge
+| Werkzeug | Einsatz |
+|---|---|
+| Claude Code (Claude Opus 5.5) | Lesen des Gesamtpakets und der Excel-Formeln, Umsetzung S0 bis S17, Tests, Browserprüfung (Playwright), Review S18 |
+| Context7, Websuche | Prüfung der Gemini-Dokumentation und der Limits der kostenlosen Stufe |
+| GitHub-API (`gh`) | aktuelle Versionen der GitHub Actions und der Schrift Inter |
+| Excel v11 | fachliche Referenz; gespeicherte Werte über openpyxl |
+
+## Prüfung durch die Gruppe (offen)
+Die folgenden Punkte sind nicht durch Claude Code erledigbar und gehören zur Abnahme durch die Gruppe:
+1. Code-Review jedes Merges durch ein anderes Gruppenmitglied (lokal ohne Pull Request gemergt, weil kein Remote vereinbart war).
+2. Excel-Mappe in Microsoft Excel neu berechnen und `make reference` wiederholen (die gespeicherten Werte stammen aus LibreOffice).
+3. Ein Lauf des Assistenten mit echtem Gemini-Schlüssel, inklusive der Negativfälle aus Abschnitt 10.
+4. Belege für die als **unbelegt** markierten Parameter (P4, P5).
+5. Freigabe der Seminardaten, bevor die Excel in ein Remote-Repository kommt.
+
+## Kritische Reflexion der KI-Nutzung
+- Nutzen: Der Port der rund 60 Rechenspalten, der Tourbildung und der 20 Prüfungen entstand in einer Sitzung. Der Abgleich gegen alle Zellen der Excel (statt nur gegen Summen) hat gezeigt, dass die Übertragung bis 1e-13 genau ist. Ohne diesen Abgleich wäre Vertrauen in die KI-Ausgabe nicht begründbar.
+- Grenzen der Kontrolle: Die Genauigkeit belegt nur, dass Python dieselbe Rechnung wie die Excel ausführt. Sie belegt nicht, dass die Excel fachlich richtig ist. Fachliche Annahmen (A01, A05, A10, I01, Verbrauchswerte, Dieselfaktor) bleiben Setzungen der Gruppe; die KI hat sie nicht geprüft und nicht verbessert.
+- Fehler der KI, die erst durch Prüfung sichtbar wurden: falsche Zuordnung von Einheit und Typ der Fahrzeugkennwerte in der Erklärung; XLSX-Export, der beim Wiedereinlesen falsch erkannt wurde; Testdatensatz mit Start gleich Ziel; ein Demo-Modus, der zunächst bei freien Anfragen einen fremden aufgezeichneten Fall abgespielt hätte. Alle wurden durch Tests oder Browserprüfung gefunden und behoben.
+- Tests der KI über eigene Arbeit: Die Tests T01 bis T10 sind Nachbauten nach Beschreibung, nicht die Originaldatensätze. Die Agent-Tests prüfen den Orchestrator mit einem Ersatzanbieter, nicht das Sprachmodell. Diese Grenzen stehen in den Testdateien.
+- Sprachmodell im Produkt: Der Assistent rechnet nicht. Die Zahlenprüfung verwirft jede Antwort mit Zahlen ohne Werkzeugquelle. Sie erkennt keine falsch zitierten Texte und keine sinnentstellende Auswahl von Zahlen; die Agent-Spur bleibt deshalb sichtbar.
+- Datenschutz: Die kostenlose Gemini-Stufe darf Eingaben verwenden. Nur synthetische Daten eingeben; die Demo läuft lokal.
