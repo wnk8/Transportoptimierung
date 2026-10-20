@@ -1,3 +1,6 @@
+# PYTHONPATH=src: macOS can flag the editable-install .pth file as hidden; Python 3.12 then skips it.
+export PYTHONPATH := src
+
 run:
 	uv run python -m tk.ui.app
 
