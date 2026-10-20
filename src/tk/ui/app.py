@@ -19,10 +19,12 @@ from tk.explain import SPEC, explain
 from tk.geo import resolve_place
 from tk.inputs import parse_csv_bytes, parse_text, parse_xlsx
 from tk.models import Result, Shipment
+from tk.routing import relation_table_csv
 from tk.scenarios import calculate, parse_change, sensitivity_row, with_changes
 from tk.ui import components
 from tk.ui import format as fmt
-from tk.ui.map_view import MapView
+from tk.ui.map_area import MapArea, route_cache
+from tk.ui.map_view import RELATION_EVENT
 from tk.ui.preview import preview_page
 from tk.ui.state import Session, base_data, reference, snapshot
 from tk.ui.theme import ScenarioToggle, apply_theme, status_chip
@@ -64,7 +66,8 @@ class Page:
                     self._param_card()
                 with ui.column().classes("gap-4 flex-1 min-w-0"):
                     with ui.element("div").classes("tk-card w-full"):
-                        self.map = MapView(self.s.result)
+                        assert self.s.result is not None
+                        self.map = MapArea(self, self.s.result)
                     self.progress = ui.element("div").classes("tk-progress w-full")
                     with self.progress:
                         ui.element("div")
@@ -76,6 +79,7 @@ class Page:
                     )
             self._tabs()
             ui.label(f"{FOOTER} | Datenstand: {self.s.base.source}").classes("tk-footer")
+        ui.on(RELATION_EVENT, lambda e: self.map.select_relation(str(e.args)))
         self.refresh_all()
         ui.timer(0.5, self.map.probe_tiles, once=True)
 
@@ -211,6 +215,25 @@ class Page:
                     .classes("flex-1")
                 )
                 self.c01_label = ui.label("").classes("tk-label").style("width:56px")
+            with ui.row().classes("w-full items-center no-wrap gap-2"):
+                self.road_switch = ui.switch(
+                    "Variante: Distanz aus Straßenrouten (ORS)",
+                    on_change=lambda e: self.set_road_km(bool(e.value)),
+                ).props("dense color=primary")
+                ui.button(
+                    "Relationstabelle",
+                    on_click=lambda: (
+                        ui.download.content(
+                            relation_table_csv(self.s.result, route_cache()).encode("utf-8-sig"),
+                            "relationstabelle_plz_orte.csv",
+                        )
+                        if self.s.result is not None
+                        else None
+                    ),
+                ).props("flat dense no-caps color=primary").tooltip(
+                    "Straßen-km zum Einfügen in PLZ_Orte R:T der Excel"
+                )
+            self.road_hint = ui.label("").classes("tk-label")
             self.param_note = ui.label("").classes("tk-note")
             self.param_note.set_visibility(False)
 
@@ -267,6 +290,26 @@ class Page:
         else:
             self.s.changes[field] = value
         ui.timer(0, self.recalculate, once=True)
+
+    def set_road_km(self, on: bool) -> None:
+        if on == self.s.road_km:
+            return
+        self.s.road_km = on
+        ui.timer(0, self.recalculate, once=True)
+
+    def refresh_road_toggle(self) -> None:
+        n = len(route_cache())
+        self.road_switch.set_enabled(n > 0)
+        if n == 0:
+            self.road_hint.set_text("Keine Straßenrouten im Cache: ORS_API_KEY in .env und make routes.")
+        elif self.s.road_km and self.s.result is not None:
+            used = sum(1 for r in self.s.result.valid_rows if r.distanz_quelle == "Relationstabelle")
+            self.road_hint.set_text(
+                f"{used} Sendungen rechnen mit Straßen-km (Quelle Relationstabelle). Die Referenzwerte der Excel gelten "
+                "für diese Variante nicht."
+            )
+        else:
+            self.road_hint.set_text(f"{n} Straßenrouten im Cache. Standard: Luftlinie × I01 wie die Excel.")
 
     def reset_params(self) -> None:
         self.s.changes.clear()
@@ -395,6 +438,7 @@ class Page:
         ]
         self.param_note.set_text("Abweichend von Assumptions: " + ", ".join(changed))
         self.param_note.set_visibility(bool(changed))
+        self.refresh_road_toggle()
         self._kpis(r)
         self.map.update(r, self.s.scenario)
         self._shipments_table(r)
@@ -522,11 +566,13 @@ class Page:
                 ("umin", "min. Auslastung"), ("co2", "CO₂e Tour kg"), ("co2e", "Σ CO₂e einzeln kg"),
                 ("kosten", "Kosten Tour €"), ("kostene", "Σ Kosten einzeln €"), ("b", "Entscheidung"),
             ]  # fmt: skip
-            ui.table(
+            table = ui.table(
                 columns=[{"name": c, "label": lab, "field": c, "sortable": True,
                           "align": "left" if c in ("start", "fzg", "b", "datum") else "right"} for c, lab in cols],
                 rows=rows, row_key="nr", pagination={"rowsPerPage": 15},
-            ).props("dense flat sticky-header").classes("w-full")  # fmt: skip
+            ).props("dense flat sticky-header").classes("w-full cursor-pointer")  # fmt: skip
+            table.on("rowClick", lambda e: self.map.open_tour(int(e.args[1]["nr"])))
+            ui.label("Zeile anklicken: Tour in der Karte (Tab Touren) mit Begründung.").classes("tk-label")
 
     def _scenarios(self, r: Result) -> None:
         self.scen_box.clear()
@@ -647,7 +693,11 @@ class Page:
         dialog.open()
 
     def _explain_content(self, key: str, r: Result) -> None:
-        ref = reference() if self.s.shipments == self.s.base.shipments and not self.s.changes else None
+        ref = (
+            reference()
+            if self.s.shipments == self.s.base.shipments and not self.s.changes and not self.s.road_km
+            else None
+        )
         e = explain(key, self.s.params, r, ref)  # type: ignore[arg-type]
         ui.label(f"{e.kennzahl} ({e.einheit})").classes("tk-section")
         ui.markdown(f"$$ {e.formel} $$", extras=["latex"])
@@ -705,7 +755,7 @@ class Page:
         if ref is None:
             components.empty_state("Referenz fehlt: make reference ausführen.")
             return
-        if self.s.shipments != self.s.base.shipments or self.s.changes:
+        if self.s.shipments != self.s.base.shipments or self.s.changes or self.s.road_km:
             components.note(
                 "Abgleich nur für die Beispieldaten mit Parametern aus Assumptions. Beispieldaten laden und Parameter zurücksetzen."
             )

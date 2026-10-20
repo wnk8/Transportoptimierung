@@ -31,13 +31,13 @@ def test_map_lines_encode_scenarios() -> None:
     ist = line_specs(result, "M3", "vorher")
     plan = line_specs(result, "M3", "nachher")
     assert len(ist) == 45
-    dashed = [o for _, o, _ in plan if o.get("dashArray")]
+    dashed = [o for _, o, _, _ in plan if o.get("dashArray")]
     assert dashed, "Bahn muss gestrichelt sein"
     rels = relations(result, "M3")
     assert sum(r.n_bahn for r in rels) == 551
     assert sum(r.sendungen for r in rels) == 2266
     m2 = line_specs(result, "M2", "nachher")
-    assert not [o for _, o, _ in m2 if o.get("dashArray")]
+    assert not [o for _, o, _, _ in m2 if o.get("dashArray")]
 
 
 @needs_excel

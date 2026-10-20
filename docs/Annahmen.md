@@ -92,7 +92,16 @@ $$x_i = \frac{tkm_i}{\sum_{j\in T} tkm_j}X_T,\qquad \Delta = \frac{\sum \mathrm{
 
 Rundung vor dem Ranking: 6 Nachkommastellen, kaufmännisch (half away from zero) über `decimal.Decimal`.
 
-## 6. Systemgrenze
+## 6. Straßenrouten (Darstellung und Variante)
+
+Straßenrouten kommen von OpenRouteService (Profil `driving-hgv`, Lkw-Beschränkungen laut ORS) und werden lokal gespeichert. Sie sind **nicht** Rechengrundlage des Standards; die Rechnung bleibt Luftlinie mal I01 wie in der Excel.
+
+- Ansicht "Straße gegen Luftlinie": je Relation Luftlinie, Näherung $d_L \cdot I_{01}$, Straßen-km und Faktor $d_S / d_L$; dazu der empirische Faktor $\sum d_S / \sum d_L$ als Prüfwert für I01 (Projektpunkt P5).
+- Variante "Distanz aus Straßenrouten": Die Straßen-km gehen als Einträge der Relationstabelle (PLZ_Orte R:T, Input X) in die Rechnung; Quelle je Sendung "Relationstabelle". Die Referenzwerte der Excel gelten dann nicht; mit dem Export "Relationstabelle" rechnet die Excel dieselbe Variante.
+- Tourrouten: Das Modell kennt keine Stoppreihenfolge (Tourstrecke $d_{\max}(1 + A_{10}(\text{Stopps}-1))$). Die Karte ordnet die Stopps nach "nächster Nachbar" ab Start; das ist Darstellung.
+- Fahrzeugvergleich: Die Tabellen "Warum dieses Fahrzeug?" rechnen alle Fahrzeugklassen mit den Formeln K2.4 bis K2.10. Gewählt ist immer die Klasse der Excel (Rangregel); die übrigen Zeilen sind Vergleichsrechnungen. Einen Pkw enthält die Flotte nicht.
+
+## 7. Systemgrenze
 
 | Bereich | Enthalten | Nicht enthalten |
 |---|---|---|
@@ -102,7 +111,7 @@ Rundung vor dem Ranking: 6 Nachkommastellen, kaufmännisch (half away from zero)
 | Servicegrad | Anteil der Sendungen ohne Zusatzlaufzeit | Fahrpläne, Zeitfenster |
 | Szenarien | Ist (Einzelversand), M2 (Bündelung der Lkw-Sendungen, Bahn-Sendungen im Ist), M3 (Bahn, dann Bündelung) | Eigenständige Tourbildung ohne Bahnprüfung |
 
-## 7. Verifikationsstatus
+## 8. Verifikationsstatus
 
 | Prüfung | Ergebnis | Nachweis |
 |---|---|---|

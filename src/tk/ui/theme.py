@@ -36,6 +36,9 @@ MAP_LINES: dict[str, tuple[str, str]] = {
     "ist": ("#B5694A", ""),
     "lkw": ("#2D8470", ""),
     "bahn": ("#2F6FA8", "8 6"),
+    "luft": ("#56616E", "4 6"),
+    "strasse": ("#1F2933", ""),
+    "auswahl": ("#B42318", ""),
 }
 """Kartenlinien: Farbe und Strichmuster (Muster zusätzlich zur Farbe)."""
 
