@@ -47,6 +47,17 @@ VECTORS: dict[str, str] = {
     "referenz_auslastung": "v_LFref",
 }
 
+VECTOR_UNITS: dict[str, str] = {
+    "name": "",
+    "paletten": "Paletten",
+    "nutzlast_kg": "kg",
+    "verbrauch_l_km": "l/km",
+    "g_tkm": "g CO₂e/tkm",
+    "kostensatz_eur_km": "€/km",
+    "referenz_auslastung": "Anteil",
+}
+"""Einheiten der Fahrzeugtabelle laut Spaltenköpfen in Assumptions (Zeilen 24, 31, 38, 58)."""
+
 SHEET = "Assumptions"
 
 
@@ -75,7 +86,10 @@ def load_assumptions(data: WorkbookData) -> Assumptions:
     vehicles = tuple(Vehicle(**{field: columns[field][i] for field in VECTORS}) for i in range(count))
     for i in range(count):
         for field, name in VECTORS.items():
-            meta[f"{field}[{i}]"] = _meta(data, name, i)
+            m = _meta(data, name, i)
+            if field in ("kostensatz_eur_km", "referenz_auslastung"):
+                m = m.model_copy(update={"typ": "Eingabe (Standardwert)"})
+            meta[f"{field}[{i}]"] = m.model_copy(update={"unit": VECTOR_UNITS[field]})
     return Assumptions(**values, vehicles=vehicles, meta=meta)
 
 
