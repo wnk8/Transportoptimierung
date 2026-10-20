@@ -52,4 +52,4 @@ Die kostenlose Stufe darf Eingaben zur Produktverbesserung nutzen: nur synthetis
 
 ## Daten und Lizenzen
 
-Postleitzahl- und Ortsdaten: GeoNames, geonames.org, CC BY 4.0. Kartendaten: © OpenStreetMap contributors (ODbL). Weitere Komponenten: `THIRD_PARTY.md`. Das Repository ist privat und ohne Lizenzdatei, bis die Gruppe entscheidet.
+Postleitzahl- und Ortsdaten: GeoNames, geonames.org, CC BY 4.0. Kartendaten: © OpenStreetMap contributors (ODbL). Weitere Komponenten: `THIRD_PARTY.md`. Das Repository ist privat; der Code steht unter der MIT-Lizenz (`LICENSE`). Daten und Excel-Mappen sind nicht enthalten.
