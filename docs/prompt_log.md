@@ -120,3 +120,11 @@ Danach getrennt vom Review behoben: B1 (Ordner `data/excel` im Klon) und B2 (ein
 Remote: `github.com/wnk8/Transportoptimierung` (privat). Der vorhandene Initial-Commit mit MIT-Lizenz wurde zusammengeführt, nicht überschrieben; README nennt die Lizenz.
 Befund: `astral-sh/setup-uv` hat keinen Major-Tag `v10`, der erste CI-Lauf schlug deshalb fehl. Jetzt `v10.3.0` fest. Danach CI grün (ruff, mypy, pytest ohne Excel-Daten).
 Gate G0: CI grün. Branch-Schutz für `main` setzt die Gruppe im GitHub-Interface (Vorschlag unter S0).
+
+## Karte ausbauen (R1 bis R6)
+Auftrag: Straßenrouten im Vergleich zur Luftlinie, Vergleich der Routenaufteilung, Begründung der Fahrzeugwahl, Klick auf eine Route mit Ist gegen Plan. Entscheidungen der Gruppe: OpenRouteService mit Profil driving-hgv; Straßen-km werden angezeigt und können optional über die Relationstabelle gerechnet werden.
+
+R1 Spike: Ein Klick auf eine Polylinie lässt sich über `layer.run_method(':on', "'click'", "() => emitEvent(...)")` an Python melden (die NiceGUI-Komponente wertet Argumente mit Präfix `:` als JavaScript aus). Kein Rückfall über `map-click` nötig.
+R2 Routing: `src/tk/routing.py` (ORS-Client mit 1,6 s Abstand und Wiederholung bei 429, Cache `data/routes/routes.json`, Linienvereinfachung, Reihenfolge der Tourstopps "nächster Nachbar" nur zur Darstellung), `scripts/make_routes.py`, `make routes`. Limits laut openrouteservice.org: 2.000 Directions je Tag, 40 je Minute. Kein Schlüssel vorhanden: getestet mit nachgebauten ORS-Antworten (httpx.MockTransport), noch kein Live-Abruf.
+R3 Vergleich: `src/tk/compare.py` (Fahrzeugalternativen je Ladung, Tourvergleich mit den vier Bedingungen, Relation Ist gegen Plan, Straße gegen Luftlinie). Prüfung: die gewählte Alternative entspricht für alle 2.266 Sendungen und 428 Touren der Excel; die Summen je Relation ergeben die Kennzahlen Ist, M2 und M3.
+R4 Variante: `with_road_km` ergänzt die Relationstabelle um Straßen-km; Quelle wird "Relationstabelle" wie in der Excel; Export für PLZ_Orte R:T. Die Standardrechnung bleibt unverändert.

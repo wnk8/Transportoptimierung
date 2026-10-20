@@ -17,3 +17,4 @@ data/reference/given/
 !tests/fixtures/*.xlsx
 data/reference/*.csv
 data/cache/
+data/routes/
