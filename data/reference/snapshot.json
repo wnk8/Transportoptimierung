@@ -1,0 +1,173 @@
+{
+ "zellbezug": "Overview & Results!B166:J179",
+ "szenarien": [
+  {
+   "zeile": 166,
+   "szenario": "Basisfall",
+   "parameter": "keiner",
+   "delta_co2_m2": -0.168901812861797,
+   "delta_co2_m3_fzgkm": -0.533120205238493,
+   "delta_co2_m3_tkm": -0.592109348535897,
+   "delta_kosten_m3": -0.249452698971746,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 318,
+   "delta_lkw_km_m3": -0.676947937095027
+  },
+  {
+   "zeile": 167,
+   "szenario": "Umweg-Zuschlag 10 %",
+   "parameter": "A10 = 0,10",
+   "delta_co2_m2": -0.244697676331186,
+   "delta_co2_m3_fzgkm": -0.608916068707882,
+   "delta_co2_m3_tkm": -0.622880429132219,
+   "delta_kosten_m3": -0.320295625274492,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 350,
+   "delta_lkw_km_m3": -0.742070677920692
+  },
+  {
+   "zeile": 168,
+   "szenario": "Umweg-Zuschlag 40 %",
+   "parameter": "A10 = 0,40",
+   "delta_co2_m2": -0.0652581281811001,
+   "delta_co2_m3_fzgkm": -0.429476520557796,
+   "delta_co2_m3_tkm": -0.443825475909513,
+   "delta_kosten_m3": -0.101934108757789,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 201,
+   "delta_lkw_km_m3": -0.511835377557007
+  },
+  {
+   "zeile": 169,
+   "szenario": "Bahn-Traktion Diesel",
+   "parameter": "A04 = Diesel",
+   "delta_co2_m2": -0.168901812861797,
+   "delta_co2_m3_fzgkm": -0.526205727006556,
+   "delta_co2_m3_tkm": -0.583166184359556,
+   "delta_kosten_m3": -0.249452698971746,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 318,
+   "delta_lkw_km_m3": -0.676947937095027
+  },
+  {
+   "zeile": 170,
+   "szenario": "Bahn-Mindestdistanz 400 km",
+   "parameter": "A01 = 400",
+   "delta_co2_m2": -0.115317049224839,
+   "delta_co2_m3_fzgkm": -0.678065566493715,
+   "delta_co2_m3_tkm": -0.673453761891782,
+   "delta_kosten_m3": -0.161421505480028,
+   "bahn_sendungen": 945,
+   "touren_gebuendelt": 288,
+   "delta_lkw_km_m3": -0.783818382770954
+  },
+  {
+   "zeile": 171,
+   "szenario": "Bahn-Mindestdistanz 600 km",
+   "parameter": "A01 = 600",
+   "delta_co2_m2": -0.204591588857182,
+   "delta_co2_m3_fzgkm": -0.361381148196532,
+   "delta_co2_m3_tkm": -0.497193544692045,
+   "delta_kosten_m3": -0.320956622856782,
+   "bahn_sendungen": 216,
+   "touren_gebuendelt": 326,
+   "delta_lkw_km_m3": -0.551508954184212
+  },
+  {
+   "zeile": 172,
+   "szenario": "Kostentoleranz 0 %",
+   "parameter": "A08 = 0",
+   "delta_co2_m2": -0.168901812861797,
+   "delta_co2_m3_fzgkm": -0.533120205238493,
+   "delta_co2_m3_tkm": -0.592109348535897,
+   "delta_kosten_m3": -0.249452698971746,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 318,
+   "delta_lkw_km_m3": -0.676947937095027
+  },
+  {
+   "zeile": 173,
+   "szenario": "Straßenfaktor 1,10",
+   "parameter": "I01 = 1,10",
+   "delta_co2_m2": -0.190118128614914,
+   "delta_co2_m3_fzgkm": -0.43704760688136,
+   "delta_co2_m3_tkm": -0.538673633240825,
+   "delta_kosten_m3": -0.287969242443781,
+   "bahn_sendungen": 355,
+   "touren_gebuendelt": 331,
+   "delta_lkw_km_m3": -0.608379339890711
+  },
+  {
+   "zeile": 174,
+   "szenario": "Bahnkosten +20 %",
+   "parameter": "A07 = 0,20",
+   "delta_co2_m2": -0.237827834714671,
+   "delta_co2_m3_fzgkm": -0.237827834714671,
+   "delta_co2_m3_tkm": -0.436293652919571,
+   "delta_kosten_m3": -0.375098626604378,
+   "bahn_sendungen": 0,
+   "touren_gebuendelt": 327,
+   "delta_lkw_km_m3": -0.461809664451885
+  },
+  {
+   "zeile": 175,
+   "szenario": "Schwelle 40 %",
+   "parameter": "A09 = 0,40",
+   "delta_co2_m2": -0.168023644686256,
+   "delta_co2_m3_fzgkm": -0.532242037062952,
+   "delta_co2_m3_tkm": -0.590570566036865,
+   "delta_kosten_m3": -0.248414672346755,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 314,
+   "delta_lkw_km_m3": -0.675784625793375
+  },
+  {
+   "zeile": 176,
+   "szenario": "Straßenfaktor 1,35",
+   "parameter": "I01 = 1,35",
+   "delta_co2_m2": -0.149709788973135,
+   "delta_co2_m3_fzgkm": -0.615386205634566,
+   "delta_co2_m3_tkm": -0.644385628980749,
+   "delta_kosten_m3": -0.213848424338923,
+   "bahn_sendungen": 732,
+   "touren_gebuendelt": 310,
+   "delta_lkw_km_m3": -0.736071966276343
+  },
+  {
+   "zeile": 177,
+   "szenario": "Lastabhängigkeit α = 0,85",
+   "parameter": "A11 = 0,85",
+   "delta_co2_m2": -0.123046166718568,
+   "delta_co2_m3_fzgkm": -0.485472560324159,
+   "delta_co2_m3_tkm": -0.562704700170647,
+   "delta_kosten_m3": -0.233518528266126,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 300,
+   "delta_lkw_km_m3": -0.657386557577418
+  },
+  {
+   "zeile": 178,
+   "szenario": "Lastabhängigkeit α = 0,70",
+   "parameter": "A11 = 0,70",
+   "delta_co2_m2": -0.0785163729913303,
+   "delta_co2_m3_fzgkm": -0.438903433404558,
+   "delta_co2_m3_tkm": -0.526855984271985,
+   "delta_kosten_m3": -0.20660175008278,
+   "bahn_sendungen": 551,
+   "touren_gebuendelt": 258,
+   "delta_lkw_km_m3": -0.624846366456011
+  },
+  {
+   "zeile": 179,
+   "szenario": "Zusatzlaufzeit 3 Tage (unzulässig)",
+   "parameter": "A05 = 3",
+   "delta_co2_m2": -0.237827834714671,
+   "delta_co2_m3_fzgkm": -0.237827834714671,
+   "delta_co2_m3_tkm": -0.436293652919571,
+   "delta_kosten_m3": -0.375098626604378,
+   "bahn_sendungen": 0,
+   "touren_gebuendelt": 327,
+   "delta_lkw_km_m3": -0.461809664451885
+  }
+ ]
+}

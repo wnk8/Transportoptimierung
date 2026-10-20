@@ -14,3 +14,4 @@ data/exports/
 data/reference/given/
 *.xlsx
 !tests/fixtures/*.xlsx
+data/reference/*.csv
