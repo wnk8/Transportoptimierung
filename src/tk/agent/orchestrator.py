@@ -158,7 +158,7 @@ class Orchestrator:
             reply = self._generate(messages, trace, request)
             if not reply.tool_calls:
                 return self._finish(reply.text, request, trace)
-            messages.append(Message(role="model", tool_calls=reply.tool_calls))
+            messages.append(Message(role="model", tool_calls=reply.tool_calls, raw=reply.raw))
             for call in reply.tool_calls:
                 t0 = time.perf_counter()
                 result = call_tool(self.ctx, call.name, call.args)

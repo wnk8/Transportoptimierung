@@ -11,6 +11,7 @@ import pytest
 from tk.routing import (
     ORSClient,
     RouteCache,
+    RouteNotFound,
     RoutingUnavailable,
     nearest_neighbor_order,
     parse_ors_geojson,
@@ -64,6 +65,7 @@ def test_client_retries_on_429_and_sends_lonlat() -> None:
     route = client.route(WAYPOINTS)
     assert route.distance_km == pytest.approx(190.5123)
     assert sent[0]["coordinates"] == [[9.18, 48.77265], [8.2688, 50.001]]
+    assert sent[0]["radiuses"] == [5000, 5000]
     assert 10 in sleeps
 
 
@@ -71,6 +73,13 @@ def test_client_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ORS_API_KEY", raising=False)
     with pytest.raises(RoutingUnavailable):
         ORSClient()
+
+
+def test_route_not_found_is_skippable() -> None:
+    body = '{"error":{"code":2009,"message":"Route could not be found"}}'
+    client = client_with([httpx.Response(404, text=body)], [])
+    with pytest.raises(RouteNotFound):
+        client.route(WAYPOINTS)
 
 
 def test_error_status_is_reported() -> None:
