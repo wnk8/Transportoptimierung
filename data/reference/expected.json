@@ -1,0 +1,232 @@
+{
+ "quelle_datei": "Thema1_Transportkonzept_v11_Beispieldaten.xlsx",
+ "zellbezuege": {
+  "kennzahlen": "Overview & Results!C10:L12",
+  "cockpit": "Input!D3:R9",
+  "abgeleitet": "Assumptions!D49:D53",
+  "touren": "Overview & Results!C193:C195",
+  "pruefungen": "Overview & Results!B142:F161",
+  "gesamtstatus": "Overview & Results!C162"
+ },
+ "anzahl_sendungen": 2266,
+ "kennzahlen": {
+  "Ist": {
+   "co2_fzgkm_kg": 306924.1122712094,
+   "delta_co2_fzgkm": null,
+   "co2_tkm_kg": 237300.80889859865,
+   "delta_co2_tkm": null,
+   "kosten_eur": 841804.2000000012,
+   "delta_kosten": null,
+   "lkw_km": 812757.6229409996,
+   "delta_lkw_km": null,
+   "bahn_sendungen": 0,
+   "servicegrad": 1
+  },
+  "M2": {
+   "co2_fzgkm_kg": 255084.07334494492,
+   "delta_co2_fzgkm": -0.16890181270755533,
+   "co2_tkm_kg": 181826.32837095848,
+   "delta_co2_tkm": -0.23377282523864074,
+   "kosten_eur": 631813.8703504605,
+   "delta_kosten": -0.24945269891685073,
+   "lkw_km": 583221.0135951992,
+   "delta_lkw_km": -0.2824170489047053,
+   "bahn_sendungen": 0,
+   "servicegrad": 1
+  },
+  "M3": {
+   "co2_fzgkm_kg": 143296.6665626406,
+   "delta_co2_fzgkm": -0.5331202051795187,
+   "co2_tkm_kg": 96792.78152466952,
+   "delta_co2_tkm": -0.5921093485777784,
+   "kosten_eur": 631813.870350461,
+   "delta_kosten": -0.24945269891685018,
+   "lkw_km": 262563.02675719967,
+   "delta_lkw_km": -0.6769479370650457,
+   "bahn_sendungen": 551,
+   "servicegrad": 0.7568402471315092
+  }
+ },
+ "cockpit_parameter": {
+  "A01": 500,
+  "A02": 100,
+  "C01": 10.8,
+  "C02": 335,
+  "A05": 1,
+  "A10": 0.2,
+  "A08": 0.1
+ },
+ "cockpit": {
+  "Sendungen gültig": 2266,
+  "CO₂e ungeplant, Fzg-km (kg)": 306924.1122712094,
+  "CO₂e ungeplant, tkm (kg)": 237300.80889859865,
+  "Kosten ungeplant (€)": 841804.2000000012,
+  "Lkw-km ungeplant": 812757.6229409996,
+  "Lkw-Fahrzeuge ungeplant": 2266,
+  "davon auf Bahn": 551,
+  "CO₂e geplant, Fzg-km (kg)": 143296.6665626406,
+  "CO₂e geplant, tkm (kg)": 96792.78152466952,
+  "Kosten geplant (€)": 631813.870350461,
+  "Lkw-km geplant": 262563.02675719967,
+  "Lkw-Fahrzeuge geplant": 545,
+  "Servicegrad (ohne Verzögerung)": 0.7568402471315092,
+  "Δ CO₂e Fzg-km": -0.5331202051795187,
+  "Δ CO₂e tkm": -0.5921093485777784,
+  "Δ Kosten": -0.24945269891685018,
+  "Δ Lkw-km": -0.6769479370650457,
+  "Status": "Plan zulässig"
+ },
+ "abgeleitet": {
+  "C01": 10.8,
+  "C02": 335,
+  "C03": 1,
+  "C04": 0.6465268596132498,
+  "C05": 2266
+ },
+ "touren_gesamt": 428,
+ "touren_gebuendelt": 318,
+ "sendungen_in_gebuendelten_touren": 1488,
+ "pruefungen": [
+  {
+   "nr": 1,
+   "name": "1 Eingabezeilen fehlerfrei",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  },
+  {
+   "nr": 2,
+   "name": "2 Gewicht vollständig in Touren",
+   "soll": 922420.9999999998,
+   "ist": 922421.0000000012,
+   "status": "OK"
+  },
+  {
+   "nr": 3,
+   "name": "3 Sendungen vollständig in Touren",
+   "soll": 1715,
+   "ist": 1715,
+   "status": "OK"
+  },
+  {
+   "nr": 4,
+   "name": "4 Plan nicht mehr Fahrzeuge als Einzelversand",
+   "soll": 2266,
+   "ist": 545,
+   "status": "OK"
+  },
+  {
+   "nr": 5,
+   "name": "5 Fahrzeugtabelle aufsteigend",
+   "soll": 1,
+   "ist": 1,
+   "status": "OK"
+  },
+  {
+   "nr": 6,
+   "name": "6 Ist-CO₂e nach Startort = Abschnitt 1",
+   "soll": 306924.1122712094,
+   "ist": 306924.1122712074,
+   "status": "OK"
+  },
+  {
+   "nr": 7,
+   "name": "7 Ist-CO₂e nach Fahrzeug = Abschnitt 1",
+   "soll": 306924.1122712094,
+   "ist": 306924.1122712084,
+   "status": "OK"
+  },
+  {
+   "nr": 8,
+   "name": "8 Ist-CO₂e nach Auslastungsklasse = Abschnitt 1",
+   "soll": 306924.1122712094,
+   "ist": 306924.11227120715,
+   "status": "OK"
+  },
+  {
+   "nr": 9,
+   "name": "9 Ist-CO₂e nach Engpass = Abschnitt 1",
+   "soll": 306924.1122712094,
+   "ist": 306924.1122712073,
+   "status": "OK"
+  },
+  {
+   "nr": 10,
+   "name": "10 Ist-CO₂e nach Monat = Abschnitt 1",
+   "soll": 306924.1122712094,
+   "ist": 306924.1122712069,
+   "status": "OK"
+  },
+  {
+   "nr": 11,
+   "name": "11 Plan-CO₂e nach Verkehrsträger = Abschnitt 1",
+   "soll": 143296.6665626406,
+   "ist": 143296.66656264075,
+   "status": "OK"
+  },
+  {
+   "nr": 12,
+   "name": "12 Transportleistung nach Zielort = Eingabe",
+   "soll": 331654.83093560726,
+   "ist": 331654.83093560755,
+   "status": "OK"
+  },
+  {
+   "nr": 13,
+   "name": "13 Kostenmodell trifft eingegebene Fracht",
+   "soll": 841804.2000000012,
+   "ist": 841804.2000000012,
+   "status": "OK"
+  },
+  {
+   "nr": 14,
+   "name": "14 Plausibilität: CO₂e Plan nicht höher als Ist",
+   "soll": 306924.1122712094,
+   "ist": 143296.6665626406,
+   "status": "OK"
+  },
+  {
+   "nr": 15,
+   "name": "15 Kein Fahrzeug einer Tour überladen",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  },
+  {
+   "nr": 16,
+   "name": "16 Parameter gültig",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  },
+  {
+   "nr": 17,
+   "name": "17 Alle Eingabezeilen im Rechenbereich",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  },
+  {
+   "nr": 18,
+   "name": "18 Eingegebene Entfernung nicht kürzer als Luftlinie",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  },
+  {
+   "nr": 19,
+   "name": "19 Keine Fehlerwerte in Input, Touren und Routen",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  },
+  {
+   "nr": 20,
+   "name": "20 Dashboard vollständig mit dem Modell verbunden",
+   "soll": 0,
+   "ist": 0,
+   "status": "OK"
+  }
+ ],
+ "gesamtstatus": "Alle Prüfungen bestanden"
+}
