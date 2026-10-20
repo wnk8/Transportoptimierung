@@ -1,0 +1,1 @@
+"""Manuelle Werkzeugschleife des Agenten."""

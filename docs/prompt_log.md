@@ -17,3 +17,7 @@ Vorschlag Branch-Schutz für `main` (im GitHub-Interface zu setzen):
 4. Block force pushes und Löschen von `main`.
 5. Regeln auch für Administratoren.
 Gate G0: ohne Remote nicht prüfbar. Ersatz: dieselben Befehle wie in `ci.yml` lokal (siehe G1).
+
+## S1 Projektgerüst
+Ergebnis: uv-Projekt (Python 3.12 gepinnt), `pyproject.toml` mit ruff, mypy (strict für `tk.*`), pytest; Makefile (run, test, lint, reference); Paket `src/tk` mit Modulen laut Abschnitt 6.
+Gate G1: `ruff check`, `mypy src`, `pytest` grün.
