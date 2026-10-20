@@ -120,7 +120,10 @@ a, button { transition: background-color 150ms, color 150ms; }
 .q-table th { font-weight: 600; color: var(--muted); font-size: 12px; }
 .q-table td { font-variant-numeric: tabular-nums; }
 .q-tab__label { font-weight: 500; }
-@media (max-width: 1279px) { .tk-two-col { flex-direction: column; } }
+@media (max-width: 1279px) {
+  .tk-two-col { flex-direction: column; }
+  .tk-two-col > * { width: 100%% !important; min-width: 0 !important; flex: none !important; }
+}
 """
 
 

@@ -47,3 +47,11 @@ Datum: 20.10.2026. Geprüfter Stand: `main` bei Commit `5bd05cb`. Prüfer: Claud
 ## Gesamturteil
 
 Rechenkern und Abnahme gegen die Excel: bestanden. Oberfläche, Agent und Export: funktionsfähig, mit den Befunden B1 bis B4. Offene manuelle Schritte der Gruppe: B4, B5, Review durch ein Gruppenmitglied, Remote-Repository mit Schutzregeln.
+
+## Nachtrag: Behebung nach dem Review
+
+| Nr. | Status | Änderung |
+|---|---|---|
+| B1 | behoben | `data/excel/.gitkeep` versioniert, `.gitignore` schließt nur den Inhalt aus |
+| B2 | behoben | Media-Query setzt alle Kinder von `.tk-two-col` auf volle Breite; bei 1.024 px sind beide Karten 926 px breit, kein horizontales Scrollen (Browserprüfung) |
+| B3 bis B7 | offen | manuelle Schritte der Gruppe bzw. Hinweis auf die Historie |
