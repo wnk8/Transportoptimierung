@@ -14,4 +14,7 @@ lint:
 reference:
 	uv run python scripts/make_reference.py
 
-.PHONY: run test lint reference
+.PHONY: run test lint reference routes
+routes:
+	uv run python scripts/make_routes.py
+

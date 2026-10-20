@@ -1181,6 +1181,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "google-genai" },
+    { name = "httpx" },
     { name = "latex2mathml" },
     { name = "nicegui" },
     { name = "numpy" },
@@ -1202,6 +1203,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "google-genai", specifier = ">=2.31.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "latex2mathml", specifier = ">=3.81.1" },
     { name = "nicegui", specifier = ">=3.18.0" },
     { name = "numpy", specifier = ">=2.5.4" },
