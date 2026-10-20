@@ -115,3 +115,8 @@ Die folgenden Punkte sind nicht durch Claude Code erledigbar und gehören zur Ab
 ## S18 Unabhängiger Review
 Ergebnis: `docs/Pruefprotokoll.md`. Alle Rechen-Gates bestanden; G0 ohne Remote nur lokal simuliert; Befunde B1 bis B7.
 Danach getrennt vom Review behoben: B1 (Ordner `data/excel` im Klon) und B2 (einspaltiges Layout unter 1.280 px). Offen für die Gruppe: B4 (Gemini live), B5 (Neuberechnung in Microsoft Excel), Review durch ein Gruppenmitglied, Remote-Repository mit Schutzregeln.
+
+## Push auf GitHub (Nachtrag)
+Remote: `github.com/wnk8/Transportoptimierung` (privat). Der vorhandene Initial-Commit mit MIT-Lizenz wurde zusammengeführt, nicht überschrieben; README nennt die Lizenz.
+Befund: `astral-sh/setup-uv` hat keinen Major-Tag `v10`, der erste CI-Lauf schlug deshalb fehl. Jetzt `v10.3.0` fest. Danach CI grün (ruff, mypy, pytest ohne Excel-Daten).
+Gate G0: CI grün. Branch-Schutz für `main` setzt die Gruppe im GitHub-Interface (Vorschlag unter S0).
