@@ -15,3 +15,4 @@ data/reference/given/
 *.xlsx
 !tests/fixtures/*.xlsx
 data/reference/*.csv
+data/cache/
