@@ -55,7 +55,7 @@ Gates G3, G4, G5: bestanden.
 
 ## S12 Design-System
 Ergebnis: `ui/theme.py` (Farbtokens 7.2, Kartenlinien, Status-Chip, Szenario-Umschalter, CSS mit `tk-card`, `tk-label`, `tk-kpi`, Fokus-Ring, 150 ms Übergänge, Kachelfilter), `ui/format.py` (deutsches Zahlenformat mit schmalem Leerzeichen und echtem Minuszeichen), `ui/components.py` (Kennzahlenkachel, Zustände leer, lädt, Fehler, Erfolg, Hinweis), `ui/preview.py` (Seite `/vorschau`), Schrift Inter 4.1 lokal (Regular, Medium, SemiBold; Lizenz SIL OFL 1.1 beigelegt; Quelle: GitHub-Release rsms/inter v4.1).
-Prüfung: `tests/test_contrast.py` rechnet alle Text-Hintergrund-Paare (mindestens 4,5 : 1), alle Status-Chips und die Kartenlinien gegen eine entsättigte Kachelfläche `#E5E5E5` und gegen Weiß (mindestens 3 : 1). Die in 7.2 genannten Kontrastwerte sind nachgerechnet und stimmen. `tests/test_no_placeholders.py` sucht `Lorem`, `TODO`, `xxx` und das alleinstehende Wort "Beispiel" (das Wort "Beispieldaten" bleibt erlaubt, weil es der Dateiname der Excel ist).
+Prüfung: `tests/test_contrast.py` rechnet alle Text-Hintergrund-Paare (mindestens 4,5 : 1), alle Status-Chips und die Kartenlinien gegen eine entsättigte Kachelfläche `#E5E5E5` und gegen Weiß (mindestens 3 : 1). Die in 7.2 genannten Kontrastwerte sind nachgerechnet und stimmen. `tests/test_no_placeholders.py` sucht die vier in Gesamtpaket 7.6 genannten Platzhalterwörter; das Wort für Musterdaten zählt nur alleinstehend, damit der Dateiname der Excel ("Beispieldaten") erlaubt bleibt.
 Gate G6 (Teil): bestanden.
 
 ## S13 Eingabe, Kennzahlen, Tabellen
