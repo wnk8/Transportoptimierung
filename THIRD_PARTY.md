@@ -23,7 +23,7 @@ Stand: 20.10.2026 (Versionen aus `uv.lock`). Lizenzangaben nach Projektseiten; v
 |---|---|---|
 | Tests | pytest, hypothesis | MIT, MPL-2.0 |
 | Qualität | ruff, mypy, pandas-stubs | MIT, MIT, BSD-3-Clause |
-| Versionskontrolle, CI | git, GitHub, GitHub Actions (`actions/checkout` v7, `astral-sh/setup-uv` v10) | GPL-2.0 (git), Nutzungsbedingungen GitHub, MIT |
+| Versionskontrolle, CI | git, GitHub, GitHub Actions (`actions/checkout` v7, `astral-sh/setup-uv` v10.3.0, ohne Major-Tag) | GPL-2.0 (git), Nutzungsbedingungen GitHub, MIT |
 | Entwicklungswerkzeug | Claude Code (Anthropic) | Nutzungsbedingungen Anthropic |
 
 ## Daten und Kartendienste
