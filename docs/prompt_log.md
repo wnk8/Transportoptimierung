@@ -77,3 +77,10 @@ Schlüssel nur aus `GEMINI_API_KEY` (lokal `.env`, von git ausgeschlossen).
 Tests mit Ersatzanbieter: Zahlenprüfung, unbekannter Ort, Gewicht 0, fehlende Pflichtfelder, Aufforderung zum Schätzen (Antwort verworfen), Aufforderung den Kern zu umgehen (Antwort verworfen), Ratenlimit mit Wiederholung und Wechsel in den Demo-Modus, Protokoll jedes Aufrufs.
 Nicht geprüft: ein Lauf mit dem echten Gemini-Modell (kein Schlüssel vorhanden). Das bleibt ein manueller Schritt der Gruppe; der Code-Pfad `GeminiProvider` ist ungetestet.
 Gate G7 (Teil): bestanden mit dieser Einschränkung.
+
+## S16 Export und Demo-Modus
+Ergebnis: `export.py` (CSV mit Semikolon und Dezimalkomma, XLSX mit Blatt "Sendungen", jeweils nur Spalten A bis H; `write_into_template` schreibt in eine Kopie der Vorlage nach Input!A14:H, das Original bleibt unverändert), `ui/export_panel.py`, `agent/demo.py` (drei aufgezeichnete Fälle: Einzelsendung, Bündelung, Bahnfall; Zahlen werden aus den Werkzeugausgaben eingesetzt; andere Anfragen werden im Demo-Modus nicht beantwortet), `docs/Demo_Skript.md`.
+Prüfung: Round Trip CSV und XLSX (Export, Import, Neuberechnung) ergibt identische Kennzahlen; Schreiben in eine Testkopie der Excel-Vorlage mit identischen Eingabezellen und unverändertem Original.
+Befund: Der XLSX-Export hieß zuerst "Input" und wurde beim Wiedereinlesen wie die Modellmappe ab Zeile 14 gelesen; jetzt Blatt "Sendungen", die Modellmappe wird am Blatt "Assumptions" erkannt.
+Nicht automatisierbar: Neuberechnung der Testkopie in Microsoft Excel (openpyxl rechnet keine Formeln). Manueller Schritt: Kopie in Excel öffnen, neu berechnen, Overview C10:L12 mit der App vergleichen.
+Gate G7: bestanden mit den genannten Einschränkungen (kein Live-Gemini, Excel-Neuberechnung manuell).
