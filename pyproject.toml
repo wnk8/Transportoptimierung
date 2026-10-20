@@ -5,6 +5,7 @@ description = "Transportplanungs-Artefakt: Python-Port des Excel-Modells v11"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "google-genai>=2.31.0",
+    "latex2mathml>=3.81.1",
     "nicegui>=3.18.0",
     "numpy>=2.5.4",
     "openpyxl>=3.1.5",
@@ -33,6 +34,8 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 # long German texts and LaTeX formulas
 "src/tk/explain.py" = ["E501"]
 "src/tk/checks.py" = ["E501"]
+"src/tk/ui/*.py" = ["E501"]
+"src/tk/agent/*.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
