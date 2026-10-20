@@ -9,6 +9,7 @@ automatisch eine Knoten-Kanten-Darstellung (SVG) aus denselben Koordinaten.
 from __future__ import annotations
 
 import html
+import json
 import math
 from dataclasses import dataclass
 
@@ -121,18 +122,29 @@ def _rail_path(rel: RelationView) -> list[list[float]]:
     return [[rel.lat1 + off_lat, rel.lon1 + off_lon], [rel.lat2 + off_lat, rel.lon2 + off_lon]]
 
 
-def line_specs(
-    result: Result, scenario: str, side: str
-) -> list[tuple[list[list[float]], dict[str, object], str]]:
-    """Linien einer Karte: (Koordinaten, Leaflet-Optionen, Popup-HTML)."""
+Spec = tuple[list[list[float]], dict[str, object], str, str]
+"""Linie: Koordinaten, Leaflet-Optionen, Tooltip-HTML, Relationsschlüssel."""
+
+RELATION_EVENT = "tk-relation"
+TOUR_EVENT = "tk-tour"
+
+
+def bind_layer(layer: object, tooltip: str, key: str, event: str = RELATION_EVENT) -> None:
+    """Tooltip beim Überfahren und Klickereignis an Python (Spike R1: run_method mit Präfix ':')."""
+    layer.run_method("bindTooltip", tooltip, {"sticky": True})  # type: ignore[attr-defined]
+    layer.run_method(":on", "'click'", f"() => emitEvent({json.dumps(event)}, {json.dumps(key)})")  # type: ignore[attr-defined]
+
+
+def line_specs(result: Result, scenario: str, side: str) -> list[Spec]:
+    """Linien einer Karte: (Koordinaten, Leaflet-Optionen, Tooltip-HTML, Relationsschlüssel)."""
     rels = relations(result, scenario)
-    specs: list[tuple[list[list[float]], dict[str, object], str]] = []
+    specs: list[Spec] = []
     if side == "vorher" or scenario == "Ist":
         n_max = max((r.sendungen for r in rels), default=0)
         color, _ = MAP_LINES["ist"]
         for rel in rels:
             opts = {"color": color, "weight": _width(rel.sendungen, n_max), "opacity": 0.9}
-            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, _popup(rel, "Ist")))
+            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, _popup(rel, "Ist"), rel.key))
         return specs
     t_max = max((max(r.tkm_lkw, r.tkm_bahn) for r in rels), default=0.0)
     lkw, _ = MAP_LINES["lkw"]
@@ -141,10 +153,10 @@ def line_specs(
         popup = _popup(rel, scenario)
         if rel.tkm_lkw > 0:
             opts = {"color": lkw, "weight": _width(rel.tkm_lkw, t_max), "opacity": 0.9}
-            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, popup))
+            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, popup, rel.key))
         if rel.tkm_bahn > 0:
             opts = {"color": bahn, "weight": _width(rel.tkm_bahn, t_max), "dashArray": dash, "opacity": 0.95}
-            specs.append((_rail_path(rel), opts, popup))
+            specs.append((_rail_path(rel), opts, popup, rel.key))
     return specs
 
 
@@ -186,7 +198,7 @@ def svg_network(result: Result, scenario: str, side: str, width: int = 520, heig
         f'<svg viewBox="0 0 {width} {height}" width="100%" role="img" aria-label="Knoten-Kanten-Ansicht">'
     ]
     parts.append(f'<rect width="{width}" height="{height}" fill="#FFFFFF"/>')
-    for coords, opts, popup in line_specs(result, scenario, side):
+    for coords, opts, popup, _key in line_specs(result, scenario, side):
         (a, b), (c, d) = xy(*coords[0]), xy(*coords[1])
         dash = opts.get("dashArray", "")
         title = html.escape(popup.split("</b>")[0].replace("<b>", ""))
@@ -339,18 +351,18 @@ class MapView:
             self.svg_left.set_content(svg_network(self.result, self.scenario, "vorher"))
             self.svg_right.set_content(svg_network(self.result, self.scenario, "nachher"))
             return
-        pending: list[tuple[ui.leaflet, object, str]] = []
+        pending: list[tuple[ui.leaflet, object, str, str]] = []
         for side, m in (("vorher", self.map_left), ("nachher", self.map_right)):
             for layer in self._layers[side]:
                 m.remove_layer(layer)  # type: ignore[arg-type]
             self._layers[side] = []
-            for coords, opts, popup in line_specs(self.result, self.scenario, side):
+            for coords, opts, popup, key in line_specs(self.result, self.scenario, side):
                 layer = m.generic_layer(name="polyline", args=[coords, opts])
                 self._layers[side].append(layer)
-                pending.append((m, layer, popup))
+                pending.append((m, layer, popup, key))
 
         async def bind() -> None:
-            # Popups can only be bound once the layers exist in the browser (spike S14).
+            # Tooltips and clicks can only be bound once the layers exist in the browser (spike S14).
             for m in (self.map_left, self.map_right):
                 await m.initialized()
             if not self._ready:
@@ -359,7 +371,9 @@ class MapView:
                 for m in (self.map_left, self.map_right):
                     m.run_map_method("invalidateSize")
                     m.run_map_method("setView", list(self._view[0]), self._view[1])
-            for _, layer, popup in pending:
-                layer.run_method("bindPopup", popup)  # type: ignore[attr-defined]
+            for _, layer, popup, key in pending:
+                bind_layer(
+                    layer, popup + "<div style='margin-top:4px'>Klick: Vergleich Ist gegen Plan</div>", key
+                )
 
         ui.timer(0.1, bind, once=True)

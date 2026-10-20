@@ -33,7 +33,14 @@ def preview_page() -> None:
 
         ui.label("Kartenlinien").classes("tk-section")
         with ui.row().classes("gap-4"):
-            labels = {"ist": "Ist, Einzelversand", "lkw": "Plan, Lkw", "bahn": "Plan, Bahn"}
+            labels = {
+                "ist": "Ist, Einzelversand",
+                "lkw": "Plan, Lkw",
+                "bahn": "Plan, Bahn",
+                "luft": "Luftlinie",
+                "strasse": "Straßenroute",
+                "auswahl": "Auswahl",
+            }
             for key, (color, dash) in MAP_LINES.items():
                 with ui.row().classes("items-center gap-2"):
                     ui.html(

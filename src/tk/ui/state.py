@@ -63,6 +63,7 @@ class Session:
     changes: dict[str, object] = field(default_factory=dict)
     scenario: str = "M3"
     result: Result | None = None
+    road_km: bool = False
 
     @property
     def model(self) -> Model:
@@ -73,5 +74,14 @@ class Session:
         return self.model.params
 
     def recalculate(self) -> Result:
-        self.result = calculate(self.shipments, self.model)
+        """Rechnet neu; mit ``road_km`` gehen Straßen-km als Relationstabelle ein (Variante)."""
+        model = self.model
+        result = calculate(self.shipments, model)
+        if self.road_km:
+            from tk.routing import with_road_km
+            from tk.ui.map_area import route_cache
+
+            road_model, _ = with_road_km(model, result, route_cache())
+            result = calculate(self.shipments, road_model)
+        self.result = result
         return self.result

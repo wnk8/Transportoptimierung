@@ -15,6 +15,7 @@ Stand: 20.10.2026 (Versionen aus `uv.lock`). Lizenzangaben nach Projektseiten; v
 | Formeln | latex2mathml | 3.81 | MIT |
 | Agent | google-genai (Gemini API, kostenlose Stufe) | 2.31 | Apache-2.0; Nutzung der API nach Nutzungsbedingungen Google |
 | Konfiguration | python-dotenv | 1.2 | BSD-3-Clause |
+| HTTP | httpx | 0.28 | BSD-3-Clause |
 | Schrift | Inter 4.1 (Regular, Medium, SemiBold), lokal in `src/tk/assets/fonts` | 4.1 | SIL Open Font License 1.1 (Lizenztext beigelegt) |
 
 ## Software (Entwicklung)
@@ -35,4 +36,6 @@ Stand: 20.10.2026 (Versionen aus `uv.lock`). Lizenzangaben nach Projektseiten; v
 | GLEC Framework v3.2 (Smart Freight Centre), über Sekundärquelle | Emissionsintensitäten in Assumptions B3 | Quelle nennen; Primärverifikation ausstehend |
 | Seminardaten (Original_Data, synthetisch und anonymisiert laut Projektplan) | Beispieldaten | Weitergabe nur nach Freigabe; nicht im Repository |
 
-Nicht verwendet: Nominatim, OpenRouteService, OSRM, OpenFreeMap, PMTiles.
+| OpenRouteService (HeiGIT), Profil driving-hgv, Standard-Plan (laut Anbieter 2.000 Directions je Tag, 40 je Minute) | Straßenrouten zur Darstellung und Variante "Straßen-km"; einmal abgerufen, lokal in `data/routes/routes.json` (nicht versioniert) | Attribution "© openrouteservice.org by HeiGIT, Daten © OpenStreetMap contributors (ODbL)" in der Ansicht; Nutzungsbedingungen von ORS; Schlüssel nur in `.env` |
+
+Nicht verwendet: Nominatim, OSRM, OpenFreeMap, PMTiles.
