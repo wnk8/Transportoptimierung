@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.nicegui/
+.DS_Store
+data/raw/
+data/excel/
+data/exports/
+data/reference/given/
+*.xlsx
+!tests/fixtures/*.xlsx
