@@ -9,7 +9,8 @@ __pycache__/
 .nicegui/
 .DS_Store
 data/raw/
-data/excel/
+data/excel/*
+!data/excel/.gitkeep
 data/exports/
 data/reference/given/
 *.xlsx

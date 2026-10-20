@@ -111,3 +111,7 @@ Die folgenden Punkte sind nicht durch Claude Code erledigbar und gehören zur Ab
 - Tests der KI über eigene Arbeit: Die Tests T01 bis T10 sind Nachbauten nach Beschreibung, nicht die Originaldatensätze. Die Agent-Tests prüfen den Orchestrator mit einem Ersatzanbieter, nicht das Sprachmodell. Diese Grenzen stehen in den Testdateien.
 - Sprachmodell im Produkt: Der Assistent rechnet nicht. Die Zahlenprüfung verwirft jede Antwort mit Zahlen ohne Werkzeugquelle. Sie erkennt keine falsch zitierten Texte und keine sinnentstellende Auswahl von Zahlen; die Agent-Spur bleibt deshalb sichtbar.
 - Datenschutz: Die kostenlose Gemini-Stufe darf Eingaben verwenden. Nur synthetische Daten eingeben; die Demo läuft lokal.
+
+## S18 Unabhängiger Review
+Ergebnis: `docs/Pruefprotokoll.md`. Alle Rechen-Gates bestanden; G0 ohne Remote nur lokal simuliert; Befunde B1 bis B7.
+Danach getrennt vom Review behoben: B1 (Ordner `data/excel` im Klon) und B2 (einspaltiges Layout unter 1.280 px). Offen für die Gruppe: B4 (Gemini live), B5 (Neuberechnung in Microsoft Excel), Review durch ein Gruppenmitglied, Remote-Repository mit Schutzregeln.
