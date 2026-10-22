@@ -82,6 +82,28 @@ def test_route_not_found_is_skippable() -> None:
         client.route(WAYPOINTS)
 
 
+def test_fallback_to_car_profile(tmp_path: Path) -> None:
+    body = '{"error":{"code":2009,"message":"Route could not be found"}}'
+    paths: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        paths.append(request.url.path)
+        return (
+            httpx.Response(404, text=body)
+            if "hgv" in request.url.path
+            else httpx.Response(200, json=ORS_RESPONSE)
+        )
+
+    client = ORSClient(
+        api_key="test", http=httpx.Client(transport=httpx.MockTransport(handler)), sleep=lambda _s: None
+    )
+    cache = RouteCache(tmp_path / "r.json")
+    route = cache.get_or_fetch(WAYPOINTS, client)
+    assert route is not None and route.profile == "driving-car"
+    assert cache.get(WAYPOINTS) is route  # unter dem Lkw-Schlüssel abgelegt, Profil sichtbar
+    assert paths[0].endswith("driving-hgv/geojson") and paths[1].endswith("driving-car/geojson")
+
+
 def test_error_status_is_reported() -> None:
     client = client_with([httpx.Response(403, text="key invalid")], [])
     with pytest.raises(RoutingUnavailable, match="403"):

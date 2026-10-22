@@ -41,6 +41,9 @@ PARAMS_PANEL = [
 ]
 """Parameter im Panel: Kennung, Feld, Schrittweite. Werte und Einheiten aus Assumptions."""
 
+PCT_JS = "(v => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 2}).replace('-', '\u2212') + '\u202f%')"
+"""Prozent im deutschen Format für ECharts (Dezimalkomma, Minuszeichen, schmales Leerzeichen)."""
+
 FOOTER = (
     "© OpenStreetMap contributors (Kartendaten, ODbL) | Postleitzahl- und Ortsdaten: GeoNames, geonames.org, "
     "CC BY 4.0 | Rechenmodell: Excel v11, Python-Port"
@@ -608,16 +611,16 @@ class Page:
                     "textStyle": {"fontFamily": "Inter, system-ui, sans-serif", "color": "#1F2933"},
                     "legend": {"top": 0, "left": 0, "itemGap": 16},
                     "grid": {"left": 56, "right": 16, "top": 36, "bottom": 32},
-                    "tooltip": {"trigger": "axis", "valueFormatter": "value => value.toLocaleString('de-DE') + ' %'"},
+                    "tooltip": {"trigger": "axis", ":valueFormatter": PCT_JS},
                     "xAxis": {"type": "category", "data": cats, "axisTick": {"show": False}},
-                    "yAxis": {"type": "value", "axisLabel": {"formatter": "{value} %"},
+                    "yAxis": {"type": "value", "axisLabel": {":formatter": PCT_JS},
                               "splitLine": {"lineStyle": {"color": "#E3E6EA"}}},
                     "series": [
                         {"name": "M2 Bündelung", "type": "bar", "barGap": "10%", "itemStyle": {"color": "#56616E"},
-                         "label": {"show": True, "position": "bottom", "formatter": "{c} %"},
+                         "label": {"show": True, "position": "bottom", ":formatter": "p => (" + PCT_JS + ")(p.value)"},
                          "data": [pct(m2.delta_co2_fzgkm), pct(m2.delta_kosten), pct(m2.delta_lkw_km)]},
                         {"name": "M3 Bahn + Bündelung", "type": "bar", "itemStyle": {"color": "#1F6F5F"},
-                         "label": {"show": True, "position": "bottom", "formatter": "{c} %"},
+                         "label": {"show": True, "position": "bottom", ":formatter": "p => (" + PCT_JS + ")(p.value)"},
                          "data": [pct(m3.delta_co2_fzgkm), pct(m3.delta_kosten), pct(m3.delta_lkw_km)]},
                     ],
                 }).classes("w-full").style("height:300px")  # fmt: skip

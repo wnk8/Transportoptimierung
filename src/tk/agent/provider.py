@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
 DEFAULT_MODEL = "gemini-flash-lite-latest"
+REQUEST_TIMEOUT_MS = 60_000
 
 
 @dataclass(slots=True)
@@ -77,8 +78,10 @@ class GeminiProvider:
         if not key:
             raise ProviderUnavailable("GEMINI_API_KEY ist nicht gesetzt (.env)")
         from google import genai
+        from google.genai import types
 
-        self._client = genai.Client(api_key=key)
+        # Time limit per request (ms): the free tier can be slow; never wait without limit.
+        self._client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS))
         self.model = model or os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
 
     def _contents(self, messages: list[Message]) -> list[Any]:

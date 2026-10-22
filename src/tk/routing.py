@@ -32,6 +32,8 @@ from tk.workbook import DATA
 
 ORS_URL = "https://api.openrouteservice.org/v2/directions/{profile}/geojson"
 PROFILE = "driving-hgv"
+FALLBACK_PROFILE = "driving-car"
+"""Rückfall, wenn das Lkw-Netz von ORS keine Route kennt (Fehler 2009, etwa Freiburg, 22.10.2026)."""
 MIN_INTERVAL_S = 1.6
 CACHE_FILE = DATA / "routes" / "routes.json"
 ATTRIBUTION = "Routen: © openrouteservice.org by HeiGIT, Daten © OpenStreetMap contributors (ODbL)"
@@ -131,6 +133,17 @@ class ORSClient:
         self._retries = retries
         self._last = 0.0
 
+    def route_with_fallback(self, waypoints: Sequence[LatLon]) -> RoadRoute:
+        """Lkw-Route; findet ORS keine, die Pkw-Route (``profile`` der Route zeigt das an)."""
+        try:
+            return self.route(waypoints)
+        except RouteNotFound:
+            car = ORSClient(api_key=self._key, profile=FALLBACK_PROFILE, http=self._http, sleep=self._sleep)
+            car._last = self._last
+            route = car.route(waypoints)
+            self._last = car._last
+            return route
+
     def route(self, waypoints: Sequence[LatLon]) -> RoadRoute:
         wait = MIN_INTERVAL_S - (time.monotonic() - self._last)
         if wait > 0:
@@ -178,8 +191,9 @@ class RouteCache:
     def get(self, waypoints: Sequence[LatLon], profile: str = PROFILE) -> RoadRoute | None:
         return self._routes.get(route_key(waypoints, profile))
 
-    def put(self, route: RoadRoute) -> None:
-        self._routes[route_key([(p[0], p[1]) for p in route.waypoints], route.profile)] = route
+    def put(self, route: RoadRoute, profile: str = PROFILE) -> None:
+        """Speichert unter dem angefragten Profil; ``route.profile`` nennt das tatsächlich genutzte."""
+        self._routes[route_key([(p[0], p[1]) for p in route.waypoints], profile)] = route
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -193,7 +207,7 @@ class RouteCache:
         hit = self.get(waypoints)
         if hit is not None or client is None:
             return hit
-        route = client.route(waypoints)
+        route = client.route_with_fallback(waypoints)
         route.labels = list(labels)
         self.put(route)
         self.save()

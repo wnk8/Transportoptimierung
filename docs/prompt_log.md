@@ -141,3 +141,10 @@ Gemini, Befunde aus dem ersten Live-Lauf:
 3. `gemini-2.5-flash` ist für neue Nutzer abgeschaltet (404), `gemini-flash-latest` war überlastet. Standard ist jetzt `gemini-flash-lite-latest`.
 Ergebnis: Einzelsendung Stuttgart > Hamburg mit den Werkzeugen parse_shipments, validate_shipments, plan_scenarios; Antwort von der Zahlenprüfung akzeptiert. Aufforderung "Schätz mal" ohne Datum: Der Agent lehnt die Schätzung ab und fragt nach dem Datum.
 OpenRouteService: Schlüssel gültig (Stuttgart > Mainz 211,4 km Straße gegen 185,0 km Rechnung). Befund: Für PLZ-Schwerpunkte abseits Lkw-tauglicher Straßen findet ORS mit dem Standardradius 350 m keine Route (Fehler 2009, Freiburg). Jetzt Fangradius 5 km; nicht routbare Relationen werden übersprungen und gemeldet.
+Weitere Befunde beim Erstellen der Screenshots (22.10.2026):
+- ORS-Tageskontingent des Schlüssels war nach etwa 210 Anfragen erschöpft ("Quota exceeded"). Stand im Cache: 43 von 45 Relationen, 223 Tourrouten (viele Touren teilen sich dieselben Stopps); 99 Tourrouten fehlen noch und lassen sich mit `make routes` nachholen.
+- Für Freiburg im Breisgau kennt das Lkw-Netz von ORS keine Route (2009 auch mit Fangradius). Rückfall auf das Pkw-Profil, in der Karte gekennzeichnet.
+- Gemini: Ein Aufruf hing ohne Zeitlimit; jetzt 60 s je Anfrage. Ein Lauf mit vier Modellschritten dauerte in der kostenlosen Stufe bis zu 2 Minuten.
+- Antworten des Modells enthalten Markdown; die Oberfläche zeigt sie jetzt als Markdown, HTML im Modelltext wird maskiert.
+- ECharts-Beschriftungen jetzt im deutschen Zahlenformat.
+Gemessener Straßenfaktor aus 43 Relationen: Σ Straße / Σ Luftlinie = 1,265 (Median 1,255) gegen I01 = 1,22. Beispiel Tour 12: Straßenroute 990,7 km gegen Modell-Tourstrecke 720,1 km (+37,6 %).
