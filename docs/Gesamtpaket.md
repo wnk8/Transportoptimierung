@@ -289,9 +289,9 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 
 ### 7.1 Leitsätze
 
-1. Eine helle Fläche, wenig Farbe. Farbe trägt Bedeutung, nie Dekoration.
+1. Weiße Seite, ruhige Pastelltöne. Jede Kennzahl und jeder Schritt hat einen eigenen Pastellton (Mint, Himmelblau, Pfirsich, Lavendel); Schrift darauf immer im passenden dunklen Ton. Farbe ist nie die einzige Information.
 2. Eine Akzentfarbe (tiefes Grün) für Konzept und primäre Aktionen. Die Vergleichsbasis (Ist) erhält eine warme Gegenfarbe. Bahn erhält Blau.
-3. Hierarchie durch Größe, Gewicht und Abstand, nicht durch Rahmen und Schatten.
+3. Hierarchie durch Größe, Gewicht und Abstand; Karten heben sich mit weichem Schatten von der weißen Seite ab.
 4. Eine Aussage pro Seite. Seite Eingabe: Eingabe und Parameter links, daneben vier Kennzahlen und die Karte. Seite Analyse: Tabellen, Szenarienvergleich, Erklärung, Prüfungen, Agent-Spur.
 5. Keine Animation außer 150 ms Übergängen bei Hover und Fokus.
 6. Jedes Element hat eine Funktion. Keine Illustrationen, Verläufe, Icons ohne Beschriftung, Emojis, Platzhaltertexte.
@@ -300,19 +300,23 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 
 | Token | Hex | Verwendung | Kontrast |
 |---|---|---|---|
-| `--bg` | `#F6F7F8` | Seitenhintergrund | Text 13,8 : 1 |
-| `--surface` | `#FFFFFF` | Karten, Panels | Text 14,8 : 1 |
-| `--line` | `#E3E6EA` | feine Trennlinien (nur Dekoration von Flächen) | 1,25 : 1, trägt keine Information |
+| `--bg` | `#FFFFFF` | Seitenhintergrund | Text 14,8 : 1 |
+| `--surface` | `#FFFFFF` | Karten, Panels (mit Schatten) | Text 14,8 : 1 |
+| `--canvas` | `#F7F9FB` | Tabellenkopf, Umschalter, Gruppenchips, Hover | Text 14,0 : 1; `--muted` 6,0 : 1 |
+| `--line` | `#E8ECF0` | feine Trennlinien (nur Dekoration von Flächen) | 1,2 : 1, trägt keine Information |
+| `--line-strong` | `#DCE2E8` | Rahmen von Eingabefeldern | trägt keine Information |
 | `--text` | `#1F2933` | Fließtext, Zahlen | 14,8 : 1 auf Weiß |
-| `--muted` | `#56616E` | Beschriftungen, Einheiten | 6,3 : 1 auf Weiß, 5,9 : 1 auf `--bg` |
+| `--muted` | `#56616E` | Beschriftungen, Einheiten | 6,3 : 1 auf Weiß, mindestens 5,4 : 1 auf jedem Pastellton |
 | `--accent` | `#1F6F5F` | Konzept, primäre Aktion, Fokus | 6,0 : 1 auf Weiß; Weiß auf Akzent 6,0 : 1 |
-| `--accent-tint` | `#E8F3EE` | Fläche für positive Veränderung | Text 13,0 : 1; `--accent` darauf 5,3 : 1 |
-| `--base` | `#9A4F2F` | Text und Chips für Ist | 5,9 : 1 auf Weiß; 5,1 : 1 auf Tint |
-| `--base-tint` | `#F8EBE4` | Fläche für Ist | Text 12,6 : 1 |
-| `--info` | `#2F6FA8` | Bahn | 5,3 : 1 auf Weiß |
-| `--info-tint` | `#E6EFF8` | Fläche für Bahn | Text 12,7 : 1 |
-| `--note-tint` | `#FAF3DC` | Annahmen, Hinweise | Text 13,3 : 1; `#8A5A00` darauf 5,3 : 1 |
-| `--danger` | `#B42318` | Fehler, Plan prüfen | 6,6 : 1 auf Weiß; 5,8 : 1 auf `#FDECEA` |
+| `--accent-tint` | `#E6F4EC` | Mint: CO₂e, Schritt 1, Reduktion, geänderte Felder | Text 13,0 : 1; `--accent` darauf 5,3 : 1 |
+| `--base` | `#9A4F2F` | Text und Chips für Ist | 5,9 : 1 auf Weiß; 5,2 : 1 auf Tint |
+| `--base-tint` | `#FCEEE4` | Pfirsich: Fahrzeug-km, Ist | Text 13,0 : 1 |
+| `--info` | `#2F6FA8` | Bahn | 5,3 : 1 auf Weiß; 4,6 : 1 auf Tint |
+| `--info-tint` | `#E6F0FA` | Himmelblau: Kosten, Bahn | Text 12,8 : 1 |
+| `--violet` | `#5B4BB0` | Schrift auf Lavendel | 6,8 : 1 auf Weiß; 5,9 : 1 auf Tint |
+| `--violet-tint` | `#EFECFA` | Lavendel: Servicegrad, Schritt 2, Zusammenfassung | Text 12,7 : 1 |
+| `--note-tint` | `#FBF4DC` | Annahmen, Hinweise | Text 13,4 : 1; `#8A5A00` darauf 5,4 : 1 |
+| `--danger` | `#B42318` | Fehler, Plan prüfen | 6,6 : 1 auf Weiß; 5,8 : 1 auf `#FDECEB` |
 
 Kartenlinien (müssen gegen die Karte mindestens 3 : 1 erreichen):
 
@@ -331,7 +335,7 @@ Regeln: Auf Tönen dunkler Text. Weißer Text nur auf `--accent`, `--text` und `
 | Schrift | Inter (lokal), Rückfall `system-ui`; Zahlen mit `font-variant-numeric: tabular-nums` |
 | Größen | Seitentitel 20 px / 600, Abschnitt 14 px / 600, Fließtext 14 px / 400, Beschriftung 12 px / 500 in `--muted`, Kennzahl 28 px / 600 |
 | Raster | 8 px; Karteninnenabstand 16 px; Abstand zwischen Karten 16 px |
-| Form | Radius 12 px für Karten, 8 px für Eingaben; 1 px Linie `--line`; kein Schatten oder höchstens `0 1px 2px rgba(31,41,51,0.06)` |
+| Form | Radius 16 px für Karten und Kennzahlen, 10 px für Eingaben, Schaltflächen und Hinweise, Chips rund; 1 px Linie `--line`; Schatten `--shadow-sm` (`0 1px 2px`) für Schaltflächen, `--shadow-md` (`0 1px 3px` und `0 8px 24px`, je 6 % Deckkraft) für Karten |
 | Zahlenformat | deutsch: Tausenderpunkt, Dezimalkomma, Einheit mit schmalem Leerzeichen (`306.924 kg CO2e`); Prozent mit Vorzeichen (`−53,3 %`) |
 | Fokus | 2 px Ring in `--accent`, nie entfernen |
 
@@ -388,7 +392,7 @@ Breakpoints: ab 960 px zweispaltig (Eingabe links 360 px, unter 1280 px 320 px),
 |---|---|
 | Szenario-Umschalter | Segmentierte Auswahl Ist, M2, M3. Aktiv: `--accent` Fläche, Weiß. Wechsel aktualisiert Karte, Kacheln, Tabellen |
 | Status-Chip | Abbild von `Input!R8`: "Keine Eingabe" (neutral), "Eingabe prüfen" (`--note-tint`), "Plan zulässig" (`--accent-tint`), "Plan prüfen" (`--danger`-Tint). Immer mit Text |
-| Kennzahlenkachel | Label, Wert Plan (28 px), darunter Delta als Chip mit Vorzeichen und Text "gegen Ist" sowie "Ist: Wert". Chip: Reduktion `--accent` auf `--accent-tint`, Zunahme `--base` auf `--base-tint`. Das Szenario steht einmal im Kopf der Kennzahlenleiste. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
+| Kennzahlenkachel | Fläche im eigenen Pastellton (CO₂e Mint, Kosten Himmelblau, Fahrzeug-km Pfirsich, Servicegrad Lavendel), Label und Link in der Tonfarbe. Label, Wert Plan (28 px), darunter Delta als Chip mit Vorzeichen und Text "gegen Ist" sowie "Ist: Wert". Chip: Reduktion `--accent` auf `--accent-tint`, Zunahme `--base` auf `--base-tint`. Das Szenario steht einmal im Kopf der Kennzahlenleiste. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
 | Eingabeformular | Schritt 1. Pflichtfelder A bis D wie in Excel, mit "(Pflicht)" beschriftet. Beschriftung über dem Feld, Einheit im Feld, Hilfetext darunter. Hinweistexte aus Spalte I. Inline-Validierung, Fehler mit Ursache und nächstem Schritt |
 | Parameterpanel | Schritt 2. Gruppen Bahnverlagerung (M3), Bündelung (M2), Kosten, Distanz. Zahlenfeld mit ID, Name und Einheit aus `Assumptions`, Anteile als Prozent. Hilfetext mit Wirkung und Standardwert; Tooltip mit Typ, Quelle, Zelle. Geänderte Felder: Fläche `--accent-tint` und Text "Geändert, Standard: Wert". Schrittstatus nennt die Zahl geänderter Werte. Link "Zurücksetzen". Änderung rechnet sofort neu |
 | Karte | Siehe Abschnitt 9 |

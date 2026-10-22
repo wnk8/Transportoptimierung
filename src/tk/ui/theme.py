@@ -14,21 +14,25 @@ from nicegui import app, ui
 FONT_DIR = Path(__file__).resolve().parents[1] / "assets" / "fonts"
 
 TOKENS: dict[str, str] = {
-    "bg": "#F6F7F8",
+    "bg": "#FFFFFF",
     "surface": "#FFFFFF",
-    "line": "#E3E6EA",
+    "canvas": "#F7F9FB",
+    "line": "#E8ECF0",
+    "line-strong": "#DCE2E8",
     "text": "#1F2933",
     "muted": "#56616E",
     "accent": "#1F6F5F",
-    "accent-tint": "#E8F3EE",
+    "accent-tint": "#E6F4EC",
     "base": "#9A4F2F",
-    "base-tint": "#F8EBE4",
+    "base-tint": "#FCEEE4",
     "info": "#2F6FA8",
-    "info-tint": "#E6EFF8",
-    "note-tint": "#FAF3DC",
+    "info-tint": "#E6F0FA",
+    "violet": "#5B4BB0",
+    "violet-tint": "#EFECFA",
+    "note-tint": "#FBF4DC",
     "note-text": "#8A5A00",
     "danger": "#B42318",
-    "danger-tint": "#FDECEA",
+    "danger-tint": "#FDECEB",
 }
 """Farbtokens (Gesamtpaket 7.2)."""
 
@@ -50,6 +54,8 @@ TEXT_PAIRS: list[tuple[str, str]] = [
     ("text", "surface"),
     ("muted", "surface"),
     ("muted", "bg"),
+    ("text", "canvas"),
+    ("muted", "canvas"),
     ("accent", "surface"),
     ("surface", "accent"),
     ("text", "accent-tint"),
@@ -58,9 +64,15 @@ TEXT_PAIRS: list[tuple[str, str]] = [
     ("base", "surface"),
     ("base", "base-tint"),
     ("text", "base-tint"),
+    ("muted", "base-tint"),
     ("info", "surface"),
     ("info", "info-tint"),
     ("text", "info-tint"),
+    ("muted", "info-tint"),
+    ("violet", "surface"),
+    ("violet", "violet-tint"),
+    ("text", "violet-tint"),
+    ("muted", "violet-tint"),
     ("text", "note-tint"),
     ("note-text", "note-tint"),
     ("danger", "surface"),
@@ -78,6 +90,14 @@ STATUS_STYLES: dict[str, tuple[str, str]] = {
 }
 """Status-Chip: Fläche und Schrift je Cockpit-Status (Input!R8)."""
 
+TONES: dict[str, tuple[str, str]] = {
+    "mint": ("accent-tint", "accent"),
+    "sky": ("info-tint", "info"),
+    "peach": ("base-tint", "base"),
+    "lavender": ("violet-tint", "violet"),
+}
+"""Pastelltöne für Kennzahlenkacheln und Schrittnummern: Fläche und Schriftfarbe (Paare in TEXT_PAIRS)."""
+
 CSS = """
 @font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
   src: url('/tk-fonts/Inter-Regular.woff2') format('woff2'); }
@@ -87,78 +107,129 @@ CSS = """
   src: url('/tk-fonts/Inter-SemiBold.woff2') format('woff2'); }
 :root {
 %(tokens)s
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 1px 3px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.06);
 }
-body { background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; font-size: 14px; }
+%(tones)s
+body { background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; font-size: 14px;
+  -webkit-font-smoothing: antialiased; }
 .q-field, .q-btn, .q-tab, .q-table, .q-item, .q-chip { font-family: Inter, system-ui, sans-serif; }
-.tk-page { max-width: 1600px; margin: 0 auto; padding: 16px; gap: 16px; }
-.tk-title { font-size: 20px; font-weight: 600; }
+.tk-page { max-width: 1600px; margin: 0 auto; padding: 0 24px 24px; gap: 20px; }
+.tk-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
 .tk-section { font-size: 14px; font-weight: 600; }
-.tk-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.tk-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px;
+  box-shadow: var(--shadow-md); }
 .tk-label { color: var(--muted); font-size: 12px; font-weight: 500; }
-.tk-kpi { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tk-kpi { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2;
+  letter-spacing: -0.02em; }
 .tk-num { font-variant-numeric: tabular-nums; }
 .tk-delta-down { color: var(--accent); font-weight: 600; }
 .tk-delta-up { color: var(--base); font-weight: 600; }
 .tk-ist { color: var(--base); }
 .tk-chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 12px;
-  font-size: 12px; font-weight: 600; border: 1px solid var(--line); }
-.tk-note { background: var(--note-tint); color: var(--text); border-radius: 8px; padding: 8px 12px; }
-.tk-error { background: var(--danger-tint); color: var(--danger); border-radius: 8px; padding: 8px 12px; }
-.tk-success { background: var(--accent-tint); color: var(--accent); border-radius: 8px; padding: 8px 12px; }
-.tk-segment { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
-  background: var(--surface); }
-.tk-segment button { padding: 6px 14px; font-size: 14px; font-weight: 500; color: var(--text);
+  font-size: 12px; font-weight: 600; border: 1px solid transparent; }
+.tk-note { background: var(--note-tint); color: var(--text); border-radius: 10px; padding: 10px 14px; }
+.tk-error { background: var(--danger-tint); color: var(--danger); border-radius: 10px; padding: 10px 14px; }
+.tk-success { background: var(--accent-tint); color: var(--accent); border-radius: 10px; padding: 10px 14px; }
+
+/* App bar: brand, page navigation, scenario, status in one row. */
+.tk-appbar { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; width: 100%%;
+  padding: 16px 0; border-bottom: 1px solid var(--line); }
+.tk-brand { display: flex; align-items: center; gap: 10px; }
+.tk-mark { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+  border-radius: 10px; background: var(--accent-tint); color: var(--accent); font-size: 13px; font-weight: 600; }
+.tk-appbar-end { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-wrap: wrap; }
+.tk-pagenav { display: flex; gap: 4px; }
+.tk-pagenav a { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; padding: 6px 14px;
+  border-radius: 999px; }
+.tk-pagenav a:hover { color: var(--text); background: var(--canvas); }
+.tk-pagenav a[aria-current="page"] { color: var(--accent); background: var(--accent-tint); font-weight: 600; }
+
+.tk-segment { display: inline-flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--canvas);
+  border: 1px solid var(--line); }
+.tk-segment button { padding: 6px 14px; font-size: 13px; font-weight: 500; color: var(--text); border-radius: 9px;
   background: transparent; border: 0; cursor: pointer; transition: background-color 150ms, color 150ms; }
-.tk-segment button + button { border-left: 1px solid var(--line); }
-.tk-segment button:hover { background: var(--bg); }
-.tk-segment button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
-.tk-link { color: var(--accent); text-decoration: underline; cursor: pointer; background: none; border: 0;
-  padding: 0; font-size: 12px; font-weight: 500; }
-.tk-footer { color: var(--muted); font-size: 12px; }
-.tk-progress { height: 2px; background: var(--accent-tint); overflow: hidden; border-radius: 2px; }
+.tk-segment button:hover { background: var(--surface); }
+.tk-segment button[aria-pressed="true"] { background: var(--accent); color: var(--surface); font-weight: 600;
+  box-shadow: var(--shadow-sm); }
+
+.tk-link { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+  background: none; border: 0; padding: 0; font-size: 12px; font-weight: 500; }
+.tk-footer { color: var(--muted); font-size: 12px; padding-top: 8px; }
+.tk-progress { height: 3px; background: var(--accent-tint); overflow: hidden; border-radius: 3px; }
 .tk-progress > div { height: 100%%; width: 40%%; background: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 a, button { transition: background-color 150ms, color 150ms; }
+
 .tk-step { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.tk-step-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
-  border-radius: 999px; background: var(--accent); color: var(--surface); font-size: 12px; font-weight: 600; }
-.tk-step-title { font-size: 16px; font-weight: 600; }
+.tk-step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+  border-radius: 999px; background: var(--tone-bg, var(--accent-tint)); color: var(--tone-ink, var(--accent));
+  font-size: 13px; font-weight: 600; }
+.tk-step-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
 .tk-step-status { color: var(--muted); font-size: 12px; font-weight: 500; margin-left: auto; }
-.tk-group { color: var(--muted); font-size: 12px; font-weight: 600; border-top: 1px solid var(--line);
-  padding-top: 12px; margin-top: 4px; width: 100%%; }
-.tk-field { display: flex; flex-direction: column; gap: 4px; width: 100%%; }
-.tk-field-label { color: var(--text); font-size: 12px; font-weight: 500; cursor: help; }
-.tk-field-label .tk-id { color: var(--muted); margin-right: 6px; }
-.tk-help { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.tk-group { display: inline-flex; align-self: flex-start; color: var(--muted); font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em; background: var(--canvas); border-radius: 999px;
+  padding: 4px 10px; margin-top: 8px; }
+.tk-field { display: flex; flex-direction: column; gap: 6px; width: 100%%; }
+.tk-field-label { color: var(--text); font-size: 13px; font-weight: 500; cursor: help; }
+.tk-field-label .tk-id { color: var(--muted); font-weight: 600; margin-right: 6px; font-size: 12px; }
+.tk-help { color: var(--muted); font-size: 12px; line-height: 1.45; }
 .tk-field--changed .q-field__control { background: var(--accent-tint); }
 .tk-field--changed .tk-help { color: var(--accent); font-weight: 500; }
+
+/* Inputs: soft border, rounded, accent focus. */
+.q-field--outlined .q-field__control { border-radius: 10px; background: var(--surface); }
+.q-field--outlined .q-field__control:before { border-color: var(--line-strong); }
+.q-field--outlined:hover .q-field__control:before { border-color: #C5CDD6; }
+.q-field__suffix { color: var(--muted); font-size: 12px; font-weight: 500; }
+.q-btn { border-radius: 10px; font-weight: 500; letter-spacing: 0; }
+.q-btn.bg-primary { box-shadow: var(--shadow-sm); }
+.q-btn--outline:before { border-color: var(--line-strong) !important; }
+.q-expansion-item .q-item { border-radius: 10px; padding-left: 8px; }
+.q-tabs { border-bottom: 1px solid var(--line); }
+.q-tab { color: var(--muted); }
+.q-tab--active { color: var(--text); }
+.q-tab__label { font-weight: 500; }
+.q-tab__indicator { height: 2px; border-radius: 2px; background: var(--accent); }
+.q-uploader { border-radius: 10px; box-shadow: none; border: 1px dashed var(--line-strong); }
+
 /* Above Leaflet panes and controls (400 to 1000), below Quasar dialogs and tooltips (6000+). */
-.tk-rail { position: sticky; top: 0; z-index: 1100; background: var(--bg); padding-bottom: 8px; }
-.tk-rail-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 4px 0 8px; }
+.tk-rail { position: sticky; top: 0; z-index: 1100; background: var(--bg); padding: 4px 0 8px; }
+.tk-rail-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 4px 0 12px; }
 .tk-kpi-grid { display: grid; gap: 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tk-kpi-tile { background: var(--tone-bg, var(--surface)); border: 1px solid transparent; border-radius: 16px;
+  padding: 18px 20px; }
+.tk-kpi-tile .tk-kpi-label { color: var(--tone-ink, var(--muted)); font-size: 12px; font-weight: 600; }
 .tk-delta-chip { display: inline-flex; border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600;
   font-variant-numeric: tabular-nums; }
 .tk-delta-chip.down { background: var(--accent-tint); color: var(--accent); }
 .tk-delta-chip.up { background: var(--base-tint); color: var(--base); }
-.tk-delta-chip.flat { background: var(--bg); color: var(--muted); }
-.tk-pagenav { display: flex; gap: 24px; border-bottom: 1px solid var(--line); width: 100%%; }
-.tk-pagenav a { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; padding: 8px 0;
-  border-bottom: 2px solid transparent; margin-bottom: -1px; }
-.tk-pagenav a:hover { color: var(--text); }
-.tk-pagenav a[aria-current="page"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+.tk-delta-chip.flat { background: var(--canvas); color: var(--muted); }
+.tk-kpi-tile .tk-delta-chip { background: var(--surface); box-shadow: var(--shadow-sm); }
+/* Links on a tinted tile use the tile ink, so every link/background pair is in TEXT_PAIRS. */
+.tk-kpi-tile .tk-link { color: var(--tone-ink); }
+
 .tk-schema { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
-.tk-schema span { background: var(--bg); border-radius: 6px; padding: 4px 6px; font-size: 12px; color: var(--text); }
+.tk-schema span { background: var(--canvas); border-radius: 8px; padding: 4px 6px; font-size: 12px; color: var(--text); }
 .tk-schema b { color: var(--muted); font-weight: 600; margin-right: 4px; }
-.tk-summary { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.tk-summary { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: var(--violet-tint);
+  border-color: transparent; box-shadow: none; }
+
 .leaflet-tile-pane { filter: grayscale(0.85) contrast(0.95) brightness(1.04); }
+.leaflet-container { border-radius: 12px; }
+.q-table__container { border-radius: 12px; box-shadow: none; }
+.q-table thead tr { background: var(--canvas); }
 .q-table th { font-weight: 600; color: var(--muted); font-size: 12px; }
 .q-table td { font-variant-numeric: tabular-nums; }
-.q-tab__label { font-weight: 500; }
+.q-table tbody tr:hover > td { background: var(--canvas); }
+.q-table--flat .q-table__middle { border-radius: 12px; }
+
 .tk-left { width: 360px; flex-shrink: 0; }
 .tk-left .q-tab { padding: 0 10px; }
 @media (max-width: 1279px) {
   .tk-left { width: 320px; }
   .tk-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tk-page { padding: 0 16px 16px; }
 }
 /* Sticky rail only where it leaves room for the map: wide and tall screens. */
 @media (max-width: 1279px), (max-height: 799px) { .tk-rail { position: static; } }
@@ -171,7 +242,10 @@ a, button { transition: background-color 150ms, color 150ms; }
 
 def css() -> str:
     tokens = "\n".join(f"  --{k}: {v};" for k, v in TOKENS.items())
-    return CSS % {"tokens": tokens}
+    tones = "\n".join(
+        f".tk-tone-{name} {{ --tone-bg: var(--{bg}); --tone-ink: var(--{ink}); }}" for name, (bg, ink) in TONES.items()
+    )
+    return CSS % {"tokens": tokens, "tones": tones}
 
 
 _fonts_registered = False

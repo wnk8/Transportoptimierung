@@ -17,10 +17,13 @@ from tk.ui import format as fmt
 from tk.ui.agent_panel import render_trace
 from tk.ui.layout import SCENARIO_LABEL, footer, header
 from tk.ui.state import Session, reference, snapshot
-from tk.ui.theme import apply_theme, status_chip
+from tk.ui.theme import TOKENS, apply_theme, status_chip
 
 PCT_JS = "(v => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 2}).replace('-', '\u2212') + '\u202f%')"
 """Prozent im deutschen Format für ECharts (Dezimalkomma, Minuszeichen, schmales Leerzeichen)."""
+
+M2_BAR = "#8A99AD"
+"""Balkenfarbe M2: gedämpftes Schiefergrau neben dem Akzent für M3 (Beschriftung trägt die Bedeutung)."""
 
 TABS = {
     "sendungen": "Sendungen",
@@ -216,18 +219,18 @@ class AnalysisPage:
 
                 ui.echart({
                     "animation": False,
-                    "textStyle": {"fontFamily": "Inter, system-ui, sans-serif", "color": "#1F2933"},
+                    "textStyle": {"fontFamily": "Inter, system-ui, sans-serif", "color": TOKENS["text"]},
                     "legend": {"top": 0, "left": 0, "itemGap": 16},
                     "grid": {"left": 56, "right": 16, "top": 36, "bottom": 32},
                     "tooltip": {"trigger": "axis", ":valueFormatter": PCT_JS},
                     "xAxis": {"type": "category", "data": cats, "axisTick": {"show": False}},
                     "yAxis": {"type": "value", "axisLabel": {":formatter": PCT_JS},
-                              "splitLine": {"lineStyle": {"color": "#E3E6EA"}}},
+                              "splitLine": {"lineStyle": {"color": TOKENS["line"]}}},
                     "series": [
-                        {"name": "M2 Bündelung", "type": "bar", "barGap": "10%", "itemStyle": {"color": "#56616E"},
+                        {"name": "M2 Bündelung", "type": "bar", "barGap": "10%", "itemStyle": {"color": M2_BAR, "borderRadius": [0, 0, 6, 6]},
                          "label": {"show": True, "position": "bottom", ":formatter": "p => (" + PCT_JS + ")(p.value)"},
                          "data": [pct(m2.delta_co2_fzgkm), pct(m2.delta_kosten), pct(m2.delta_lkw_km)]},
-                        {"name": "M3 Bahn + Bündelung", "type": "bar", "itemStyle": {"color": "#1F6F5F"},
+                        {"name": "M3 Bahn + Bündelung", "type": "bar", "itemStyle": {"color": TOKENS["accent"], "borderRadius": [0, 0, 6, 6]},
                          "label": {"show": True, "position": "bottom", ":formatter": "p => (" + PCT_JS + ")(p.value)"},
                          "data": [pct(m3.delta_co2_fzgkm), pct(m3.delta_kosten), pct(m3.delta_lkw_km)]},
                     ],

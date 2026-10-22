@@ -18,7 +18,7 @@ from nicegui import ui
 from tk.excelfn import fold
 from tk.models import Result
 from tk.ui import format as fmt
-from tk.ui.theme import MAP_LINES
+from tk.ui.theme import MAP_LINES, TOKENS
 
 GERMANY_CENTER = (51.1, 10.2)
 TILE_PROBE = "https://a.tile.osm.org/6/33/21.png"
@@ -197,7 +197,7 @@ def svg_network(result: Result, scenario: str, side: str, width: int = 520, heig
     parts = [
         f'<svg viewBox="0 0 {width} {height}" width="100%" role="img" aria-label="Knoten-Kanten-Ansicht">'
     ]
-    parts.append(f'<rect width="{width}" height="{height}" fill="#FFFFFF"/>')
+    parts.append(f'<rect width="{width}" height="{height}" fill="{TOKENS["surface"]}"/>')
     for coords, opts, popup, _key in line_specs(result, scenario, side):
         (a, b), (c, d) = xy(*coords[0]), xy(*coords[1])
         dash = opts.get("dashArray", "")
@@ -214,8 +214,8 @@ def svg_network(result: Result, scenario: str, side: str, width: int = 520, heig
     for name, (lat, lon) in nodes.items():
         x, y = xy(lat, lon)
         label = html.escape(name.split(" ", 1)[-1])
-        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="#1F2933"/>')
-        parts.append(f'<text x="{x + 6:.1f}" y="{y - 6:.1f}" font-size="11" fill="#1F2933">{label}</text>')
+        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{TOKENS["text"]}"/>')
+        parts.append(f'<text x="{x + 6:.1f}" y="{y - 6:.1f}" font-size="11" fill="{TOKENS["text"]}">{label}</text>')
     parts.append("</svg>")
     return "".join(parts)
 

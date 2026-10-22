@@ -39,7 +39,7 @@ from tk.routing import (
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.map_view import MapView, bind_layer, relations, view_for
-from tk.ui.theme import MAP_LINES
+from tk.ui.theme import MAP_LINES, TOKENS
 
 _cache: RouteCache | None = None
 
@@ -450,8 +450,8 @@ class TourView:
                         list(p),
                         {
                             "radius": 7,
-                            "color": "#1F2933",
-                            "fillColor": "#FFFFFF",
+                            "color": TOKENS["text"],
+                            "fillColor": TOKENS["surface"],
                             "fillOpacity": 1,
                             "weight": 2,
                         },

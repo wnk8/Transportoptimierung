@@ -215,7 +215,7 @@ class Page:
         base = self.s.base.model.params
         current = self.s.params
         with ui.element("div").classes("tk-card w-full flex flex-col gap-3").props('id="schritt-2"'):
-            self.param_status = components.step_header(2, "Parameter anpassen")
+            self.param_status = components.step_header(2, "Parameter anpassen", tone="lavender")
             with ui.row().classes("w-full items-center justify-between no-wrap"):
                 ui.label("Jede Änderung rechnet sofort neu. Quelle je Wert: Mauszeiger auf die Beschriftung.").classes(
                     "tk-help"
@@ -512,17 +512,17 @@ class Page:
                 return
             k, ist = r.kpis[self.s.scenario], r.kpis["Ist"]
             tiles = [
-                ("CO₂e (Fzg-km)", k.co2_fzgkm_kg, k.delta_co2_fzgkm, "kg", "co2_fzgkm", ist.co2_fzgkm_kg),
-                ("Kosten", k.kosten_eur, k.delta_kosten, "€", "kosten", ist.kosten_eur),
-                ("Fahrzeug-km (Lkw)", k.lkw_km, k.delta_lkw_km, "km", "lkw_km", ist.lkw_km),
+                ("CO₂e (Fzg-km)", k.co2_fzgkm_kg, k.delta_co2_fzgkm, "kg", "co2_fzgkm", ist.co2_fzgkm_kg, "mint"),
+                ("Kosten", k.kosten_eur, k.delta_kosten, "€", "kosten", ist.kosten_eur, "sky"),
+                ("Fahrzeug-km (Lkw)", k.lkw_km, k.delta_lkw_km, "km", "lkw_km", ist.lkw_km, "peach"),
             ]
-            for label, value, delta, unit, key, base in tiles:
+            for label, value, delta, unit, key, base, tone in tiles:
                 components.kpi_tile(
                     label, value, base if plan else None, delta if plan else None, unit,
-                    on_explain=functools.partial(self.open_explain, key),
+                    on_explain=functools.partial(self.open_explain, key), tone=tone,
                 )  # fmt: skip
             components.kpi_tile(
-                "Servicegrad", k.servicegrad, None, None, "%",
+                "Servicegrad", k.servicegrad, None, None, "%", tone="lavender",
                 on_explain=lambda: self.open_explain("servicegrad"),
                 extra=f"Anteil Bahn: {fmt.percent(k.bahn_sendungen / r.n_valid, 1, False)} "
                 f"({fmt.number(k.bahn_sendungen)} Sendungen)",

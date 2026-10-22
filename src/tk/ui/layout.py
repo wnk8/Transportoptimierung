@@ -18,16 +18,18 @@ FOOTER = (
 )
 
 
-def header(session: Session, active: str, on_scenario: Callable[[str], object]) -> ui.row:
-    """Titel, Szenario-Umschalter, Status und Seitennavigation. Gibt den Container des Status-Chips zurück."""
-    with ui.row().classes("w-full items-center justify-between gap-4 flex-wrap"):
-        with ui.row().classes("items-baseline gap-3"):
-            ui.label("Transportkonzept").classes("tk-title")
-            ui.label("Nachhaltiges Transportkonzept, Excel v11").classes("tk-label")
-        with ui.row().classes("items-center gap-4"):
+def header(session: Session, active: str, on_scenario: Callable[[str], object]) -> ui.element:
+    """App-Leiste: Marke, Seitennavigation, Szenario-Umschalter, Status. Gibt den Container des Status-Chips zurück."""
+    with ui.element("header").classes("tk-appbar"):
+        with ui.element("div").classes("tk-brand"):
+            ui.label("TK").classes("tk-mark").props('aria-hidden="true"')
+            with ui.column().classes("gap-0"):
+                ui.label("Transportkonzept").classes("tk-title")
+                ui.label("Nachhaltiges Transportkonzept, Excel v11").classes("tk-label")
+        components.page_nav(active)
+        with ui.element("div").classes("tk-appbar-end"):
             ScenarioToggle(session.scenario, on_scenario)
             status_box = ui.row().classes("items-center")
-    components.page_nav(active)
     return status_box
 
 

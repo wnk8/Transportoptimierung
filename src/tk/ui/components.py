@@ -22,14 +22,16 @@ def kpi_tile(
     extra: str | None = None,
     delta_is_level: bool = False,
     delta_label: str = "gegen Ist",
+    tone: str | None = None,
 ) -> None:
     """Kennzahlenkachel: Label, Wert Plan (28 px), darunter Delta als Chip und Ist-Wert.
 
     Reduktion in Akzentfarbe, Zunahme in der Farbe der Vergleichsbasis. Das Delta steht
     immer als Text mit Vorzeichen, Farbe ist nie die einzige Information.
     """
-    with ui.element("div").classes("tk-card flex flex-col gap-1 min-w-0"):
-        ui.label(label).classes("tk-label")
+    surface = f"tk-kpi-tile tk-tone-{tone}" if tone else "tk-card"
+    with ui.element("div").classes(f"{surface} flex flex-col gap-1 min-w-0"):
+        ui.label(label).classes("tk-kpi-label" if tone else "tk-label")
         ui.label(fmt.with_unit(plan, unit, decimals) if unit != "%" else fmt.percent(plan, 1, False)).classes(
             "tk-kpi"
         )
@@ -84,9 +86,9 @@ def note(text: str) -> None:
     ui.label(text).classes("tk-note")
 
 
-def step_header(n: int, title: str) -> ui.label:
-    """Schrittkopf mit Nummer und Titel; gibt das Statuslabel rechts zurück."""
-    with ui.element("div").classes("tk-step w-full"):
+def step_header(n: int, title: str, tone: str = "mint") -> ui.label:
+    """Schrittkopf mit Nummer im Pastellton und Titel; gibt das Statuslabel rechts zurück."""
+    with ui.element("div").classes(f"tk-step tk-tone-{tone} w-full"):
         ui.label(str(n)).classes("tk-step-num").props('aria-hidden="true"')
         ui.label(title).classes("tk-step-title")
         return ui.label("").classes("tk-step-status")

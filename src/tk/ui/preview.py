@@ -94,28 +94,22 @@ def preview_page() -> None:
             )
         else:
             k = data.result.kpis
-            with (
-                ui.element("div").classes("grid gap-4").style("grid-template-columns:repeat(4,minmax(0,1fr))")
-            ):
-                components.kpi_tile(
-                    "CO₂e (Fzg-km)",
-                    k["M3"].co2_fzgkm_kg,
-                    k["Ist"].co2_fzgkm_kg,
-                    k["M3"].delta_co2_fzgkm,
-                    "kg",
-                )
-                components.kpi_tile(
-                    "Kosten", k["M3"].kosten_eur, k["Ist"].kosten_eur, k["M3"].delta_kosten, "€"
-                )
-                components.kpi_tile("Lkw-km", k["M3"].lkw_km, k["Ist"].lkw_km, k["M3"].delta_lkw_km, "km")
-                components.kpi_tile(
-                    "Servicegrad",
-                    k["M3"].servicegrad,
-                    k["Ist"].servicegrad,
-                    None,
-                    "%",
-                    extra=f"Bahn: {k['M3'].bahn_sendungen} Sendungen",
-                )
+            for tones in ((None, None, None, None), ("mint", "sky", "peach", "lavender")):
+                with ui.element("div").classes("tk-kpi-grid w-full"):
+                    components.kpi_tile(
+                        "CO₂e (Fzg-km)", k["M3"].co2_fzgkm_kg, k["Ist"].co2_fzgkm_kg, k["M3"].delta_co2_fzgkm, "kg",
+                        tone=tones[0],
+                    )  # fmt: skip
+                    components.kpi_tile(
+                        "Kosten", k["M3"].kosten_eur, k["Ist"].kosten_eur, k["M3"].delta_kosten, "€", tone=tones[1]
+                    )
+                    components.kpi_tile(
+                        "Lkw-km", k["M3"].lkw_km, k["Ist"].lkw_km, k["M3"].delta_lkw_km, "km", tone=tones[2]
+                    )
+                    components.kpi_tile(
+                        "Servicegrad", k["M3"].servicegrad, k["Ist"].servicegrad, None, "%",
+                        extra=f"Bahn: {k['M3'].bahn_sendungen} Sendungen", tone=tones[3],
+                    )  # fmt: skip
 
         ui.label("Zustände").classes("tk-section")
         with ui.element("div").classes("grid gap-4").style("grid-template-columns:repeat(2,minmax(0,1fr))"):
