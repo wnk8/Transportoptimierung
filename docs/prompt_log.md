@@ -132,3 +132,19 @@ R5 Oberfläche: `ui/map_area.py` mit Tabs "Vorher / Nachher", "Straße gegen Luf
 Browserprüfung: Stuttgart > Mainz zeigt 63 Einzelfahrten, davon 49 in Sammeltouren und 14 bleiben einzeln, CO₂e −26,4 %, Kosten −25,7 %; Tour 1 mit Lkw 7,5t, alle Bedingungen erfüllt, 3 Sprinter wären 860,3 kg statt 478,0 kg CO₂e. Befunde: 39 Tour-Schaltflächen waren zu viele (jetzt 8 und eine aufklappbare Liste); die Fahrzeugtabelle der Tour war in der Seitenspalte zu schmal (jetzt volle Breite); die Vorschauseite brach mit den neuen Linienarten ab (Beschriftung ergänzt).
 R6 Doku: THIRD_PARTY (ORS, httpx), Annahmen Abschnitt 6, Demo-Skript Schritt 5a, `.env.example` mit `ORS_API_KEY`.
 Offen: Live-Abruf der Straßenrouten (kein ORS-Schlüssel vorhanden); danach `make routes` und Sichtprüfung der Ansicht mit echten Routen.
+
+## Live-Test mit echten Schlüsseln (20.10.2026)
+Schlüssel lagen zunächst in `.env.example` (versioniert, noch nicht committet). Sie wurden in die ignorierte `.env` verschoben, `.env.example` ist wieder leer; in der Git-Historie stehen sie nicht (geprüft).
+Gemini, Befunde aus dem ersten Live-Lauf:
+1. HTTP 503 (Modell überlastet) brach ab; jetzt wie ein Ratenlimit: Wiederholung mit Wartezeit, danach Demo-Modus.
+2. HTTP 400 "missing thought_signature": Neuere Modelle verlangen die Werkzeugaufrufe unverändert zurück. Der Verlauf führt jetzt den Originalinhalt der Antwort mit (`Message.raw`).
+3. `gemini-2.5-flash` ist für neue Nutzer abgeschaltet (404), `gemini-flash-latest` war überlastet. Standard ist jetzt `gemini-flash-lite-latest`.
+Ergebnis: Einzelsendung Stuttgart > Hamburg mit den Werkzeugen parse_shipments, validate_shipments, plan_scenarios; Antwort von der Zahlenprüfung akzeptiert. Aufforderung "Schätz mal" ohne Datum: Der Agent lehnt die Schätzung ab und fragt nach dem Datum.
+OpenRouteService: Schlüssel gültig (Stuttgart > Mainz 211,4 km Straße gegen 185,0 km Rechnung). Befund: Für PLZ-Schwerpunkte abseits Lkw-tauglicher Straßen findet ORS mit dem Standardradius 350 m keine Route (Fehler 2009, Freiburg). Jetzt Fangradius 5 km; nicht routbare Relationen werden übersprungen und gemeldet.
+Weitere Befunde beim Erstellen der Screenshots (22.10.2026):
+- ORS-Tageskontingent des Schlüssels war nach etwa 210 Anfragen erschöpft ("Quota exceeded"). Stand im Cache: 43 von 45 Relationen, 223 Tourrouten (viele Touren teilen sich dieselben Stopps); 99 Tourrouten fehlen noch und lassen sich mit `make routes` nachholen.
+- Für Freiburg im Breisgau kennt das Lkw-Netz von ORS keine Route (2009 auch mit Fangradius). Rückfall auf das Pkw-Profil, in der Karte gekennzeichnet.
+- Gemini: Ein Aufruf hing ohne Zeitlimit; jetzt 60 s je Anfrage. Ein Lauf mit vier Modellschritten dauerte in der kostenlosen Stufe bis zu 2 Minuten.
+- Antworten des Modells enthalten Markdown; die Oberfläche zeigt sie jetzt als Markdown, HTML im Modelltext wird maskiert.
+- ECharts-Beschriftungen jetzt im deutschen Zahlenformat.
+Gemessener Straßenfaktor aus 43 Relationen: Σ Straße / Σ Luftlinie = 1,265 (Median 1,255) gegen I01 = 1,22. Beispiel Tour 12: Straßenroute 990,7 km gegen Modell-Tourstrecke 720,1 km (+37,6 %).

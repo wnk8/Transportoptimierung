@@ -11,6 +11,7 @@ import pytest
 from tk.routing import (
     ORSClient,
     RouteCache,
+    RouteNotFound,
     RoutingUnavailable,
     nearest_neighbor_order,
     parse_ors_geojson,
@@ -64,6 +65,7 @@ def test_client_retries_on_429_and_sends_lonlat() -> None:
     route = client.route(WAYPOINTS)
     assert route.distance_km == pytest.approx(190.5123)
     assert sent[0]["coordinates"] == [[9.18, 48.77265], [8.2688, 50.001]]
+    assert sent[0]["radiuses"] == [5000, 5000]
     assert 10 in sleeps
 
 
@@ -71,6 +73,35 @@ def test_client_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ORS_API_KEY", raising=False)
     with pytest.raises(RoutingUnavailable):
         ORSClient()
+
+
+def test_route_not_found_is_skippable() -> None:
+    body = '{"error":{"code":2009,"message":"Route could not be found"}}'
+    client = client_with([httpx.Response(404, text=body)], [])
+    with pytest.raises(RouteNotFound):
+        client.route(WAYPOINTS)
+
+
+def test_fallback_to_car_profile(tmp_path: Path) -> None:
+    body = '{"error":{"code":2009,"message":"Route could not be found"}}'
+    paths: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        paths.append(request.url.path)
+        return (
+            httpx.Response(404, text=body)
+            if "hgv" in request.url.path
+            else httpx.Response(200, json=ORS_RESPONSE)
+        )
+
+    client = ORSClient(
+        api_key="test", http=httpx.Client(transport=httpx.MockTransport(handler)), sleep=lambda _s: None
+    )
+    cache = RouteCache(tmp_path / "r.json")
+    route = cache.get_or_fetch(WAYPOINTS, client)
+    assert route is not None and route.profile == "driving-car"
+    assert cache.get(WAYPOINTS) is route  # unter dem Lkw-Schlüssel abgelegt, Profil sichtbar
+    assert paths[0].endswith("driving-hgv/geojson") and paths[1].endswith("driving-car/geojson")
 
 
 def test_error_status_is_reported() -> None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import os
 from typing import TYPE_CHECKING, Any
@@ -69,12 +70,21 @@ def build_agent_input(page: Page, box: ui.column) -> None:
             if result is None:
                 return
             answer: AgentAnswer = result
+            used = (
+                "Gemini"
+                if answer.provider == "gemini"
+                else "Demo-Modus (Gemini nicht verfügbar, aufgezeichneter Ablauf)"
+            )
+            mode_label.set_text(f"Modus: {used}")
             page.agent_trace = answer.trace  # type: ignore[attr-defined]
             page.agent_ctx = ctx  # type: ignore[attr-defined]
             answer_box.clear()
             with answer_box:
-                (ui.label(answer.text).classes("tk-card") if answer.accepted else components.error_state(
-                    answer.text, "Spur prüfen; Zahlen stehen in den Werkzeugausgaben."))  # fmt: skip
+                if answer.accepted:
+                    # Model text as Markdown; HTML in the model output is escaped first.
+                    ui.markdown(html.escape(answer.text, quote=False)).classes("tk-card w-full")
+                else:
+                    components.error_state(answer.text, "Spur prüfen; Zahlen stehen in den Werkzeugausgaben.")
                 if ctx.arbeitsliste:
                     ui.button(
                         f"{len(ctx.arbeitsliste)} Sendung(en) in die Eingabe übernehmen",

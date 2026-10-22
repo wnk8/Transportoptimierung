@@ -271,6 +271,8 @@ class RoadView:
                 )
                 self._layers.append(road)
                 tip += f"<br>Straße {fmt.with_unit(route.distance_km, 'km', 1)}"
+                if route.profile != "driving-hgv":
+                    tip += " (Pkw-Profil: ORS kennt hier keine Lkw-Route)"
                 pending.append((road, tip, stop.key))
             pending.append((air, tip, stop.key))
 

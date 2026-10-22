@@ -7,7 +7,7 @@ Umgebungsvariable ``GEMINI_API_KEY`` (lokal aus ``.env``).
 Geprüft am 20.10.2026 gegen google-genai 2.31 (Context7, Doku v2.30): manuelle
 Funktionsaufrufe über ``FunctionDeclaration`` mit ``parameters_json_schema``,
 ``AutomaticFunctionCallingConfig(disable=True)`` und ``Part.from_function_response``.
-Modellname über ``GEMINI_MODEL``; ohne Angabe der Alias ``gemini-flash-latest``.
+Modellname über ``GEMINI_MODEL``; ohne Angabe der Alias ``gemini-flash-lite-latest`` (Live-Test 20.10.2026: ``gemini-flash-latest`` überlastet, ``gemini-2.5-flash`` für neue Nutzer abgeschaltet).
 Limits der kostenlosen Stufe stehen in Google AI Studio (Stand vor Nutzung prüfen).
 """
 
@@ -17,7 +17,10 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
-DEFAULT_MODEL = "gemini-flash-latest"
+import httpx
+
+DEFAULT_MODEL = "gemini-flash-lite-latest"
+REQUEST_TIMEOUT_MS = 60_000
 
 
 @dataclass(slots=True)
@@ -35,6 +38,8 @@ class Message:
     tool_calls: list[ToolCall] = field(default_factory=list)
     tool_name: str = ""
     tool_result: dict[str, Any] = field(default_factory=dict)
+    raw: Any = None
+    """Originalinhalt des Anbieters (Gemini: Content mit thought_signature), unverändert zurückzusenden."""
 
 
 @dataclass(slots=True)
@@ -48,10 +53,11 @@ class ToolSpec:
 class Reply:
     text: str
     tool_calls: list[ToolCall]
+    raw: Any = None
 
 
 class RateLimitError(RuntimeError):
-    """Ratenlimit oder Kontingent des Anbieters erschöpft (HTTP 429)."""
+    """Ratenlimit (HTTP 429) oder vorübergehende Überlastung des Modells (HTTP 503)."""
 
 
 class ProviderUnavailable(RuntimeError):
@@ -74,8 +80,10 @@ class GeminiProvider:
         if not key:
             raise ProviderUnavailable("GEMINI_API_KEY ist nicht gesetzt (.env)")
         from google import genai
+        from google.genai import types
 
-        self._client = genai.Client(api_key=key)
+        # Time limit per request (ms): the free tier can be slow; never wait without limit.
+        self._client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS))
         self.model = model or os.environ.get("GEMINI_MODEL") or DEFAULT_MODEL
 
     def _contents(self, messages: list[Message]) -> list[Any]:
@@ -85,6 +93,8 @@ class GeminiProvider:
         for m in messages:
             if m.role == "user":
                 contents.append(types.Content(role="user", parts=[types.Part.from_text(text=m.text)]))
+            elif m.role == "model" and m.raw is not None:
+                contents.append(m.raw)
             elif m.role == "model":
                 parts = [types.Part.from_text(text=m.text)] if m.text else []
                 parts += [types.Part.from_function_call(name=c.name, args=c.args) for c in m.tool_calls]
@@ -120,11 +130,19 @@ class GeminiProvider:
             if exc.code == 429:
                 raise RateLimitError(str(exc)) from exc
             raise ProviderUnavailable(str(exc)) from exc
-        except (errors.ServerError, OSError) as exc:
+        except errors.ServerError as exc:
+            if exc.code in (503, 504):
+                # Model overloaded or deadline exceeded: temporary, handled like a rate limit.
+                raise RateLimitError(str(exc)) from exc
+            raise ProviderUnavailable(str(exc)) from exc
+        except httpx.TimeoutException as exc:
+            raise RateLimitError(f"Zeitlimit {REQUEST_TIMEOUT_MS / 1000:.0f} s überschritten") from exc
+        except OSError as exc:
             raise ProviderUnavailable(str(exc)) from exc
         calls = [ToolCall(c.name or "", dict(c.args or {})) for c in (response.function_calls or [])]
         text = "" if calls else (response.text or "")
-        return Reply(text=text, tool_calls=calls)
+        raw = response.candidates[0].content if response.candidates else None
+        return Reply(text=text, tool_calls=calls, raw=raw)
 
 
 class ScriptedProvider:

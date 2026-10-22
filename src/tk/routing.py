@@ -32,9 +32,13 @@ from tk.workbook import DATA
 
 ORS_URL = "https://api.openrouteservice.org/v2/directions/{profile}/geojson"
 PROFILE = "driving-hgv"
+FALLBACK_PROFILE = "driving-car"
+"""Rückfall, wenn das Lkw-Netz von ORS keine Route kennt (Fehler 2009, etwa Freiburg, 22.10.2026)."""
 MIN_INTERVAL_S = 1.6
 CACHE_FILE = DATA / "routes" / "routes.json"
 ATTRIBUTION = "Routen: © openrouteservice.org by HeiGIT, Daten © OpenStreetMap contributors (ODbL)"
+SNAP_RADIUS_M = 5000
+"""Fangradius je Wegpunkt: PLZ-Schwerpunkte liegen oft abseits Lkw-tauglicher Straßen (ORS-Standard 350 m)."""
 SIMPLIFY_DEG = 0.0005
 """Toleranz der Linienvereinfachung (etwa 50 m); nur Darstellung."""
 
@@ -43,6 +47,10 @@ LatLon = tuple[float, float]
 
 class RoutingUnavailable(RuntimeError):
     """Kein Schlüssel, kein Netz oder Dienstfehler."""
+
+
+class RouteNotFound(RoutingUnavailable):
+    """ORS findet zwischen den Wegpunkten keine Route (Fehler 2009 bzw. 2010); andere Routen gehen weiter."""
 
 
 @dataclass(slots=True)
@@ -125,11 +133,26 @@ class ORSClient:
         self._retries = retries
         self._last = 0.0
 
+    def route_with_fallback(self, waypoints: Sequence[LatLon]) -> RoadRoute:
+        """Lkw-Route; findet ORS keine, die Pkw-Route (``profile`` der Route zeigt das an)."""
+        try:
+            return self.route(waypoints)
+        except RouteNotFound:
+            car = ORSClient(api_key=self._key, profile=FALLBACK_PROFILE, http=self._http, sleep=self._sleep)
+            car._last = self._last
+            route = car.route(waypoints)
+            self._last = car._last
+            return route
+
     def route(self, waypoints: Sequence[LatLon]) -> RoadRoute:
         wait = MIN_INTERVAL_S - (time.monotonic() - self._last)
         if wait > 0:
             self._sleep(wait)
-        body = {"coordinates": [[lon, lat] for lat, lon in waypoints], "instructions": False}
+        body = {
+            "coordinates": [[lon, lat] for lat, lon in waypoints],
+            "radiuses": [SNAP_RADIUS_M] * len(waypoints),
+            "instructions": False,
+        }
         headers = {"Authorization": self._key, "Content-Type": "application/json"}
         url = ORS_URL.format(profile=self.profile)
         for attempt in range(self._retries + 1):
@@ -142,6 +165,8 @@ class ORSClient:
             if resp.status_code == 429 and attempt < self._retries:
                 self._sleep(10 * 2**attempt)
                 continue
+            if resp.status_code == 404 and any(code in resp.text for code in ('"code":2009', '"code":2010')):
+                raise RouteNotFound(f"keine Route: {resp.text[:160]}")
             if resp.status_code != 200:
                 raise RoutingUnavailable(f"ORS antwortet {resp.status_code}: {resp.text[:200]}")
             route = parse_ors_geojson(resp.json(), waypoints)
@@ -166,8 +191,9 @@ class RouteCache:
     def get(self, waypoints: Sequence[LatLon], profile: str = PROFILE) -> RoadRoute | None:
         return self._routes.get(route_key(waypoints, profile))
 
-    def put(self, route: RoadRoute) -> None:
-        self._routes[route_key([(p[0], p[1]) for p in route.waypoints], route.profile)] = route
+    def put(self, route: RoadRoute, profile: str = PROFILE) -> None:
+        """Speichert unter dem angefragten Profil; ``route.profile`` nennt das tatsächlich genutzte."""
+        self._routes[route_key([(p[0], p[1]) for p in route.waypoints], profile)] = route
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -181,7 +207,7 @@ class RouteCache:
         hit = self.get(waypoints)
         if hit is not None or client is None:
             return hit
-        route = client.route(waypoints)
+        route = client.route_with_fallback(waypoints)
         route.labels = list(labels)
         self.put(route)
         self.save()
