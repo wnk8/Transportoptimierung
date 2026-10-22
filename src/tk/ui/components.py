@@ -86,23 +86,6 @@ def note(text: str) -> None:
     ui.label(text).classes("tk-note")
 
 
-def step_header(n: int, title: str, tone: str = "mint") -> ui.label:
-    """Schrittkopf mit Nummer im Pastellton und Titel; gibt das Statuslabel rechts zurück."""
-    with ui.element("div").classes(f"tk-step tk-tone-{tone} w-full"):
-        ui.label(str(n)).classes("tk-step-num").props('aria-hidden="true"')
-        ui.label(title).classes("tk-step-title")
-        return ui.label("").classes("tk-step-status")
-
-
-def page_nav(active: str) -> None:
-    """Seitennavigation Eingabe und Analyse; aktive Seite mit aria-current, Strich und Gewicht."""
-    with ui.element("nav").classes("tk-pagenav").props('aria-label="Seiten"'):
-        for href, text in (("/", "Eingabe"), ("/analyse", "Analyse")):
-            link = ui.link(text, href)
-            if href == active:
-                link.props('aria-current="page"')
-
-
 def number_field(
     label: str,
     unit: str,
@@ -164,32 +147,19 @@ def bounds_text(minimum: float | None, maximum: float | None, unit: str) -> str:
     return "Zahl eingeben"
 
 
-def section(
-    nr: int,
-    kicker: str,
-    title: str,
-    intro: str = "",
-    tone: str = "mint",
-    anchor: str | None = None,
-    delay: int = 0,
-) -> tuple[ui.label, ui.element]:
-    """Nummerierter Abschnitt: Haarlinie, Kicker, Titel mit Punkt und Einleitung links, Inhalt rechts.
+def section(nr: int, title: str, anchor: str | None = None, delay: int = 0) -> tuple[ui.label, ui.element]:
+    """Nummerierter Abschnitt: Haarlinie, links Nummer, Titel und kurzer Status, rechts der Inhalt.
 
-    Gibt das Statuslabel (Pille im Pastellton) und die Inhaltsspalte zurück.
+    Gibt das Statuslabel (leer ausgeblendet) und die Inhaltsspalte zurück.
     """
-    sec = ui.element("section").classes(f"tk-sec tk-reveal tk-tone-{tone}").style(f"--delay:{delay}ms")
+    sec = ui.element("section").classes("tk-sec tk-reveal").style(f"--delay:{delay}ms")
     if anchor:
         sec.props(f'id="{anchor}"')
     with sec:
         with ui.element("div").classes("tk-sec-head"):
-            with ui.element("div").classes("tk-kicker tk-kicker-line"):
-                ui.label(f"{nr:02d}")
-                ui.label(kicker)
             with ui.element("h2").classes("tk-sec-title"):
-                ui.label(title).classes("inline")
-                ui.label(".").classes("inline tk-dot")
-            if intro:
-                ui.label(intro).classes("tk-sec-intro")
+                ui.label(f"{nr:02d}").classes("tk-sec-num")
+                ui.label(title)
             status = ui.label("").classes("tk-step-status")
         body = ui.element("div").classes("tk-sec-body")
     return status, body

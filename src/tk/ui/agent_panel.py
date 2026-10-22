@@ -92,9 +92,7 @@ def build_agent_input(page: Page, box: ui.column) -> None:
                         f"{len(ctx.arbeitsliste)} Sendung(en) in die Eingabe übernehmen",
                         on_click=lambda: page.set_shipments(ctx.arbeitsliste, replace=False, origin="Agent"),
                     ).props("unelevated no-caps color=primary")
-                ui.link("Werkzeugaufrufe ansehen (Analyse, Agent-Spur)", "/analyse?tab=agent").classes(
-                    "tk-link"
-                )
+                ui.link("Werkzeugaufrufe ansehen (Info, Agent-Spur)", "/info?tab=agent").classes("tk-link")
 
         ui.button("Senden", on_click=send).props("unelevated no-caps color=primary")
 
@@ -109,7 +107,9 @@ def render_trace(session: Session, box: ui.column) -> None:
     trace = session.agent_trace
     with box:
         if trace is None or not trace.entries:
-            components.empty_state("Noch keine Agent-Anfrage. Seite Eingabe, Tab Freitext.")
+            components.empty_state(
+                "Noch keine Agent-Anfrage. Seite Rechnen, Abschnitt Sendungen, Tab Freitext."
+            )
             return
         ui.label("Chronologische Werkzeugaufrufe mit Ein- und Ausgabe.").classes("tk-label")
         for e in trace.entries:

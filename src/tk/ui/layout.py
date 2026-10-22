@@ -1,4 +1,4 @@
-"""Gemeinsame Teile beider Seiten: feste Leiste, Szenario-Umschalter, Abschluss mit Attribution."""
+"""Gemeinsame Teile der drei Seiten Rechnen, Ergebnis, Info: Navigation, Headline, Attribution."""
 
 from __future__ import annotations
 
@@ -6,9 +6,7 @@ from collections.abc import Callable
 
 from nicegui import ui
 
-from tk.models import Result
 from tk.ui import components
-from tk.ui import format as fmt
 from tk.ui.state import Session
 from tk.ui.theme import ScenarioToggle, apply_theme
 
@@ -19,64 +17,53 @@ FOOTER = (
     "CC BY 4.0 | Rechenmodell: Excel v11, Python-Port"
 )
 
+PAGES = (("/", "Rechnen"), ("/ergebnis", "Ergebnis"), ("/info", "Info"))
+"""Seiten in der Navigation: Pfad und Beschriftung."""
 
-def nav(active: str) -> ui.element:
-    """Feste Leiste: Wortmarke, Seiten-Pillen, Platz für kompakte Kennzahlen, CTA zur jeweils anderen Seite.
 
-    Gibt den Container der kompakten Kennzahlen zurück (befüllt mit ``nav_kpis``).
-    """
-    other, other_text = ("/analyse", "Analyse öffnen") if active == "/" else ("/", "Zur Eingabe")
+def nav(active: str) -> None:
+    """Kopfzeile: Wortmarke links, drei Textlinks rechts; die aktive Seite ist unterstrichen und per aria-current markiert."""
     with ui.element("header").classes("tk-nav"):
-        with ui.link(target="/").classes("tk-wordmark").props('aria-label="Transportkonzept, Startseite"'):
+        with ui.link(target="/").classes("tk-wordmark").props('aria-label="Transportkonzept, Rechnen"'):
             ui.label("TK").classes("inline")
             ui.label(".").classes("inline tk-dot")
-        components.page_nav(active)
-        kpis = ui.element("div").classes("tk-nav-kpis").props('aria-label="Kennzahlen"')
-        ui.button(other_text, on_click=lambda: ui.navigate.to(other)).props(
-            "unelevated no-caps color=primary"
-        ).classes("tk-cta tk-cta-link")
-    return kpis
+        with ui.element("nav").classes("tk-pagenav").props('aria-label="Seiten"'):
+            for href, text in PAGES:
+                link = ui.link(text, href)
+                if href == active:
+                    link.props('aria-current="page"')
 
 
-def nav_kpis(box: ui.element, result: Result | None, scenario: str) -> None:
-    """Kompakte Kennzahlen in der festen Leiste: Bezeichnung, Wert, Delta gegen Ist."""
-    box.clear()
-    if result is None or result.n_valid == 0:
-        return
-    k = result.kpis[scenario]
-    items = [
-        ("CO₂e", fmt.with_unit(k.co2_fzgkm_kg, "kg"), k.delta_co2_fzgkm, "mint"),
-        ("Kosten", fmt.with_unit(k.kosten_eur, "€"), k.delta_kosten, "sky"),
-        ("Fzg-km", fmt.with_unit(k.lkw_km, "km"), k.delta_lkw_km, "peach"),
-    ]
-    with box:
-        for label, value, delta, tone in items:
-            with ui.element("div").classes(f"tk-nav-kpi tk-tone-{tone}"):
-                ui.label(label).classes("tk-nav-kpi-label")
-                ui.label(value).classes("tk-nav-kpi-value")
-                if delta is not None and scenario != "Ist":
-                    css = "down" if delta < 0 else "up" if delta > 0 else "flat"
-                    ui.label(fmt.percent(delta)).classes(f"tk-delta-chip {css}")
-        with ui.element("div").classes("tk-nav-kpi"):
-            ui.label("Servicegrad").classes("tk-nav-kpi-label")
-            ui.label(fmt.percent(k.servicegrad, 1, False)).classes("tk-nav-kpi-value")
+def hero(kicker: str, serif: str = "") -> tuple[ui.label, ui.label, ui.label, ui.label, ui.element]:
+    """Headline: Kicker, Titel mit kursivem Serif-Wort, Nachsatz und Punkt, Einleitung, rechte Spalte.
+
+    Gibt Titel, Serif-Wort, Nachsatz, Einleitung und die rechte Spalte zurück. Das Serif-Wort ohne
+    Sonderzeichen wählen: Instrument Serif enthält etwa kein tiefgestelltes ₂.
+    """
+    with ui.element("div").classes("tk-hero tk-reveal"):
+        with ui.element("div"):
+            ui.label(kicker).classes("tk-kicker tk-hero-kicker")
+            with ui.element("h1").classes("tk-hero-title"):
+                title = ui.label("").classes("inline")
+                serif_label = ui.label(serif).classes("inline tk-serif")
+                tail = ui.label("").classes("inline")
+                ui.label(".").classes("inline tk-dot")
+            sub = ui.label("").classes("tk-hero-sub")
+        side = ui.element("div").classes("tk-hero-side")
+    serif_label.set_visibility(bool(serif))
+    return title, serif_label, tail, sub, side
 
 
 def scenario_controls(session: Session, on_scenario: Callable[[str], object]) -> ui.element:
     """Szenario-Umschalter und Status. Gibt den Container des Status-Chips zurück."""
-    with ui.element("div").classes("tk-hero-side"):
-        ScenarioToggle(session.scenario, on_scenario)
-        status_box = ui.row().classes("items-center")
-    return status_box
+    ScenarioToggle(session.scenario, on_scenario)
+    return ui.row().classes("items-center")
 
 
-def end(session: Session, href: str, text: str) -> ui.element:
-    """Abschluss: optionale Zusammenfassung, großer Link zur nächsten Seite, Attribution."""
+def end(session: Session) -> None:
+    """Attribution und Datenstand am Seitenende."""
     with ui.element("footer").classes("tk-end"):
-        summary = ui.element("div").classes("tk-label")
-        ui.link(text, href).classes("tk-end-link")
         ui.label(f"{FOOTER} | Datenstand: {session.base.source}").classes("tk-footer")
-    return summary
 
 
 def missing_workbook() -> None:

@@ -167,7 +167,7 @@ $$S = 1 - \frac{N_{\text{Bahn}}}{N}$$
 | Tests | pytest, hypothesis | MIT, MPL-2.0 |
 | Qualität | ruff, mypy | MIT |
 | Agent | Gemini API (kostenlose Stufe) hinter `LLMProvider` | Nutzungsbedingungen Google |
-| Schrift | Geist (Rückfall Inter), lokal eingebunden | SIL OFL |
+| Schrift | Geist und Instrument Serif (Rückfall Inter), lokal eingebunden | SIL OFL |
 | Versionskontrolle, CI | GitHub, GitHub Actions | |
 
 ### 4.2 Daten und Kartendienste
@@ -289,10 +289,10 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 
 ### 7.1 Leitsätze
 
-1. Minimaler Website-Look: warmes Off-White, viel Weißraum, Haarlinien statt Karten. Dezente, aufeinander abgestimmte Pastelltöne (Salbei, Himmel, Pfirsich, Lavendel, Butter, Rosé) als Punkte, Pillen und Flächen; Schrift darauf immer im passenden dunklen Ton. Farbe ist nie die einzige Information.
+1. Weiße Minimal-Website (Vorbild: siiimple.com, Kategorie „white“): reines Weiß, schwarze Schrift, sehr viel Leerraum, Haarlinien statt Karten, kleine Textlinks. Pastelltöne (Salbei, Himmel, Pfirsich, Lavendel, Butter, Rosé) nur als Punkte, Delta-Pillen und geänderte Felder; Schrift darauf immer im passenden dunklen Ton. Farbe ist nie die einzige Information.
 2. Tiefgrün `--accent` für Reduktion, Akzentpunkt und Fokus; dunkle Tinte `--text` für primäre Aktionen (Pille mit Pfeil). Die Vergleichsbasis (Ist) erhält Pfirsich, Bahn Himmelblau.
-3. Hierarchie durch Typografie: sehr große Headline, nummerierte Abschnitte (Kicker „01“ mit kurzer Linie), Titel mit Akzentpunkt.
-4. Eine Aussage pro Seite. Seite Eingabe: Ergebnis als Headline, Kennzahlenreihe, dann 01 Sendungen, 02 Parameter, 03 Karte. Seite Analyse: Tabellen, Szenarienvergleich, Erklärung, Prüfungen, Agent-Spur.
+3. Hierarchie durch Typografie: übergroße Headline aus Geist mit einem kursiven Serif-Wort (Instrument Serif) und Akzentpunkt, nummerierte Abschnitte „01 Sendungen“.
+4. Drei Seiten, je eine Aufgabe. Rechnen: nur Sendungen und Parameter, „Berechnen“ leitet weiter. Ergebnis: Kennzahlen, Karte und Tabellen. Info: Erklärung, Annahmen und Quellen, Prüfungen, Sensitivität, Agent-Spur.
 5. Bewegung dezent und funktional: Abschnitte blenden beim Laden ein, neu berechnete Zahlen gleiten ein, Pfeile und Unterstriche reagieren auf Hover (200 bis 700 ms). `prefers-reduced-motion: reduce` schaltet jede Bewegung ab.
 6. Jedes Element hat eine Funktion. Keine Illustrationen, Verläufe, Icons ohne Beschriftung, Emojis, Platzhaltertexte.
 
@@ -300,14 +300,14 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 
 | Token | Hex | Verwendung | Kontrast |
 |---|---|---|---|
-| `--bg` | `#FAF8F5` | Seitenhintergrund (warmes Off-White) | Text 13,9 : 1; `--muted` 5,9 : 1 |
+| `--bg` | `#FFFFFF` | Seitenhintergrund (reines Weiß) | Text 14,8 : 1; `--muted` 6,3 : 1 |
 | `--surface` | `#FFFFFF` | Eingabefelder, aktive Pillen, Dialoge | Text 14,8 : 1 |
-| `--canvas` | `#F3F0EB` | Pillen-Hintergrund, Hover, Tabellenzeilen | Text 13,0 : 1; `--muted` 5,5 : 1 |
-| `--line` | `#E6E1D9` | Haarlinien zwischen Abschnitten und Kennzahlen | trägt keine Information |
-| `--line-strong` | `#D8D2C8` | Rahmen von Eingabefeldern | trägt keine Information |
+| `--canvas` | `#F5F5F4` | Umschalter, Hover, Tabellenzeilen | Text 13,5 : 1; `--muted` 5,8 : 1 |
+| `--line` | `#ECECEA` | Haarlinien zwischen Abschnitten und Kennzahlen | trägt keine Information |
+| `--line-strong` | `#D9D9D6` | Rahmen von Eingabefeldern | trägt keine Information |
 | `--text` | `#1F2933` | Fließtext, Zahlen, primäre Schaltfläche | 14,8 : 1 auf Weiß; Weiß darauf 14,8 : 1 |
 | `--muted` | `#56616E` | Beschriftungen, Einheiten, Kicker | 6,3 : 1 auf Weiß, mindestens 5,1 : 1 auf jedem Pastellton |
-| `--accent` | `#1F6F5F` | Reduktion, Akzentpunkt, Fokus | 6,0 : 1 auf Weiß; 5,7 : 1 auf `--bg` |
+| `--accent` | `#1F6F5F` | Reduktion, Akzentpunkt, Fokus | 6,0 : 1 auf Weiß |
 | `--accent-tint` | `#E3EEE7` | Salbei: CO₂e, Abschnitt 01, Reduktion, geänderte Felder | Text 12,4 : 1; `--accent` darauf 5,0 : 1 |
 | `--base` | `#9A4F2F` | Ist, Zunahme | 5,9 : 1 auf Weiß; 4,9 : 1 auf Tint |
 | `--base-tint` | `#F6E6DB` | Pfirsich: Fahrzeug-km, Ist, Zunahme | Text 12,1 : 1 |
@@ -332,10 +332,10 @@ Regeln: Auf Tönen dunkler Text. Weißer Text nur auf `--accent`, `--text` und `
 
 | Element | Festlegung |
 |---|---|
-| Schrift | Geist (variabel, lokal, SIL OFL), Rückfall Inter und `system-ui`; Zahlen mit `font-variant-numeric: tabular-nums` |
-| Größen | Headline 44 bis 72 px / 600, Laufweite −0,045 em; Abschnittstitel 34 px / 600; Kennzahl 30 bis 40 px / 600; Fließtext 15 px / 400; Einleitung 18 px in `--muted`; Beschriftung 13 px / 500; Kicker 12 px, Großbuchstaben, Laufweite +0,08 em |
-| Raster | Inhalt höchstens 1280 px, 12 Spalten, Abstand 32 px; Abschnitte 56 px oben und unten; Abschnittskopf 4 Spalten (bleibt beim Scrollen stehen), Inhalt 8 Spalten |
-| Form | Keine Karten auf der Seite, Gliederung durch 1 px Haarlinien `--line`. Eingaben Radius 12 px, Schaltflächen, Umschalter, Status und Deltas als Pillen. Schatten nur `--shadow-sm` (`0 1px 2px`) für aktive Pillen |
+| Schrift | Geist (variabel, lokal, SIL OFL), Rückfall Inter und `system-ui`; ein Wort je Headline in Instrument Serif kursiv (lokal, SIL OFL; ohne Sonderzeichen wie ₂, die die Schrift nicht enthält); Zahlen mit `font-variant-numeric: tabular-nums` |
+| Größen | Headline 48 bis 88 px / 500, Laufweite −0,045 em; Abschnittstitel 22 px / 500 mit Nummer 13 px; Kennzahl 30 bis 40 px / 600; Fließtext 15 px / 400; Einleitung 17 px in `--muted`, höchstens 520 px breit; Beschriftung 13 px / 500; Kicker 12 px, Großbuchstaben, Laufweite +0,08 em |
+| Raster | Inhalt höchstens 1280 px, 12 Spalten, Abstand 32 px; Hero 96 px oben; Abschnitte 48 px oben und unten; Abschnittskopf 3 Spalten (bleibt beim Scrollen stehen), Inhalt 9 Spalten |
+| Form | Keine Karten auf der Seite, Gliederung durch 1 px Haarlinien `--line`. Eingaben Radius 12 px; primäre Schaltfläche schwarze Pille mit Pfeil, sonst Textlinks; Umschalter, Status und Deltas als Pillen. Schatten nur für aktive Pillen (`0 1px 2px`) und die schwebende Leiste |
 | Zahlenformat | deutsch: Tausenderpunkt, Dezimalkomma, Einheit mit schmalem Leerzeichen (`306.924 kg CO2e`); Prozent mit Vorzeichen (`−53,3 %`) |
 | Fokus | 2 px Ring in `--accent`, nie entfernen |
 
@@ -362,41 +362,38 @@ Der Filter auf der Kachelebene dämpft die Standardkarte, ohne Anbieter oder Att
 
 ### 7.4 Layout
 
-Seite Eingabe (`/`):
+Drei Seiten mit derselben Kopfzeile (Wortmarke „TK.“, Textlinks Rechnen, Ergebnis, Info; aktive Seite unterstrichen):
 
 ```
-TK.  ( Eingabe | Analyse )      CO2e −53,3 %  Kosten −24,9 %  ...   ( Analyse öffnen → )   feste Leiste
--------------------------------------------------------------------------------------------
-−53,3 % CO2e.                                          ( Ist | M2 | M3 )
-M3 Bahn + Bündelung gegen Einzelversand: ...           ● Plan zulässig
+/            RECHNEN
+             Transport rechnen.          (rechnen kursiv, Serif)
+             Sendungen erfassen, Parameter prüfen, berechnen.
+             ---------------------------------------------------------------
+             01 Sendungen   | Formular | Einfügen / CSV | Freitext
+             ---------------------------------------------------------------
+             02 Parameter   | BAHNVERLAGERUNG A01 A02 A05 A04 | BÜNDELUNG A10 A09
+                            | KOSTEN A08 | DISTANZ I01, Straßen-km
+             ( 2.266 Sendungen / M3 Bahn + Bündelung / CO2e −53,3 %   Berechnen → )  schwebend
 
-CO2e (Fzg-km)    | Kosten          | Fahrzeug-km     | Servicegrad
-143.297 kg       | 631.814 €       | 262.563 km      | 75,7 %
-(−53,3 % gegen Ist)  Ist: ...      | ...             | Bahn 24,3 %
--------------------------------------------------------------------------------------------
-01 ── SENDUNGEN          | Formular | Einfügen / CSV | Freitext
-Sendungen erfassen.      | Datum  Gewicht / Start  Ziel / ( Sendung hinzufügen → )
--------------------------------------------------------------------------------------------
-02 ── PARAMETER          | BAHNVERLAGERUNG (M3)  A01  A02  A05  A04
-Parameter anpassen.      | BÜNDELUNG (M2)  A10  A09 | KOSTEN  A08 | DISTANZ  I01, ORS
--------------------------------------------------------------------------------------------
-03 ── KARTE
-Vorher und nachher.      (Karte volle Breite)
--------------------------------------------------------------------------------------------
-Weiter zur Analyse →     (Zusammenfassung, Attribution OSM, GeoNames, Datenstand)
+/ergebnis    ERGEBNIS                                ( Ist | M2 | M3 )  ● Plan zulässig
+             53,3 % weniger CO2e.                     Parameter ändern
+             CO2e | Kosten | Fahrzeug-km | Servicegrad   (Wie berechnet? führt zu Info)
+             ( Karte ) Sendungen  Touren  Szenarien
+
+/info        INFO
+             So wird gerechnet.
+             ( Erklärung ) Annahmen und Quellen  Prüfungen  Sensitivität  Agent-Spur
 ```
 
-Die feste Leiste zeigt die kompakten Kennzahlen, sobald die Kennzahlenreihe oben aus dem Bild scrollt; so bleibt jede Änderung in Schritt 02 sofort sichtbar.
+„Berechnen“ wartet eine laufende Neuberechnung ab und öffnet `/ergebnis?tab=karte`. Tabs per `?tab=`: Ergebnis `karte|sendungen|touren|szenarien` (dazu `?tour=N`), Info `erklaerung|annahmen|pruefungen|sensitivitaet|agent` (dazu `?k=` für die Kennzahl). `/analyse` leitet auf `/ergebnis` weiter. Alle Seiten teilen den Stand je Browser (Sendungen, Parameter, Szenario, Agent-Spur).
 
-Seite Analyse (`/analyse`, Tab per `?tab=sendungen|touren|szenarien|erklaerung|pruefungen|agent`): gleiche Leiste, Headline „Analyse.“, die Tabs als nummerierte Pillen 01 bis 06, Tabellen ohne Karten. Beide Seiten teilen den Stand je Browser (Sendungen, Parameter, Szenario, Agent-Spur).
-
-Breakpoints: Abschnittskopf und Inhalt nebeneinander ab 1100 px, darunter untereinander; Kennzahlen vierspaltig ab 1100 px, darunter 2 × 2; in der Leiste unter 1280 px nur Bezeichnung und Delta. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
+Breakpoints: Abschnittskopf und Inhalt nebeneinander ab 1100 px, darunter untereinander; Kennzahlen vierspaltig ab 1100 px, darunter 2 × 2. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
 
 ### 7.5 Komponenten
 
 | Komponente | Verhalten |
 |---|---|
-| Szenario-Umschalter | Pillen Ist, M2, M3 auf `--canvas`. Aktiv: weiße Pille, Schrift 600, `aria-pressed`. Wechsel aktualisiert Headline, Kennzahlen, Leiste, Karte, Tabellen |
+| Szenario-Umschalter | Pillen Ist, M2, M3 auf `--canvas`. Aktiv: weiße Pille, Schrift 600, `aria-pressed`. Liegt auf Ergebnis; Wechsel aktualisiert Headline, Kennzahlen, Karte, Tabellen |
 | Status-Chip | Abbild von `Input!R8`: "Keine Eingabe" (neutral), "Eingabe prüfen" (`--note-tint`), "Plan zulässig" (`--accent-tint`), "Plan prüfen" (`--danger`-Tint). Immer mit Text |
 | Kennzahl | Ohne Karte in einer Reihe mit Haarlinien. Label mit Punkt im eigenen Pastellton (CO₂e Salbei, Kosten Himmel, Fahrzeug-km Pfirsich, Servicegrad Lavendel), Wert Plan (bis 40 px), darunter Delta als Pille mit Vorzeichen und Text "gegen Ist" sowie "Ist: Wert". Pille: Reduktion `--accent` auf `--accent-tint`, Zunahme `--base` auf `--base-tint`. Das Szenario steht in der Headline. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
 | Eingabeformular | Abschnitt 01. Pflichtfelder A bis D wie in Excel, mit "(Pflicht)" beschriftet. Beschriftung über dem Feld, Einheit im Feld, Hilfetext darunter. Hinweistexte aus Spalte I. Inline-Validierung, Fehler mit Ursache und nächstem Schritt |

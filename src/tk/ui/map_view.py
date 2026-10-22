@@ -215,7 +215,9 @@ def svg_network(result: Result, scenario: str, side: str, width: int = 520, heig
         x, y = xy(lat, lon)
         label = html.escape(name.split(" ", 1)[-1])
         parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{TOKENS["text"]}"/>')
-        parts.append(f'<text x="{x + 6:.1f}" y="{y - 6:.1f}" font-size="11" fill="{TOKENS["text"]}">{label}</text>')
+        parts.append(
+            f'<text x="{x + 6:.1f}" y="{y - 6:.1f}" font-size="11" fill="{TOKENS["text"]}">{label}</text>'
+        )
     parts.append("</svg>")
     return "".join(parts)
 

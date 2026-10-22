@@ -1,22 +1,23 @@
-"""Seite Analyse: Detailtabellen, Szenarienvergleich, Erklärung, Prüfungen und Agent-Spur.
+"""Seite Ergebnis: Headline, Kennzahlen, Karte und Tabellen zum Stand der Seite Rechnen.
 
-Zeigt denselben Stand wie die Seite Eingabe (Sitzung je Browser). Alle Zahlen aus ``tk``.
+Alle Zahlen aus ``tk``. Tab per ``?tab=karte|sendungen|touren|szenarien``, Tour per ``?tour=N``.
 """
 
 from __future__ import annotations
 
-from nicegui import run, ui
+import functools
+
+from nicegui import ui
 
 from tk.analysis import input_figures
 from tk.excelfn import general_text, serial_to_date
-from tk.explain import SPEC, explain
 from tk.models import Result
-from tk.scenarios import calculate, parse_change, sensitivity_row, with_changes
 from tk.ui import components
 from tk.ui import format as fmt
-from tk.ui.agent_panel import render_trace
-from tk.ui.layout import SCENARIO_LABEL, end, nav, nav_kpis, scenario_controls
-from tk.ui.state import Session, reference, snapshot
+from tk.ui.layout import SCENARIO_LABEL, end, hero, nav, scenario_controls
+from tk.ui.map_area import MapArea
+from tk.ui.map_view import RELATION_EVENT
+from tk.ui.state import Session
 from tk.ui.theme import TOKENS, apply_theme, status_chip
 
 PCT_JS = "(v => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 2}).replace('-', '\u2212') + '\u202f%')"
@@ -25,62 +26,67 @@ PCT_JS = "(v => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFrac
 M2_BAR = "#A79BD6"
 """Balkenfarbe M2: gedämpftes Lavendel neben dem Akzent für M3 (Beschriftung trägt die Bedeutung)."""
 
-TABS = {
-    "sendungen": "Sendungen",
-    "touren": "Touren",
-    "szenarien": "Szenarien",
-    "erklaerung": "Erklärung",
-    "pruefungen": "Prüfungen",
-    "agent": "Agent-Spur",
-}
-"""Tabs der Analyse; der Schlüssel ist der Wert für ``?tab=``."""
+TABS = {"karte": "Karte", "sendungen": "Sendungen", "touren": "Touren", "szenarien": "Szenarien"}
+"""Tabs der Ergebnisseite; der Schlüssel ist der Wert für ``?tab=``."""
 
 
-class AnalysisPage:
-    """Eine Sitzung der Seite Analyse."""
+class ResultsPage:
+    """Eine Sitzung der Seite Ergebnis."""
 
     def __init__(self, session: Session) -> None:
         self.s = session
-        self.explain_key = "co2_fzgkm"
 
-    def build(self, tab: str | None) -> None:
+    def build(self, tab: str | None, tour: int | None) -> None:
         apply_theme()
-        self.nav_kpi_box = nav("/analyse")
+        nav("/ergebnis")
+        r = self.s.result
+        assert r is not None
         with ui.column().classes("tk-page w-full"):
-            with ui.element("div").classes("tk-hero tk-reveal").style("padding-bottom:24px"):
-                with ui.element("div"):
-                    with ui.element("h1").classes("tk-hero-title"):
-                        ui.label("Analyse").classes("inline")
-                        ui.label(".").classes("inline tk-dot")
-                    ui.label(
-                        "Sendungen, Touren, Szenarienvergleich, Erklärung der Kennzahlen, Prüfungen und "
-                        "Agent-Spur zum aktuellen Stand der Seite Eingabe."
-                    ).classes("tk-hero-sub")
+            self.hero_title, self.hero_serif, self.hero_tail, self.hero_sub, side = hero(
+                "Ergebnis", "weniger"
+            )
+            with side:
                 self.status_box = scenario_controls(self.s, self.set_scenario)
-            with ui.element("div").classes("w-full tk-reveal").style("--delay:100ms"):
+                ui.link("Parameter ändern", "/#schritt-2").classes("tk-link")
+            self.kpi_box = ui.element("div").classes("tk-stats tk-reveal").style("--delay:80ms")
+            with ui.element("div").classes("w-full tk-reveal").style("--delay:160ms; padding-top: 40px"):
                 with ui.tabs().props("dense no-caps align=left").classes("tk-pilltabs") as tabs:
-                    handles = {
-                        key: ui.tab(key, f"{i:02d}  {label}")
-                        for i, (key, label) in enumerate(TABS.items(), start=1)
-                    }
-                start = handles.get(tab or "", handles["sendungen"])
-                with (
-                    ui.tab_panels(tabs, value=start).classes("w-full bg-transparent").props("animated=false")
-                ):
-                    with ui.tab_panel(handles["sendungen"]):
+                    self.handles = {key: ui.tab(key, label) for key, label in TABS.items()}
+                start = self.handles.get(tab or "", self.handles["karte"])
+                self.panels = (
+                    ui.tab_panels(tabs, value=start, on_change=self._tab_changed)
+                    .classes("w-full bg-transparent")
+                    .props("animated=false keep-alive")
+                )
+                with self.panels:
+                    with ui.tab_panel(self.handles["karte"]):
+                        self.map = MapArea(self, r)
+                    with ui.tab_panel(self.handles["sendungen"]):
                         self.ship_box = ui.column().classes("w-full gap-2")
-                    with ui.tab_panel(handles["touren"]):
+                    with ui.tab_panel(self.handles["touren"]):
                         self.tour_box = ui.column().classes("w-full gap-2")
-                    with ui.tab_panel(handles["szenarien"]):
+                    with ui.tab_panel(self.handles["szenarien"]):
                         self.scen_box = ui.column().classes("w-full gap-3")
-                    with ui.tab_panel(handles["erklaerung"]):
-                        self.explain_box = ui.column().classes("w-full gap-2")
-                    with ui.tab_panel(handles["pruefungen"]):
-                        self.check_box = ui.column().classes("w-full gap-2")
-                    with ui.tab_panel(handles["agent"]):
-                        self.trace_box = ui.column().classes("w-full gap-2")
-            end(self.s, "/", "Zurück zur Eingabe")
+            end(self.s)
+        ui.on(RELATION_EVENT, lambda e: self.map.select_relation(str(e.args)))
         self.refresh_all()
+        ui.timer(0.5, self.map.probe_tiles, once=True)
+        if tour is not None and any(t.tour_nr == tour for t in r.tours):
+            ui.timer(0.6, lambda: self.open_tour(tour), once=True)
+
+    async def _tab_changed(self, _e: object) -> None:
+        if self.panels.value in (self.handles["karte"], "karte"):
+            await self.map.settle()
+
+    def open_tour(self, tour_nr: int) -> None:
+        """Tour in der Karte zeigen (Tab Karte, darin Touren)."""
+        self.panels.set_value(self.handles["karte"])
+        self.map.open_tour(tour_nr)
+
+    def refresh_road_toggle(self) -> None:
+        """Von der Straßenansicht nach dem Abruf neuer Routen aufgerufen; der Schalter liegt auf Rechnen."""
+        if self.s.result is not None:
+            self.map.update(self.s.result, self.s.scenario)
 
     def set_scenario(self, key: str) -> None:
         self.s.scenario = key
@@ -93,19 +99,69 @@ class AnalysisPage:
         self.status_box.clear()
         with self.status_box:
             status_chip(r.status)
-        nav_kpis(self.nav_kpi_box, r, self.s.scenario)
+        self._kpis(r)
+        self.map.update(r, self.s.scenario)
         self._shipments_table(r)
         self._tours_table(r)
         self._scenarios(r)
-        self._explanation(r)
-        self._checks(r)
-        render_trace(self.s, self.trace_box)
+
+    def _kpis(self, r: Result) -> None:
+        plan = self.s.scenario != "Ist"
+        k, ist = r.kpis[self.s.scenario], r.kpis["Ist"]
+        self.hero_serif.set_visibility(r.n_valid > 0)
+        delta = k.delta_co2_fzgkm
+        self.hero_serif.set_text(
+            ("mehr" if delta is not None and delta > 0 else "weniger") if plan else "im Ist"
+        )
+        self.hero_tail.set_text(" CO₂e" if plan and r.n_valid else "")
+        if r.n_valid == 0:
+            self.hero_title.set_text("Keine Sendungen")
+            self.hero_sub.set_text("Auf der Seite Rechnen Sendungen erfassen oder Beispieldaten laden.")
+        elif plan:
+            self.hero_title.set_text(f"{fmt.percent(abs(delta) if delta is not None else None, 1, False)} ")
+            self.hero_sub.set_text(
+                f"{SCENARIO_LABEL[self.s.scenario]} gegen Einzelversand: {fmt.with_unit(k.co2_fzgkm_kg, 'kg')} statt "
+                f"{fmt.with_unit(ist.co2_fzgkm_kg, 'kg')}."
+            )
+        else:
+            self.hero_title.set_text(f"{fmt.with_unit(ist.co2_fzgkm_kg, 'kg')} CO₂e ")
+            self.hero_sub.set_text(f"{fmt.number(r.n_valid)} Sendungen einzeln gefahren. M2 oder M3 wählen.")
+        self.kpi_box.clear()
+        with self.kpi_box:
+            if r.n_valid == 0:
+                return
+            tiles = [
+                (
+                    "CO₂e (Fzg-km)",
+                    k.co2_fzgkm_kg,
+                    k.delta_co2_fzgkm,
+                    "kg",
+                    "co2_fzgkm",
+                    ist.co2_fzgkm_kg,
+                    "mint",
+                ),
+                ("Kosten", k.kosten_eur, k.delta_kosten, "€", "kosten", ist.kosten_eur, "sky"),
+                ("Fahrzeug-km (Lkw)", k.lkw_km, k.delta_lkw_km, "km", "lkw_km", ist.lkw_km, "peach"),
+            ]
+            for label, value, delta, unit, key, base, tone in tiles:
+                components.kpi_stat(
+                    label, fmt.with_unit(value, unit), delta if plan else None,
+                    f"Ist: {fmt.with_unit(base, unit)}" if plan else None, tone,
+                    on_explain=functools.partial(ui.navigate.to, f"/info?tab=erklaerung&k={key}"),
+                )  # fmt: skip
+            components.kpi_stat(
+                "Servicegrad", fmt.percent(k.servicegrad, 1, False), None,
+                f"Bahn {fmt.percent(k.bahn_sendungen / r.n_valid, 1, False)}, {fmt.number(k.bahn_sendungen)} Sendungen",
+                "lavender", on_explain=lambda: ui.navigate.to("/info?tab=erklaerung&k=servicegrad"),
+            )  # fmt: skip
 
     def _shipments_table(self, r: Result) -> None:
         self.ship_box.clear()
         with self.ship_box:
             if not r.rows:
-                components.empty_state("Noch keine Sendungen.", "Zur Eingabe", lambda: ui.navigate.to("/"))
+                components.empty_state(
+                    "Noch keine Sendungen.", "Zur Seite Rechnen", lambda: ui.navigate.to("/")
+                )
                 return
             rows = []
             for row in r.rows:
@@ -199,15 +255,13 @@ class AnalysisPage:
                           "align": "left" if c in ("start", "fzg", "b", "datum") else "right"} for c, lab in cols],
                 rows=rows, row_key="nr", pagination={"rowsPerPage": 15},
             ).props("dense flat sticky-header").classes("w-full cursor-pointer")  # fmt: skip
-            table.on("rowClick", lambda e: ui.navigate.to(f"/?tour={int(e.args[1]['nr'])}"))
-            ui.label(
-                "Zeile anklicken: Tour auf der Seite Eingabe in der Karte (Tab Touren) mit Begründung."
-            ).classes("tk-label")
+            table.on("rowClick", lambda e: self.open_tour(int(e.args[1]["nr"])))
+            ui.label("Zeile anklicken: Tour in der Karte mit Begründung.").classes("tk-label")
 
     def _scenarios(self, r: Result) -> None:
         self.scen_box.clear()
         with self.scen_box:
-            ui.label("Methodenvergleich (Overview & Results, Abschnitt 1)").classes("tk-section")
+            ui.label("Methodenvergleich").classes("tk-section")
             rows = []
             for name in ("Ist", "M2", "M3"):
                 k = r.kpis[name]
@@ -256,139 +310,3 @@ class AnalysisPage:
                         "Die Kosten von M2 und M3 sind gleich, weil die Bahn mit A07 = 0 so viel kostet wie der "
                         "Lkw-Einzelversand der Sendung und M2 die Bahn-Sendungen mit genau diesen Einzelkosten führt."
                     )
-            self._sensitivity()
-
-    def _sensitivity(self) -> None:
-        snap = snapshot()
-        ui.label("Sensitivität (Overview & Results, Abschnitt 6)").classes("tk-section")
-        if snap is None:
-            components.empty_state("Snapshot fehlt: make reference ausführen.")
-            return
-        ui.label(
-            "Momentaufnahme der Excel für die Beispieldaten, je Zeile ein Parameter. "
-            "Python rechnet jede Zeile mit dem Kern nach."
-        ).classes("tk-label")
-        box = ui.column().classes("w-full")
-
-        def render(py: dict[int, dict[str, float | int]] | None) -> None:
-            box.clear()
-            rows = []
-            for scen in snap["szenarien"]:
-                row = {
-                    "s": scen["szenario"], "p": scen["parameter"],
-                    "m2": fmt.percent(scen["delta_co2_m2"], 1), "m3": fmt.percent(scen["delta_co2_m3_fzgkm"], 1),
-                    "k": fmt.percent(scen["delta_kosten_m3"], 1), "b": scen["bahn_sendungen"],
-                    "t": scen["touren_gebuendelt"], "km": fmt.percent(scen["delta_lkw_km_m3"], 1), "py": "",
-                }  # fmt: skip
-                if py is not None:
-                    got = py[scen["zeile"]]
-                    worst = max(abs(float(got[k]) - float(scen[k])) for k in got)
-                    row["py"] = f"{worst:.1e}"
-                rows.append(row)
-            cols = [("s", "Szenario"), ("p", "Parameter"), ("m2", "Δ CO₂e M2"), ("m3", "Δ CO₂e M3"),
-                    ("k", "Δ Kosten M3"), ("b", "Bahn"), ("t", "gebündelte Touren"), ("km", "Δ Lkw-km M3"),
-                    ("py", "max. Abweichung Python")]  # fmt: skip
-            with box:
-                ui.table(
-                    columns=[{"name": c, "label": lab, "field": c, "align": "left" if c in ("s", "p") else "right"}
-                             for c, lab in cols],
-                    rows=rows, row_key="s",
-                ).props("dense flat hide-bottom").classes("w-full")  # fmt: skip
-
-        async def recompute() -> None:
-            if self.s.shipments != self.s.base.shipments:
-                ui.notify("Nachrechnung nur mit den Beispieldaten der Excel möglich.", type="warning")
-                return
-
-            def work() -> dict[int, dict[str, float | int]]:
-                base = self.s.base.model
-                return {
-                    scen["zeile"]: sensitivity_row(calculate(self.s.base.shipments, with_changes(base, parse_change(scen["parameter"]))))
-                    for scen in snap["szenarien"]
-                }  # fmt: skip
-
-            render(await run.io_bound(work))
-
-        ui.button("Mit Python nachrechnen", on_click=recompute).props("outline no-caps color=primary")
-        render(None)
-
-    def _explanation(self, r: Result) -> None:
-        self.explain_box.clear()
-        with self.explain_box:
-            options = {k: v["titel"] for k, v in SPEC.items()}
-            content = ui.column().classes("w-full gap-2")
-
-            def show(key: str) -> None:
-                self.explain_key = key
-                content.clear()
-                with content:
-                    explain_content(key, self.s, r)
-
-            ui.select(
-                options, value=self.explain_key, label="Kennzahl", on_change=lambda e: show(e.value)
-            ).props("dense outlined").style("width:320px")
-            show(self.explain_key)
-
-    def _checks(self, r: Result) -> None:
-        self.check_box.clear()
-        with self.check_box:
-            ok = r.gesamtstatus == "Alle Prüfungen bestanden"
-            ui.label(f"Gesamtstatus: {r.gesamtstatus}").classes("tk-success" if ok else "tk-error")
-            rows = [{"nr": c.nr, "name": c.name, "soll": fmt.number(c.soll, 2), "ist": fmt.number(c.ist, 2),
-                     "diff": fmt.number(c.differenz, 6), "status": c.status, "text": c.beschreibung} for c in r.checks]  # fmt: skip
-            ui.table(
-                columns=[{"name": c, "label": lab, "field": c, "align": "right" if c in ("nr", "soll", "ist", "diff") else "left"}
-                         for c, lab in [("nr", "Nr"), ("name", "Prüfung"), ("soll", "Soll"), ("ist", "Ist"),
-                                        ("diff", "Differenz"), ("status", "Status"), ("text", "Was geprüft wird")]],
-                rows=rows, row_key="nr", pagination={"rowsPerPage": 20},
-            ).props("dense flat wrap-cells hide-bottom").classes("w-full")  # fmt: skip
-            self._reference_compare(r)
-
-    def _reference_compare(self, r: Result) -> None:
-        ref = reference()
-        ui.label("Referenzabgleich Python gegen Excel v11").classes("tk-section")
-        if ref is None:
-            components.empty_state("Referenz fehlt: make reference ausführen.")
-            return
-        if self.s.shipments != self.s.base.shipments or self.s.changes or self.s.road_km:
-            components.note(
-                "Abgleich nur für die Beispieldaten mit Parametern aus Assumptions. Beispieldaten laden und Parameter zurücksetzen."
-            )
-            return
-        rows = []
-        for name in ("Ist", "M2", "M3"):
-            got = r.kpis[name].model_dump()
-            for key, want in ref["kennzahlen"][name].items():
-                if want is None:
-                    continue
-                dev = 0.0 if want == got[key] else abs(got[key] / want - 1) if want else abs(got[key])
-                rows.append({"k": f"{name} {key}", "excel": general_text(want), "py": general_text(got[key]),
-                             "dev": f"{dev:.1e}", "ok": "bestanden" if dev <= 1e-9 else "Abweichung"})  # fmt: skip
-        ui.table(
-            columns=[{"name": c, "label": lab, "field": c, "align": "left" if c in ("k", "ok") else "right"}
-                     for c, lab in [("k", "Kennzahl"), ("excel", "Excel"), ("py", "Python"), ("dev", "rel. Abweichung"), ("ok", "Ergebnis (≤ 1e-9)")]],
-            rows=rows, row_key="k", pagination={"rowsPerPage": 30},
-        ).props("dense flat hide-bottom").classes("w-full")  # fmt: skip
-
-
-def explain_content(key: str, s: Session, r: Result) -> None:
-    """Erklärung einer Kennzahl: Formel, Werte, Parameter, Quelle, Systemgrenze, Verifikation."""
-    ref = reference() if s.shipments == s.base.shipments and not s.changes and not s.road_km else None
-    e = explain(key, s.params, r, ref)  # type: ignore[arg-type]
-    ui.label(f"{e.kennzahl} ({e.einheit})").classes("tk-section")
-    ui.markdown(f"$$ {e.formel} $$", extras=["latex"])
-    ui.label(e.beschreibung)
-    ui.label(
-        "Werte: "
-        + ", ".join(f"{n}: {fmt.number(v, 2) if isinstance(v, float) else v}" for n, v in e.werte.items())
-    ).classes("tk-num")
-    ui.label(f"Formelregister: {e.formelregister} (Assumptions K2)").classes("tk-label")
-    ui.label(f"Datenquelle: {e.datenquelle}").classes("tk-label")
-    ui.label(f"Systemgrenze: {e.systemgrenze}").classes("tk-label")
-    ui.label(f"Verifikation: {e.verifikation}").classes("tk-note")
-    if e.parameter:
-        ui.table(
-            columns=[{"name": c, "label": lab, "field": c, "align": "left"} for c, lab in
-                     [("id", "ID"), ("name", "Parameter"), ("wert", "Wert"), ("einheit", "Einheit"), ("typ", "Typ"), ("quelle", "Quelle")]],
-            rows=[{**p.model_dump(), "wert": p.wert if isinstance(p.wert, str) else general_text(p.wert).replace(".", ",")} for p in e.parameter], row_key="name",
-        ).props("dense flat hide-bottom wrap-cells").classes("w-full")  # fmt: skip

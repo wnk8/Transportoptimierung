@@ -14,11 +14,11 @@ from nicegui import app, ui
 FONT_DIR = Path(__file__).resolve().parents[1] / "assets" / "fonts"
 
 TOKENS: dict[str, str] = {
-    "bg": "#FAF8F5",
+    "bg": "#FFFFFF",
     "surface": "#FFFFFF",
-    "canvas": "#F3F0EB",
-    "line": "#E6E1D9",
-    "line-strong": "#D8D2C8",
+    "canvas": "#F5F5F4",
+    "line": "#ECECEA",
+    "line-strong": "#D9D9D6",
     "text": "#1F2933",
     "muted": "#56616E",
     "accent": "#1F6F5F",
@@ -106,11 +106,16 @@ TONES: dict[str, tuple[str, str]] = {
 CSS = """
 @font-face { font-family: 'Geist'; font-weight: 100 900; font-display: swap;
   src: url('/tk-fonts/Geist-Variable.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('/tk-fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('/tk-fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
   src: url('/tk-fonts/Inter-Regular.woff2') format('woff2'); }
 :root {
 %(tokens)s
   --font: Geist, Inter, system-ui, sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
   --shadow-sm: 0 1px 2px rgba(31, 41, 51, 0.06);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -129,6 +134,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .tk-kicker { color: var(--muted); font-size: 12px; font-weight: 500; text-transform: uppercase;
   letter-spacing: 0.08em; }
 .tk-dot { color: var(--accent); }
+.tk-serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em;
+  font-size: 1.06em; }
 .tk-kicker-line { display: flex; align-items: center; gap: 12px; }
 .tk-kicker-line > :first-child::after { content: ""; display: inline-block; width: 28px; height: 1px;
   background: currentColor; vertical-align: middle; margin-left: 12px; }
@@ -138,32 +145,26 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .tk-delta-up { color: var(--base); font-weight: 600; }
 .tk-ist { color: var(--base); }
 
-/* ---------- Navigation (fest) ---------- */
+/* ---------- Navigation ---------- */
 .tk-nav { position: sticky; top: 0; z-index: 1100; display: flex; align-items: center; gap: 24px; width: 100%%;
-  height: 68px; box-sizing: border-box;
-  padding: 0 max(32px, calc((100%% - 1280px) / 2 + 32px)); background: color-mix(in srgb, var(--bg) 88%%, transparent); backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  height: 72px; box-sizing: border-box; padding: 0 max(32px, calc((100%% - 1280px) / 2 + 32px));
+  background: var(--bg); }
 .tk-wordmark { font-size: 20px; font-weight: 700; letter-spacing: -0.04em; text-decoration: none; color: var(--text); }
-.tk-pagenav { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--canvas); }
-.tk-pagenav a { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; padding: 6px 14px;
-  border-radius: 999px; transition: background-color 200ms var(--ease), color 200ms var(--ease); }
-.tk-pagenav a:hover { color: var(--text); }
-.tk-pagenav a[aria-current="page"] { color: var(--text); background: var(--surface); font-weight: 600;
-  box-shadow: var(--shadow-sm); }
-.tk-nav-kpis { display: flex; gap: 20px; margin-left: auto; align-items: center;
-  transition: opacity 300ms var(--ease), transform 300ms var(--ease); }
-.tk-nav-kpi { display: flex; align-items: center; gap: 8px; font-size: 13px; white-space: nowrap; }
-.tk-nav-kpi .tk-nav-kpi-label { color: var(--muted); }
-.tk-nav-kpi .tk-nav-kpi-value { font-weight: 600; font-variant-numeric: tabular-nums; }
-body.tk-hero-page:not(.tk-scrolled) .tk-nav-kpis { opacity: 0; transform: translateY(-6px); pointer-events: none; }
-.tk-nav .tk-cta-link { margin-left: 8px; flex-shrink: 0; }
+.tk-pagenav { display: flex; gap: 28px; margin-left: auto; }
+.tk-pagenav a { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; padding: 4px 0;
+  background-image: linear-gradient(currentColor, currentColor); background-size: 0%% 1px;
+  background-position: 0 100%%; background-repeat: no-repeat;
+  transition: color 200ms var(--ease), background-size 250ms var(--ease); }
+.tk-pagenav a:hover { color: var(--text); background-size: 100%% 1px; }
+.tk-pagenav a[aria-current="page"] { color: var(--text); background-size: 100%% 1px; }
 
 /* ---------- Hero ---------- */
 .tk-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end;
-  padding: 72px 0 40px; width: 100%%; }
-.tk-hero-title { font-size: clamp(44px, 5.4vw, 72px); font-weight: 600; line-height: 1.02; letter-spacing: -0.045em;
+  padding: 96px 0 56px; width: 100%%; }
+.tk-hero-kicker { margin-bottom: 20px; }
+.tk-hero-title { font-size: clamp(48px, 6.4vw, 88px); font-weight: 500; line-height: 1; letter-spacing: -0.045em;
   margin: 0; }
-.tk-hero-sub { color: var(--muted); font-size: 18px; line-height: 1.5; max-width: 660px; margin-top: 18px; }
+.tk-hero-sub { color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 520px; margin-top: 24px; }
 .tk-hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
 
 /* ---------- Kennzahlen ---------- */
@@ -186,22 +187,34 @@ body.tk-hero-page:not(.tk-scrolled) .tk-nav-kpis { opacity: 0; transform: transl
 .tk-delta-chip.flat { background: var(--canvas); color: var(--muted); }
 
 /* ---------- Abschnitte ---------- */
-.tk-sec { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 32px; row-gap: 24px;
-  width: 100%%; padding: 56px 0; border-top: 1px solid var(--line); scroll-margin-top: 72px; }
-.tk-sec:first-of-type { border-top: 0; }
-.tk-sec-head { grid-column: span 4; display: flex; flex-direction: column; gap: 14px; align-self: start;
-  position: sticky; top: 92px; }
-.tk-sec-body { grid-column: span 8; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.tk-sec { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 32px; row-gap: 20px;
+  width: 100%%; padding: 48px 0; border-top: 1px solid var(--line); scroll-margin-top: 80px; }
+.tk-sec-head { grid-column: span 3; display: flex; flex-direction: column; gap: 10px; align-self: start;
+  position: sticky; top: 96px; }
+.tk-sec-body { grid-column: 4 / -1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .tk-sec-wide { grid-column: 1 / -1; }
-.tk-sec-title { font-size: 34px; font-weight: 600; line-height: 1.08; letter-spacing: -0.035em; margin: 0; }
-.tk-sec-intro { color: var(--muted); font-size: 15px; max-width: 340px; }
-.tk-step-status { display: inline-flex; align-self: flex-start; color: var(--text); font-size: 13px; font-weight: 500;
-  background: var(--tone-bg, var(--canvas)); border-radius: 999px; padding: 4px 12px; }
+.tk-sec-title { display: flex; align-items: baseline; gap: 14px; font-size: 22px; font-weight: 500;
+  letter-spacing: -0.02em; margin: 0; }
+.tk-sec-num { color: var(--muted); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tk-step-status { color: var(--muted); font-size: 13px; }
+.tk-step-status:empty { display: none; }
 .tk-group { color: var(--muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
   padding-bottom: 8px; border-bottom: 1px solid var(--line); width: 100%%; margin-top: 8px; }
 .tk-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; width: 100%%; }
 .tk-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; width: 100%%;
   align-items: start; }
+
+/* ---------- Schwebende Leiste (Rechnen) ---------- */
+.tk-dock { position: fixed; left: 50%%; bottom: 24px; transform: translateX(-50%%); z-index: 1200;
+  display: flex; align-items: center; gap: 20px; padding: 8px 8px 8px 24px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(31, 41, 51, 0.06), 0 12px 32px rgba(31, 41, 51, 0.10);
+  animation: tk-rise 600ms var(--ease) both; animation-delay: 300ms; width: max-content;
+  max-width: calc(100%% - 32px); }
+.tk-dock-info { display: flex; align-items: center; gap: 14px; font-size: 14px; white-space: nowrap; min-width: 0; }
+.tk-dock .q-btn { flex-shrink: 0; white-space: nowrap; }
+.tk-dock-info .tk-sep { color: var(--line-strong); }
+.tk-page-dock { padding-bottom: 140px; }
 
 /* Alte Kartenklassen bleiben für Dialoge, leere Zustände und die Vorschau. */
 .tk-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
@@ -299,18 +312,15 @@ body.tk-hero-page:not(.tk-scrolled) .tk-nav-kpis { opacity: 0; transform: transl
 @keyframes tk-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes tk-slide { from { transform: translateX(-100%%); } to { transform: translateX(250%%); } }
 .tk-reveal { animation: tk-rise 700ms var(--ease) both; animation-delay: var(--delay, 0ms); }
-.tk-stat-value, .tk-hero-title, .tk-nav-kpi-value { animation: tk-pop 450ms var(--ease) both; }
+.tk-stat-value, .tk-hero-title { animation: tk-pop 450ms var(--ease) both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
 /* ---------- Breakpoints ---------- */
 @media (max-width: 1279px) {
-  .tk-nav-kpi-value { display: none; }
-  .tk-nav-kpi:last-child .tk-nav-kpi-value { display: inline; }
-  .tk-nav-kpis { gap: 14px; }
-  .tk-nav { padding: 0 24px; gap: 16px; }
   .tk-page { padding: 0 24px 40px; }
+  .tk-nav { padding: 0 24px; }
 }
 @media (max-width: 1099px) {
   .tk-sec-head, .tk-sec-body { grid-column: 1 / -1; }
@@ -323,23 +333,6 @@ body.tk-hero-page:not(.tk-scrolled) .tk-nav-kpis { opacity: 0; transform: transl
   .tk-hero-side { align-items: flex-start; }
 }
 """
-
-MOTION_JS = """
-<script>
-(() => {
-  // Fixed nav shows the compact figures once the hero figures have scrolled out of view.
-  const update = () => {
-    const stats = document.querySelector('.tk-stats');
-    const scrolled = !stats || stats.getBoundingClientRect().bottom < 72;
-    document.body.classList.toggle('tk-scrolled', scrolled);
-  };
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  setInterval(update, 1000);
-})();
-</script>
-"""
-"""Kleines Skript für die feste Leiste: setzt ``tk-scrolled``, sobald die Kennzahlen des Hero oben verschwinden."""
 
 
 def css() -> str:
@@ -361,7 +354,6 @@ def apply_theme() -> None:
         app.add_static_files("/tk-fonts", FONT_DIR)
         _fonts_registered = True
     ui.add_css(css())
-    ui.add_body_html(MOTION_JS)
     ui.colors(
         primary=TOKENS["text"],
         secondary=TOKENS["muted"],

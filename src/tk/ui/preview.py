@@ -10,6 +10,7 @@ from nicegui import ui
 
 from tk.ui import components
 from tk.ui import format as fmt
+from tk.ui.layout import hero, nav
 from tk.ui.state import base_data
 from tk.ui.theme import MAP_LINES, STATUS_STYLES, TOKENS, ScenarioToggle, apply_theme, status_chip
 
@@ -65,10 +66,21 @@ def preview_page() -> None:
             for status in STATUS_STYLES:
                 status_chip(status)
 
-        ui.label("Seitennavigation und Schrittkopf").classes("tk-section")
-        with ui.element("div").classes("tk-card flex flex-col gap-3"):
-            components.page_nav("/vorschau")
-            components.step_header(1, "Sendungen erfassen").set_text("2.266 Zeilen, davon 2.266 gültig")
+        ui.label("Navigation, Headline und schwebende Leiste").classes("tk-section")
+        nav("/")
+        title, _, _, sub, _ = hero("Rechnen", "rechnen")
+        title.set_text("Transport ")
+        sub.set_text("Headline aus Geist mit kursivem Serif-Wort (Instrument Serif) und Akzentpunkt.")
+        with (
+            ui.element("div").classes("tk-dock").style("position:static;transform:none;align-self:flex-start")
+        ):
+            with ui.element("div").classes("tk-dock-info"):
+                ui.label("Sendungen")
+                ui.label("/").classes("tk-sep")
+                ui.label("M3 Bahn + Bündelung")
+            ui.button("Berechnen", on_click=lambda: None).props("unelevated no-caps color=primary").classes(
+                "tk-cta"
+            )
 
         ui.label("Zahlenfelder").classes("tk-section")
         with ui.element("div").classes("grid gap-4").style("grid-template-columns:repeat(3,minmax(0,1fr))"):
@@ -88,11 +100,11 @@ def preview_page() -> None:
                 num.validate()
 
         ui.label("Abschnitt und Kennzahlenreihe").classes("tk-section")
-        sec_status, sec_body = components.section(1, "Sendungen", "Sendungen erfassen", "Einleitung des Abschnitts.")
+        sec_status, sec_body = components.section(1, "Sendungen")
         with sec_body:
-            ui.button("Sendung hinzufügen", on_click=lambda: None).props("unelevated no-caps color=primary").classes(
-                "tk-cta self-start"
-            )
+            ui.button("Sendung hinzufügen", on_click=lambda: None).props(
+                "unelevated no-caps color=primary"
+            ).classes("tk-cta self-start")
         sample = base_data()
         if sample is not None:
             m3, ist = sample.result.kpis["M3"], sample.result.kpis["Ist"]
@@ -103,8 +115,12 @@ def preview_page() -> None:
                     f"Ist: {fmt.with_unit(ist.co2_fzgkm_kg, 'kg')}", "mint",
                 )  # fmt: skip
                 components.kpi_stat("Kosten", fmt.with_unit(m3.kosten_eur, "€"), m3.delta_kosten, None, "sky")
-                components.kpi_stat("Fahrzeug-km (Lkw)", fmt.with_unit(m3.lkw_km, "km"), m3.delta_lkw_km, None, "peach")
-                components.kpi_stat("Servicegrad", fmt.percent(m3.servicegrad, 1, False), None, None, "lavender")
+                components.kpi_stat(
+                    "Fahrzeug-km (Lkw)", fmt.with_unit(m3.lkw_km, "km"), m3.delta_lkw_km, None, "peach"
+                )
+                components.kpi_stat(
+                    "Servicegrad", fmt.percent(m3.servicegrad, 1, False), None, None, "lavender"
+                )
 
         ui.label("Kennzahlenkacheln").classes("tk-section")
         data = base_data()
@@ -121,7 +137,12 @@ def preview_page() -> None:
                         tone=tones[0],
                     )  # fmt: skip
                     components.kpi_tile(
-                        "Kosten", k["M3"].kosten_eur, k["Ist"].kosten_eur, k["M3"].delta_kosten, "€", tone=tones[1]
+                        "Kosten",
+                        k["M3"].kosten_eur,
+                        k["Ist"].kosten_eur,
+                        k["M3"].delta_kosten,
+                        "€",
+                        tone=tones[1],
                     )
                     components.kpi_tile(
                         "Lkw-km", k["M3"].lkw_km, k["Ist"].lkw_km, k["M3"].delta_lkw_km, "km", tone=tones[2]
