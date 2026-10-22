@@ -17,6 +17,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
+import httpx
+
 DEFAULT_MODEL = "gemini-flash-lite-latest"
 REQUEST_TIMEOUT_MS = 60_000
 
@@ -129,10 +131,12 @@ class GeminiProvider:
                 raise RateLimitError(str(exc)) from exc
             raise ProviderUnavailable(str(exc)) from exc
         except errors.ServerError as exc:
-            if exc.code == 503:
-                # Model overloaded: temporary, handled like a rate limit (retry, then demo mode).
+            if exc.code in (503, 504):
+                # Model overloaded or deadline exceeded: temporary, handled like a rate limit.
                 raise RateLimitError(str(exc)) from exc
             raise ProviderUnavailable(str(exc)) from exc
+        except httpx.TimeoutException as exc:
+            raise RateLimitError(f"Zeitlimit {REQUEST_TIMEOUT_MS / 1000:.0f} s überschritten") from exc
         except OSError as exc:
             raise ProviderUnavailable(str(exc)) from exc
         calls = [ToolCall(c.name or "", dict(c.args or {})) for c in (response.function_calls or [])]

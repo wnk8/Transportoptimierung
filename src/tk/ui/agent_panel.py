@@ -70,6 +70,12 @@ def build_agent_input(page: Page, box: ui.column) -> None:
             if result is None:
                 return
             answer: AgentAnswer = result
+            used = (
+                "Gemini"
+                if answer.provider == "gemini"
+                else "Demo-Modus (Gemini nicht verfügbar, aufgezeichneter Ablauf)"
+            )
+            mode_label.set_text(f"Modus: {used}")
             page.agent_trace = answer.trace  # type: ignore[attr-defined]
             page.agent_ctx = ctx  # type: ignore[attr-defined]
             answer_box.clear()
