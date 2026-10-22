@@ -29,3 +29,18 @@ def percent(value: float | None, decimals: int = 1, signed: bool = True) -> str:
     if signed and value > 0 and not text.startswith(MINUS):
         text = "+" + text
     return f"{text}{NARROW}%"
+
+
+def display_unit(unit: str) -> str:
+    """Einheit im Eingabefeld: Anteile erscheinen als Prozent."""
+    return "%" if unit == "Anteil" else unit
+
+
+def to_display(value: float, unit: str) -> float:
+    """Modellwert in Feldwert, ``0.1`` Anteil wird ``10`` %. Gerundet gegen Gleitkommareste."""
+    return round(value * 100, 6) if unit == "Anteil" else value
+
+
+def from_display(value: float, unit: str) -> float:
+    """Feldwert in Modellwert, ``10`` % wird ``0.1``."""
+    return round(value / 100, 10) if unit == "Anteil" else value

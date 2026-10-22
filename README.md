@@ -74,13 +74,13 @@ Die Rechnung nutzt wie die Excel Luftlinie × 1,22. Der Tab **Straße gegen Luft
 
 ### 7. Wie berechnet? Und stimmt das mit der Excel?
 
-**Wie berechnet?** an jeder Kennzahl zeigt Formel, Parameter mit Quelle und Belegstand sowie die Abweichung zur Excel. Der Tab **Prüfungen** enthält die 20 Prüfungen der Excel und den Abgleich je Kennzahl.
+**Wie berechnet?** an jeder Kennzahl zeigt Formel, Parameter mit Quelle und Belegstand sowie die Abweichung zur Excel. Die Seite **Analyse**, Tab **Prüfungen**, enthält die 20 Prüfungen der Excel und den Abgleich je Kennzahl.
 
 ![Erklärung einer Kennzahl mit Formel und Verifikation](docs/images/05_erklaerung.png)
 
 ### 8. Freitext mit dem Assistenten
 
-Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt nur genannte Werte, ruft den Rechenkern auf und nennt nur Zahlen aus den Werkzeugausgaben. Jede andere Zahl wird verworfen; eine Aufforderung zum Schätzen lehnt er ab. Die Agent-Spur zeigt jeden Werkzeugaufruf.
+Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt nur genannte Werte, ruft den Rechenkern auf und nennt nur Zahlen aus den Werkzeugausgaben. Jede andere Zahl wird verworfen; eine Aufforderung zum Schätzen lehnt er ab. Die Agent-Spur (Seite **Analyse**) zeigt jeden Werkzeugaufruf.
 
 ![Assistent mit Antwort aus dem Rechenkern](docs/images/07_assistent.png)
 
@@ -91,8 +91,8 @@ Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt
 | eigene Sendungen rechnen | Eingabe, Tab **Einfügen / CSV**: Zeilen aus Excel (Spalten A bis H wie Blatt Input) einfügen, "Ersetzen" wählen, **Übernehmen**. Oder CSV/XLSX hochladen |
 | eine einzelne Sendung prüfen | Tab **Formular**: Datum, Start, Ziel, Gewicht; beim Verlassen des Feldes zeigt die App die Ortszuordnung |
 | Parameter testen | Parameterpanel: Wert ändern, die App rechnet sofort neu; **Zurücksetzen** stellt die Werte aus Assumptions wieder her |
-| Ergebnisse je Sendung sehen | Tab **Sendungen**, Filter nach Verkehrsträger oder Tour; Spalte Ergebnis entspricht Input!BD |
-| eine Tour verstehen | Tab **Touren**, Zeile anklicken |
+| Ergebnisse je Sendung sehen | Seite **Analyse**, Tab **Sendungen**, Filter nach Verkehrsträger oder Tour; Spalte Ergebnis entspricht Input!BD |
+| eine Tour verstehen | Seite **Analyse**, Tab **Touren**, Zeile anklicken: die Tour öffnet sich in der Karte der Seite Eingabe |
 | zurück in die Excel | **Export CSV** oder **Export XLSX**, Spalten A bis H in Input!A14 einfügen; für die Variante Straßen-km zusätzlich **Relationstabelle** in PLZ_Orte R:T |
 | Daten der Excel wiederherstellen | **Beispieldaten laden** |
 

@@ -18,6 +18,7 @@ from tk.ui import components
 
 if TYPE_CHECKING:
     from tk.ui.app import Page
+    from tk.ui.state import Session
 
 
 def _provider(request: str) -> tuple[LLMProvider, str]:
@@ -30,7 +31,8 @@ def _provider(request: str) -> tuple[LLMProvider, str]:
 
 
 def build_agent_input(page: Page, box: ui.column) -> None:
-    page.agent_trace = Trace()  # type: ignore[attr-defined]
+    if page.s.agent_trace is None:
+        page.s.agent_trace = Trace()
     page.agent_ctx = AgentContext(model=page.s.model)  # type: ignore[attr-defined]
     with box:
         ui.label(
@@ -76,7 +78,7 @@ def build_agent_input(page: Page, box: ui.column) -> None:
                 else "Demo-Modus (Gemini nicht verfügbar, aufgezeichneter Ablauf)"
             )
             mode_label.set_text(f"Modus: {used}")
-            page.agent_trace = answer.trace  # type: ignore[attr-defined]
+            page.s.agent_trace = answer.trace
             page.agent_ctx = ctx  # type: ignore[attr-defined]
             answer_box.clear()
             with answer_box:
@@ -90,7 +92,9 @@ def build_agent_input(page: Page, box: ui.column) -> None:
                         f"{len(ctx.arbeitsliste)} Sendung(en) in die Eingabe übernehmen",
                         on_click=lambda: page.set_shipments(ctx.arbeitsliste, replace=False, origin="Agent"),
                     ).props("unelevated no-caps color=primary")
-            page.render_trace()
+                ui.link("Werkzeugaufrufe ansehen (Analyse, Agent-Spur)", "/analyse?tab=agent").classes(
+                    "tk-link"
+                )
 
         ui.button("Senden", on_click=send).props("unelevated no-caps color=primary")
 
@@ -100,12 +104,12 @@ def _short(value: Any) -> str:
     return text if len(text) < 4000 else text[:4000] + "\n(gekürzt)"
 
 
-def render_trace(page: Page, box: ui.column) -> None:
+def render_trace(session: Session, box: ui.column) -> None:
     box.clear()
-    trace: Trace | None = getattr(page, "agent_trace", None)
+    trace = session.agent_trace
     with box:
         if trace is None or not trace.entries:
-            components.empty_state("Noch keine Agent-Anfrage. Eingabe, Tab Freitext.")
+            components.empty_state("Noch keine Agent-Anfrage. Seite Eingabe, Tab Freitext.")
             return
         ui.label("Chronologische Werkzeugaufrufe mit Ein- und Ausgabe.").classes("tk-label")
         for e in trace.entries:

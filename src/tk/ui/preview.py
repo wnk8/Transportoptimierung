@@ -64,6 +64,28 @@ def preview_page() -> None:
             for status in STATUS_STYLES:
                 status_chip(status)
 
+        ui.label("Seitennavigation und Schrittkopf").classes("tk-section")
+        with ui.element("div").classes("tk-card flex flex-col gap-3"):
+            components.page_nav("/vorschau")
+            components.step_header(1, "Sendungen erfassen").set_text("2.266 Zeilen, davon 2.266 gültig")
+
+        ui.label("Zahlenfelder").classes("tk-section")
+        with ui.element("div").classes("grid gap-4").style("grid-template-columns:repeat(3,minmax(0,1fr))"):
+            with ui.element("div").classes("tk-card"):
+                components.number_field(
+                    "Bahn-Mindestdistanz", "km", "Standard: 500 km", "Tooltip mit Typ, Quelle und Zelle",
+                    value=500, field_id="A01",
+                )  # fmt: skip
+            with ui.element("div").classes("tk-card"):
+                box, _, _ = components.number_field(
+                    "Umweg-Zuschlag", "%", "Geändert, Standard: 20 %", value=40, field_id="A10", maximum=100
+                )
+                box.classes("tk-field--changed")
+            with ui.element("div").classes("tk-card"):
+                _, num, _ = components.number_field("Gewicht (Pflicht)", "kg", "Bruttogewicht.", minimum=0)
+                num.set_value(-5)
+                num.validate()
+
         ui.label("Kennzahlenkacheln").classes("tk-section")
         data = base_data()
         if data is None:

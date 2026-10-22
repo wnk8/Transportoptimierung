@@ -119,11 +119,50 @@ body { background: var(--bg); color: var(--text); font-family: Inter, system-ui,
 .tk-progress > div { height: 100%%; width: 40%%; background: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 a, button { transition: background-color 150ms, color 150ms; }
+.tk-step { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tk-step-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+  border-radius: 999px; background: var(--accent); color: var(--surface); font-size: 12px; font-weight: 600; }
+.tk-step-title { font-size: 16px; font-weight: 600; }
+.tk-step-status { color: var(--muted); font-size: 12px; font-weight: 500; margin-left: auto; }
+.tk-group { color: var(--muted); font-size: 12px; font-weight: 600; border-top: 1px solid var(--line);
+  padding-top: 12px; margin-top: 4px; width: 100%%; }
+.tk-field { display: flex; flex-direction: column; gap: 4px; width: 100%%; }
+.tk-field-label { color: var(--text); font-size: 12px; font-weight: 500; cursor: help; }
+.tk-field-label .tk-id { color: var(--muted); margin-right: 6px; }
+.tk-help { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.tk-field--changed .q-field__control { background: var(--accent-tint); }
+.tk-field--changed .tk-help { color: var(--accent); font-weight: 500; }
+/* Above Leaflet panes and controls (400 to 1000), below Quasar dialogs and tooltips (6000+). */
+.tk-rail { position: sticky; top: 0; z-index: 1100; background: var(--bg); padding-bottom: 8px; }
+.tk-rail-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 4px 0 8px; }
+.tk-kpi-grid { display: grid; gap: 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tk-delta-chip { display: inline-flex; border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600;
+  font-variant-numeric: tabular-nums; }
+.tk-delta-chip.down { background: var(--accent-tint); color: var(--accent); }
+.tk-delta-chip.up { background: var(--base-tint); color: var(--base); }
+.tk-delta-chip.flat { background: var(--bg); color: var(--muted); }
+.tk-pagenav { display: flex; gap: 24px; border-bottom: 1px solid var(--line); width: 100%%; }
+.tk-pagenav a { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; padding: 8px 0;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tk-pagenav a:hover { color: var(--text); }
+.tk-pagenav a[aria-current="page"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+.tk-schema { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.tk-schema span { background: var(--bg); border-radius: 6px; padding: 4px 6px; font-size: 12px; color: var(--text); }
+.tk-schema b { color: var(--muted); font-weight: 600; margin-right: 4px; }
+.tk-summary { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .leaflet-tile-pane { filter: grayscale(0.85) contrast(0.95) brightness(1.04); }
 .q-table th { font-weight: 600; color: var(--muted); font-size: 12px; }
 .q-table td { font-variant-numeric: tabular-nums; }
 .q-tab__label { font-weight: 500; }
+.tk-left { width: 360px; flex-shrink: 0; }
+.tk-left .q-tab { padding: 0 10px; }
 @media (max-width: 1279px) {
+  .tk-left { width: 320px; }
+  .tk-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Sticky rail only where it leaves room for the map: wide and tall screens. */
+@media (max-width: 1279px), (max-height: 799px) { .tk-rail { position: static; } }
+@media (max-width: 959px) {
   .tk-two-col { flex-direction: column; }
   .tk-two-col > * { width: 100%% !important; min-width: 0 !important; flex: none !important; }
 }

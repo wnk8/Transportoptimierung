@@ -292,7 +292,7 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 1. Eine helle Fläche, wenig Farbe. Farbe trägt Bedeutung, nie Dekoration.
 2. Eine Akzentfarbe (tiefes Grün) für Konzept und primäre Aktionen. Die Vergleichsbasis (Ist) erhält eine warme Gegenfarbe. Bahn erhält Blau.
 3. Hierarchie durch Größe, Gewicht und Abstand, nicht durch Rahmen und Schatten.
-4. Eine Aussage pro Ansicht: Karte als Hauptelement, darunter vier Kennzahlen.
+4. Eine Aussage pro Seite. Seite Eingabe: Eingabe und Parameter links, daneben vier Kennzahlen und die Karte. Seite Analyse: Tabellen, Szenarienvergleich, Erklärung, Prüfungen, Agent-Spur.
 5. Keine Animation außer 150 ms Übergängen bei Hover und Fokus.
 6. Jedes Element hat eine Funktion. Keine Illustrationen, Verläufe, Icons ohne Beschriftung, Emojis, Platzhaltertexte.
 
@@ -358,25 +358,29 @@ Der Filter auf der Kachelebene dämpft die Standardkarte, ohne Anbieter oder Att
 
 ### 7.4 Layout
 
+Seite Eingabe (`/`):
+
 ```
 +-----------------------------------------------------------------------------+
 | Transportkonzept            [ Ist | M2 Bündelung | M3 Bahn + Bündelung ]  Status |
-+------------------+----------------------------------------------------------+
-| Eingabe          |  Karte (Vorher | Nachher, Umschalter)                    |
-|  Formular        |                                                          |
-|  Einfügen / CSV  |                                                          |
-|  Freitext (Agent)+----------------+----------------+----------------+-------+
-| Parameter        | CO2e           | Kosten         | Fahrzeug-km    | Service|
-|  A01 A02 A05 A08 | Ist > Plan     | Ist > Plan     | Ist > Plan     | Anteil |
-|  A10 C01         | Delta          | Delta          | Delta          | Bahn   |
-+------------------+----------------+----------------+----------------+-------+
-| Tabs: Sendungen | Touren | Szenarien | Erklärung | Prüfungen | Agent-Spur   |
-+-----------------------------------------------------------------------------+
+| Eingabe | Analyse                                                           |
++--------------------------+--------------------------------------------------+
+| 1 Sendungen erfassen     | Ergebnis M3 gegen Ist (bleibt beim Scrollen oben) |
+|   Formular | CSV | Text  | CO2e | Kosten | Fahrzeug-km | Servicegrad        |
+|   Datenbestand, Export   +--------------------------------------------------+
+| 2 Parameter anpassen     | Karte (Vorher | Nachher, Straße, Touren)          |
+|   Bahnverlagerung (M3)   |                                                  |
+|   Bündelung (M2), Kosten |                                                  |
+|   Distanz                |                                                  |
++--------------------------+--------------------------------------------------+
+| Zusammenfassung: Sendungen, Touren, Prüfungen bestanden   [ Zur Analyse ]   |
 | Fußzeile: © OpenStreetMap contributors | GeoNames CC BY 4.0 | Stand der Daten |
 +-----------------------------------------------------------------------------+
 ```
 
-Breakpoints: ab 1280 px zweispaltig (Eingabe links, Karte rechts), darunter einspaltig. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
+Seite Analyse (`/analyse`, Tab per `?tab=sendungen|touren|szenarien|erklaerung|pruefungen|agent`): gleiche Kopfzeile, darunter die Tabs Sendungen, Touren, Szenarien, Erklärung, Prüfungen, Agent-Spur. Beide Seiten teilen den Stand je Browser (Sendungen, Parameter, Szenario, Agent-Spur).
+
+Breakpoints: ab 960 px zweispaltig (Eingabe links 360 px, unter 1280 px 320 px), darunter einspaltig. Kennzahlen vierspaltig ab 1280 px, darunter 2 × 2. Die Kennzahlenleiste bleibt nur ab 1280 × 800 px beim Scrollen oben. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
 
 ### 7.5 Komponenten
 
@@ -384,9 +388,9 @@ Breakpoints: ab 1280 px zweispaltig (Eingabe links, Karte rechts), darunter eins
 |---|---|
 | Szenario-Umschalter | Segmentierte Auswahl Ist, M2, M3. Aktiv: `--accent` Fläche, Weiß. Wechsel aktualisiert Karte, Kacheln, Tabellen |
 | Status-Chip | Abbild von `Input!R8`: "Keine Eingabe" (neutral), "Eingabe prüfen" (`--note-tint`), "Plan zulässig" (`--accent-tint`), "Plan prüfen" (`--danger`-Tint). Immer mit Text |
-| Kennzahlenkachel | Label, Wert Plan (28 px), darunter "Ist: Wert" und Delta mit Vorzeichen. Delta-Farbe: Reduktion `--accent`, Zunahme `--base`. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
-| Eingabeformular | Pflichtfelder A bis D wie in Excel, Hinweistexte aus Spalte I. Inline-Validierung, Fehler mit Ursache und nächstem Schritt |
-| Parameterpanel | Regler und Zahlenfelder mit Einheit, Standardwert aus `Assumptions`, Link "Zurücksetzen". Änderung rechnet sofort neu |
+| Kennzahlenkachel | Label, Wert Plan (28 px), darunter Delta als Chip mit Vorzeichen und Text "gegen Ist" sowie "Ist: Wert". Chip: Reduktion `--accent` auf `--accent-tint`, Zunahme `--base` auf `--base-tint`. Das Szenario steht einmal im Kopf der Kennzahlenleiste. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
+| Eingabeformular | Schritt 1. Pflichtfelder A bis D wie in Excel, mit "(Pflicht)" beschriftet. Beschriftung über dem Feld, Einheit im Feld, Hilfetext darunter. Hinweistexte aus Spalte I. Inline-Validierung, Fehler mit Ursache und nächstem Schritt |
+| Parameterpanel | Schritt 2. Gruppen Bahnverlagerung (M3), Bündelung (M2), Kosten, Distanz. Zahlenfeld mit ID, Name und Einheit aus `Assumptions`, Anteile als Prozent. Hilfetext mit Wirkung und Standardwert; Tooltip mit Typ, Quelle, Zelle. Geänderte Felder: Fläche `--accent-tint` und Text "Geändert, Standard: Wert". Schrittstatus nennt die Zahl geänderter Werte. Link "Zurücksetzen". Änderung rechnet sofort neu |
 | Karte | Siehe Abschnitt 9 |
 | Tabellen | Sortierbar, feste Kopfzeile, Zahlen rechtsbündig, Klartext-Ergebnis je Sendung (Spalte `BD`), Filter nach Tour und Verkehrsträger |
 | Szenarienvergleich | Tabelle Ist, M2, M3 plus ein gruppiertes Balkendiagramm (Delta CO2e, Kosten, Fahrzeug-km). Kein weiteres Diagramm |
