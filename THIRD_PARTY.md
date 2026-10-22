@@ -16,7 +16,9 @@ Stand: 20.10.2026 (Versionen aus `uv.lock`). Lizenzangaben nach Projektseiten; v
 | Agent | google-genai (Gemini API, kostenlose Stufe) | 2.31 | Apache-2.0; Nutzung der API nach Nutzungsbedingungen Google |
 | Konfiguration | python-dotenv | 1.2 | BSD-3-Clause |
 | HTTP | httpx | 0.28 | BSD-3-Clause |
-| Schrift | Inter 4.1 (Regular, Medium, SemiBold), lokal in `src/tk/assets/fonts` | 4.1 | SIL Open Font License 1.1 (Lizenztext beigelegt) |
+| Schrift | Geist (variabel), Vercel und basement.studio, lokal in `src/tk/assets/fonts` | 1.8.2 (npm `geist`) | SIL Open Font License 1.1 (Lizenztext beigelegt) |
+| Schrift | Instrument Serif (Regular, Italic, latin), The Instrument Serif Project Authors, lokal in `src/tk/assets/fonts` | 5.3.0 (npm `@fontsource/instrument-serif`) | SIL Open Font License 1.1 (Lizenztext beigelegt) |
+| Schrift (Rückfall) | Inter 4.1 (Regular, Medium, SemiBold), lokal in `src/tk/assets/fonts` | 4.1 | SIL Open Font License 1.1 (Lizenztext beigelegt) |
 
 ## Software (Entwicklung)
 

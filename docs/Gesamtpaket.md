@@ -167,7 +167,7 @@ $$S = 1 - \frac{N_{\text{Bahn}}}{N}$$
 | Tests | pytest, hypothesis | MIT, MPL-2.0 |
 | Qualität | ruff, mypy | MIT |
 | Agent | Gemini API (kostenlose Stufe) hinter `LLMProvider` | Nutzungsbedingungen Google |
-| Schrift | Inter, lokal eingebunden | SIL OFL |
+| Schrift | Geist und Instrument Serif (Rückfall Inter), lokal eingebunden | SIL OFL |
 | Versionskontrolle, CI | GitHub, GitHub Actions | |
 
 ### 4.2 Daten und Kartendienste
@@ -289,30 +289,34 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 
 ### 7.1 Leitsätze
 
-1. Eine helle Fläche, wenig Farbe. Farbe trägt Bedeutung, nie Dekoration.
-2. Eine Akzentfarbe (tiefes Grün) für Konzept und primäre Aktionen. Die Vergleichsbasis (Ist) erhält eine warme Gegenfarbe. Bahn erhält Blau.
-3. Hierarchie durch Größe, Gewicht und Abstand, nicht durch Rahmen und Schatten.
-4. Eine Aussage pro Ansicht: Karte als Hauptelement, darunter vier Kennzahlen.
-5. Keine Animation außer 150 ms Übergängen bei Hover und Fokus.
+1. Weiße Minimal-Website (Vorbild: siiimple.com, Kategorie „white“): reines Weiß, schwarze Schrift, sehr viel Leerraum, Haarlinien statt Karten, kleine Textlinks. Pastelltöne (Salbei, Himmel, Pfirsich, Lavendel, Butter, Rosé) nur als Punkte, Delta-Pillen und geänderte Felder; Schrift darauf immer im passenden dunklen Ton. Farbe ist nie die einzige Information.
+2. Tiefgrün `--accent` für Reduktion, Akzentpunkt und Fokus; dunkle Tinte `--text` für primäre Aktionen (Pille mit Pfeil). Die Vergleichsbasis (Ist) erhält Pfirsich, Bahn Himmelblau.
+3. Hierarchie durch Typografie: übergroße Headline aus Geist mit einem kursiven Serif-Wort (Instrument Serif) und Akzentpunkt, nummerierte Abschnitte „01 Sendungen“.
+4. Drei Seiten, je eine Aufgabe. Rechnen: nur Sendungen und Parameter, „Berechnen“ leitet weiter. Ergebnis: Kennzahlen, Karte und Tabellen. Info: Erklärung, Annahmen und Quellen, Prüfungen, Sensitivität, Agent-Spur.
+5. Bewegung dezent und funktional: Abschnitte blenden beim Laden ein, neu berechnete Zahlen gleiten ein, Pfeile und Unterstriche reagieren auf Hover (200 bis 700 ms). `prefers-reduced-motion: reduce` schaltet jede Bewegung ab.
 6. Jedes Element hat eine Funktion. Keine Illustrationen, Verläufe, Icons ohne Beschriftung, Emojis, Platzhaltertexte.
 
 ### 7.2 Farbtokens (Kontraste mit WCAG-Formel berechnet)
 
 | Token | Hex | Verwendung | Kontrast |
 |---|---|---|---|
-| `--bg` | `#F6F7F8` | Seitenhintergrund | Text 13,8 : 1 |
-| `--surface` | `#FFFFFF` | Karten, Panels | Text 14,8 : 1 |
-| `--line` | `#E3E6EA` | feine Trennlinien (nur Dekoration von Flächen) | 1,25 : 1, trägt keine Information |
-| `--text` | `#1F2933` | Fließtext, Zahlen | 14,8 : 1 auf Weiß |
-| `--muted` | `#56616E` | Beschriftungen, Einheiten | 6,3 : 1 auf Weiß, 5,9 : 1 auf `--bg` |
-| `--accent` | `#1F6F5F` | Konzept, primäre Aktion, Fokus | 6,0 : 1 auf Weiß; Weiß auf Akzent 6,0 : 1 |
-| `--accent-tint` | `#E8F3EE` | Fläche für positive Veränderung | Text 13,0 : 1; `--accent` darauf 5,3 : 1 |
-| `--base` | `#9A4F2F` | Text und Chips für Ist | 5,9 : 1 auf Weiß; 5,1 : 1 auf Tint |
-| `--base-tint` | `#F8EBE4` | Fläche für Ist | Text 12,6 : 1 |
-| `--info` | `#2F6FA8` | Bahn | 5,3 : 1 auf Weiß |
-| `--info-tint` | `#E6EFF8` | Fläche für Bahn | Text 12,7 : 1 |
-| `--note-tint` | `#FAF3DC` | Annahmen, Hinweise | Text 13,3 : 1; `#8A5A00` darauf 5,3 : 1 |
-| `--danger` | `#B42318` | Fehler, Plan prüfen | 6,6 : 1 auf Weiß; 5,8 : 1 auf `#FDECEA` |
+| `--bg` | `#FFFFFF` | Seitenhintergrund (reines Weiß) | Text 14,8 : 1; `--muted` 6,3 : 1 |
+| `--surface` | `#FFFFFF` | Eingabefelder, aktive Pillen, Dialoge | Text 14,8 : 1 |
+| `--canvas` | `#F5F5F4` | Umschalter, Hover, Tabellenzeilen | Text 13,5 : 1; `--muted` 5,8 : 1 |
+| `--line` | `#ECECEA` | Haarlinien zwischen Abschnitten und Kennzahlen | trägt keine Information |
+| `--line-strong` | `#D9D9D6` | Rahmen von Eingabefeldern | trägt keine Information |
+| `--text` | `#1F2933` | Fließtext, Zahlen, primäre Schaltfläche | 14,8 : 1 auf Weiß; Weiß darauf 14,8 : 1 |
+| `--muted` | `#56616E` | Beschriftungen, Einheiten, Kicker | 6,3 : 1 auf Weiß, mindestens 5,1 : 1 auf jedem Pastellton |
+| `--accent` | `#1F6F5F` | Reduktion, Akzentpunkt, Fokus | 6,0 : 1 auf Weiß |
+| `--accent-tint` | `#E3EEE7` | Salbei: CO₂e, Abschnitt 01, Reduktion, geänderte Felder | Text 12,4 : 1; `--accent` darauf 5,0 : 1 |
+| `--base` | `#9A4F2F` | Ist, Zunahme | 5,9 : 1 auf Weiß; 4,9 : 1 auf Tint |
+| `--base-tint` | `#F6E6DB` | Pfirsich: Fahrzeug-km, Ist, Zunahme | Text 12,1 : 1 |
+| `--info` | `#2F6FA8` | Bahn | 5,3 : 1 auf Weiß; 4,6 : 1 auf Tint |
+| `--info-tint` | `#E9F0F7` | Himmel: Kosten, Bahn, Abschnitt 03 | Text 12,8 : 1 |
+| `--violet` | `#5B4BB0` | Schrift auf Lavendel | 6,8 : 1 auf Weiß; 5,5 : 1 auf Tint |
+| `--violet-tint` | `#E9E5F4` | Lavendel: Servicegrad, Abschnitt 02 | Text 11,9 : 1 |
+| `--note-tint` | `#F5EED8` | Butter: Annahmen, Hinweise | Text 12,7 : 1; `#8A5A00` darauf 5,1 : 1 |
+| `--danger` | `#B42318` | Fehler, Plan prüfen | 6,6 : 1 auf Weiß; 5,4 : 1 auf Rosé `#F7E4E2` |
 
 Kartenlinien (müssen gegen die Karte mindestens 3 : 1 erreichen):
 
@@ -328,10 +332,10 @@ Regeln: Auf Tönen dunkler Text. Weißer Text nur auf `--accent`, `--text` und `
 
 | Element | Festlegung |
 |---|---|
-| Schrift | Inter (lokal), Rückfall `system-ui`; Zahlen mit `font-variant-numeric: tabular-nums` |
-| Größen | Seitentitel 20 px / 600, Abschnitt 14 px / 600, Fließtext 14 px / 400, Beschriftung 12 px / 500 in `--muted`, Kennzahl 28 px / 600 |
-| Raster | 8 px; Karteninnenabstand 16 px; Abstand zwischen Karten 16 px |
-| Form | Radius 12 px für Karten, 8 px für Eingaben; 1 px Linie `--line`; kein Schatten oder höchstens `0 1px 2px rgba(31,41,51,0.06)` |
+| Schrift | Geist (variabel, lokal, SIL OFL), Rückfall Inter und `system-ui`; ein Wort je Headline in Instrument Serif kursiv (lokal, SIL OFL; ohne Sonderzeichen wie ₂, die die Schrift nicht enthält); Zahlen mit `font-variant-numeric: tabular-nums` |
+| Größen | Headline 48 bis 88 px / 500, Laufweite −0,045 em; Abschnittstitel 22 px / 500 mit Nummer 13 px; Kennzahl 30 bis 40 px / 600; Fließtext 15 px / 400; Einleitung 17 px in `--muted`, höchstens 520 px breit; Beschriftung 13 px / 500; Kicker 12 px, Großbuchstaben, Laufweite +0,08 em |
+| Raster | Inhalt höchstens 1280 px, 12 Spalten, Abstand 32 px; Hero 96 px oben; Abschnitte 48 px oben und unten; Abschnittskopf 3 Spalten (bleibt beim Scrollen stehen), Inhalt 9 Spalten |
+| Form | Keine Karten auf der Seite, Gliederung durch 1 px Haarlinien `--line`. Eingaben Radius 12 px; primäre Schaltfläche schwarze Pille mit Pfeil, sonst Textlinks; Umschalter, Status und Deltas als Pillen. Schatten nur für aktive Pillen (`0 1px 2px`) und die schwebende Leiste |
 | Zahlenformat | deutsch: Tausenderpunkt, Dezimalkomma, Einheit mit schmalem Leerzeichen (`306.924 kg CO2e`); Prozent mit Vorzeichen (`−53,3 %`) |
 | Fokus | 2 px Ring in `--accent`, nie entfernen |
 
@@ -358,35 +362,42 @@ Der Filter auf der Kachelebene dämpft die Standardkarte, ohne Anbieter oder Att
 
 ### 7.4 Layout
 
+Drei Seiten mit derselben Kopfzeile (Wortmarke „TK.“, Textlinks Rechnen, Ergebnis, Info; aktive Seite unterstrichen):
+
 ```
-+-----------------------------------------------------------------------------+
-| Transportkonzept            [ Ist | M2 Bündelung | M3 Bahn + Bündelung ]  Status |
-+------------------+----------------------------------------------------------+
-| Eingabe          |  Karte (Vorher | Nachher, Umschalter)                    |
-|  Formular        |                                                          |
-|  Einfügen / CSV  |                                                          |
-|  Freitext (Agent)+----------------+----------------+----------------+-------+
-| Parameter        | CO2e           | Kosten         | Fahrzeug-km    | Service|
-|  A01 A02 A05 A08 | Ist > Plan     | Ist > Plan     | Ist > Plan     | Anteil |
-|  A10 C01         | Delta          | Delta          | Delta          | Bahn   |
-+------------------+----------------+----------------+----------------+-------+
-| Tabs: Sendungen | Touren | Szenarien | Erklärung | Prüfungen | Agent-Spur   |
-+-----------------------------------------------------------------------------+
-| Fußzeile: © OpenStreetMap contributors | GeoNames CC BY 4.0 | Stand der Daten |
-+-----------------------------------------------------------------------------+
+/            RECHNEN
+             Transport rechnen.          (rechnen kursiv, Serif)
+             Sendungen erfassen, Parameter prüfen, berechnen.
+             ---------------------------------------------------------------
+             01 Sendungen   | Formular | Einfügen / CSV | Freitext
+             ---------------------------------------------------------------
+             02 Parameter   | BAHNVERLAGERUNG A01 A02 A05 A04 | BÜNDELUNG A10 A09
+                            | KOSTEN A08 | DISTANZ I01, Straßen-km
+             ( 2.266 Sendungen / M3 Bahn + Bündelung / CO2e −53,3 %   Berechnen → )  schwebend
+
+/ergebnis    ERGEBNIS                                ( Ist | M2 | M3 )  ● Plan zulässig
+             53,3 % weniger CO2e.                     Parameter ändern
+             CO2e | Kosten | Fahrzeug-km | Servicegrad   (Wie berechnet? führt zu Info)
+             ( Karte ) Sendungen  Touren  Szenarien
+
+/info        INFO
+             So wird gerechnet.
+             ( Erklärung ) Annahmen und Quellen  Prüfungen  Sensitivität  Agent-Spur
 ```
 
-Breakpoints: ab 1280 px zweispaltig (Eingabe links, Karte rechts), darunter einspaltig. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
+„Berechnen“ wartet eine laufende Neuberechnung ab und öffnet `/ergebnis?tab=karte`. Tabs per `?tab=`: Ergebnis `karte|sendungen|touren|szenarien` (dazu `?tour=N`), Info `erklaerung|annahmen|pruefungen|sensitivitaet|agent` (dazu `?k=` für die Kennzahl). `/analyse` leitet auf `/ergebnis` weiter. Alle Seiten teilen den Stand je Browser (Sendungen, Parameter, Szenario, Agent-Spur).
+
+Breakpoints: Abschnittskopf und Inhalt nebeneinander ab 1100 px, darunter untereinander; Kennzahlen vierspaltig ab 1100 px, darunter 2 × 2. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
 
 ### 7.5 Komponenten
 
 | Komponente | Verhalten |
 |---|---|
-| Szenario-Umschalter | Segmentierte Auswahl Ist, M2, M3. Aktiv: `--accent` Fläche, Weiß. Wechsel aktualisiert Karte, Kacheln, Tabellen |
+| Szenario-Umschalter | Pillen Ist, M2, M3 auf `--canvas`. Aktiv: weiße Pille, Schrift 600, `aria-pressed`. Liegt auf Ergebnis; Wechsel aktualisiert Headline, Kennzahlen, Karte, Tabellen |
 | Status-Chip | Abbild von `Input!R8`: "Keine Eingabe" (neutral), "Eingabe prüfen" (`--note-tint`), "Plan zulässig" (`--accent-tint`), "Plan prüfen" (`--danger`-Tint). Immer mit Text |
-| Kennzahlenkachel | Label, Wert Plan (28 px), darunter "Ist: Wert" und Delta mit Vorzeichen. Delta-Farbe: Reduktion `--accent`, Zunahme `--base`. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
-| Eingabeformular | Pflichtfelder A bis D wie in Excel, Hinweistexte aus Spalte I. Inline-Validierung, Fehler mit Ursache und nächstem Schritt |
-| Parameterpanel | Regler und Zahlenfelder mit Einheit, Standardwert aus `Assumptions`, Link "Zurücksetzen". Änderung rechnet sofort neu |
+| Kennzahl | Ohne Karte in einer Reihe mit Haarlinien. Label mit Punkt im eigenen Pastellton (CO₂e Salbei, Kosten Himmel, Fahrzeug-km Pfirsich, Servicegrad Lavendel), Wert Plan (bis 40 px), darunter Delta als Pille mit Vorzeichen und Text "gegen Ist" sowie "Ist: Wert". Pille: Reduktion `--accent` auf `--accent-tint`, Zunahme `--base` auf `--base-tint`. Das Szenario steht in der Headline. Link "Wie berechnet?" öffnet Erklärung (Formel, Parameter, Quelle, Verifikationsstatus) |
+| Eingabeformular | Abschnitt 01. Pflichtfelder A bis D wie in Excel, mit "(Pflicht)" beschriftet. Beschriftung über dem Feld, Einheit im Feld, Hilfetext darunter. Hinweistexte aus Spalte I. Inline-Validierung, Fehler mit Ursache und nächstem Schritt |
+| Parameterpanel | Abschnitt 02, Felder im Dreierraster. Gruppen Bahnverlagerung (M3), Bündelung (M2), Kosten, Distanz. Zahlenfeld mit ID, Name und Einheit aus `Assumptions`, Anteile als Prozent. Hilfetext mit Wirkung und Standardwert; Tooltip mit Typ, Quelle, Zelle. Geänderte Felder: Fläche `--accent-tint` und Text "Geändert, Standard: Wert". Schrittstatus nennt die Zahl geänderter Werte. Link "Zurücksetzen". Änderung rechnet sofort neu |
 | Karte | Siehe Abschnitt 9 |
 | Tabellen | Sortierbar, feste Kopfzeile, Zahlen rechtsbündig, Klartext-Ergebnis je Sendung (Spalte `BD`), Filter nach Tour und Verkehrsträger |
 | Szenarienvergleich | Tabelle Ist, M2, M3 plus ein gruppiertes Balkendiagramm (Delta CO2e, Kosten, Fahrzeug-km). Kein weiteres Diagramm |
@@ -397,7 +408,7 @@ Zustände (jeweils gestaltet): leer (eine klare Aktion, z. B. "Beispieldaten lad
 
 ### 7.6 Ausdrücklich nicht enthalten
 
-Dunkelmodus, Animationen jenseits von Hover, Verläufe, Illustrationen, Emojis, Tortendiagramme, Tachometer, 3D, Konfetti, Willkommensbanner, Cookie-Hinweise, Anmeldung, Mehrsprachigkeit, Platzhaltertexte (`Lorem`, `TODO`, `xxx`, `Beispiel`). `tests/test_no_placeholders.py` durchsucht das Repository danach.
+Dunkelmodus, Animationen ohne Funktion (Endlosschleifen, Parallaxe, Konfetti), Verläufe, Illustrationen, Emojis, Tortendiagramme, Tachometer, 3D, Konfetti, Willkommensbanner, Cookie-Hinweise, Anmeldung, Mehrsprachigkeit, Platzhaltertexte (`Lorem`, `TODO`, `xxx`, `Beispiel`). `tests/test_no_placeholders.py` durchsucht das Repository danach.
 
 ---
 

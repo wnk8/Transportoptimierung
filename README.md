@@ -2,7 +2,7 @@
 
 Weboberfläche und Python-Rechenkern für das Excel-Modell v11 "Nachhaltiges Transportkonzept" (Seminar Planungsprozesse BLO513/WPML733, HWG Ludwigshafen). Die App rechnet drei Szenarien, zeigt sie auf der Karte und erklärt jede Zahl. Die Excel ist maßgeblich: Kennzahlen und alle 2.266 Sendungen stimmen auf 1e-9 überein.
 
-![Startansicht: Karte Vorher und Nachher, Kennzahlen M3](docs/images/01_uebersicht.png)
+![Seite Ergebnis: 53,3 % weniger CO₂e, Kennzahlen und Karte Vorher gegen Nachher](docs/images/01_uebersicht.png)
 
 | Szenario | Was passiert | CO₂e | Kosten | Lkw-km | Servicegrad |
 |---|---|---:|---:|---:|---:|
@@ -11,6 +11,12 @@ Weboberfläche und Python-Rechenkern für das Excel-Modell v11 "Nachhaltiges Tra
 | M3 Bahn + Bündelung | erst Bahnprüfung, dann Bündelung der Lkw-Sendungen | −53,3 % | −24,9 % | −67,7 % | 75,7 % |
 
 Werte der Beispieldaten (2.266 Sendungen, 3 Startorte, 15 Zielorte).
+
+Die Oberfläche hat drei Seiten: **Rechnen** (Sendungen und Parameter erfassen), **Ergebnis** (Kennzahlen, Karte, Touren, Szenarien) und **Info** (Formeln, Annahmen, Prüfungen, Agent-Spur).
+
+| Rechnen | Ergebnis | Info |
+|---|---|---|
+| [![Seite Rechnen](docs/images/08_rechnen.png)](docs/images/08_rechnen.png) | [![Seite Ergebnis, Tour im Detail](docs/images/03_tour.png)](docs/images/03_tour.png) | [![Seite Info](docs/images/05_erklaerung.png)](docs/images/05_erklaerung.png) |
 
 ## Inhalt
 
@@ -27,6 +33,7 @@ Werte der Beispieldaten (2.266 Sendungen, 3 Startorte, 15 Zielorte).
 
 | Bereich | Was die App zeigt |
 |---|---|
+| Oberfläche | weiße Minimal-Website mit drei Seiten, schwebende Leiste "Berechnen", auch auf dem Smartphone bedienbar |
 | Szenarien | Umschalter Ist, M2, M3; Status-Chip wie das Cockpit der Excel ("Plan zulässig") |
 | Karte Vorher/Nachher | Luftlinien je Relation, Breite nach Sendungen bzw. tkm, Bahn gestrichelt |
 | Relationsdetail | Klick auf eine Linie: Ist gegen Plan, beteiligte Sammeltouren, "Warum dieses Fahrzeug?" |
@@ -41,6 +48,10 @@ Werte der Beispieldaten (2.266 Sendungen, 3 Startorte, 15 Zielorte).
 ## Demo in acht Schritten
 
 ### 1. Ausgangslage: Einzelversand (Ist)
+
+Auf der Seite **Rechnen** sind die Beispieldaten der Excel geladen (2.266 Sendungen) und alle Parameter auf den Werten aus Assumptions. **Berechnen** öffnet die Seite **Ergebnis**.
+
+![Seite Rechnen: Sendungen erfassen, Parameter prüfen, Leiste Berechnen](docs/images/08_rechnen.png)
 
 Umschalter auf **Ist**. Jede Sendung fährt einzeln: 2.266 Fahrten, 306.924 kg CO₂e. Die Linien sind Luftlinien zwischen PLZ-Schwerpunkten (schematisch), die Breite zeigt die Zahl der Sendungen.
 
@@ -74,15 +85,27 @@ Die Rechnung nutzt wie die Excel Luftlinie × 1,22. Der Tab **Straße gegen Luft
 
 ### 7. Wie berechnet? Und stimmt das mit der Excel?
 
-**Wie berechnet?** an jeder Kennzahl zeigt Formel, Parameter mit Quelle und Belegstand sowie die Abweichung zur Excel. Der Tab **Prüfungen** enthält die 20 Prüfungen der Excel und den Abgleich je Kennzahl.
+**Wie berechnet?** an jeder Kennzahl zeigt Formel, Parameter mit Quelle und Belegstand sowie die Abweichung zur Excel. Die Seite **Info**, Tab **Prüfungen**, enthält die 20 Prüfungen der Excel und den Abgleich je Kennzahl.
 
 ![Erklärung einer Kennzahl mit Formel und Verifikation](docs/images/05_erklaerung.png)
 
+![Die 20 Prüfungen der Excel, alle bestanden](docs/images/09_pruefungen.png)
+
 ### 8. Freitext mit dem Assistenten
 
-Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt nur genannte Werte, ruft den Rechenkern auf und nennt nur Zahlen aus den Werkzeugausgaben. Jede andere Zahl wird verworfen; eine Aufforderung zum Schätzen lehnt er ab. Die Agent-Spur zeigt jeden Werkzeugaufruf.
+Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt nur genannte Werte, ruft den Rechenkern auf und nennt nur Zahlen aus den Werkzeugausgaben. Jede andere Zahl wird verworfen; eine Aufforderung zum Schätzen lehnt er ab. Die Agent-Spur (Seite **Info**) zeigt jeden Werkzeugaufruf.
 
 ![Assistent mit Antwort aus dem Rechenkern](docs/images/07_assistent.png)
+
+### Auf dem Smartphone
+
+Alle drei Seiten passen sich der Bildschirmbreite an; Kennzahlen stehen dann zu zweit nebeneinander, der Szenario-Umschalter rückt unter die Überschrift.
+
+<p>
+  <img src="docs/images/10_mobil_rechnen.png" alt="Seite Rechnen auf dem Smartphone" width="260">
+  &nbsp;
+  <img src="docs/images/10_mobil_ergebnis.png" alt="Seite Ergebnis auf dem Smartphone" width="260">
+</p>
 
 ## Bedienung
 
@@ -91,8 +114,8 @@ Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt
 | eigene Sendungen rechnen | Eingabe, Tab **Einfügen / CSV**: Zeilen aus Excel (Spalten A bis H wie Blatt Input) einfügen, "Ersetzen" wählen, **Übernehmen**. Oder CSV/XLSX hochladen |
 | eine einzelne Sendung prüfen | Tab **Formular**: Datum, Start, Ziel, Gewicht; beim Verlassen des Feldes zeigt die App die Ortszuordnung |
 | Parameter testen | Parameterpanel: Wert ändern, die App rechnet sofort neu; **Zurücksetzen** stellt die Werte aus Assumptions wieder her |
-| Ergebnisse je Sendung sehen | Tab **Sendungen**, Filter nach Verkehrsträger oder Tour; Spalte Ergebnis entspricht Input!BD |
-| eine Tour verstehen | Tab **Touren**, Zeile anklicken |
+| Ergebnisse je Sendung sehen | Seite **Ergebnis**, Tab **Sendungen**, Filter nach Verkehrsträger oder Tour; Spalte Ergebnis entspricht Input!BD |
+| eine Tour verstehen | Seite **Ergebnis**, Tab **Touren**, Zeile anklicken: die Tour öffnet sich im Tab **Karte** |
 | zurück in die Excel | **Export CSV** oder **Export XLSX**, Spalten A bis H in Input!A14 einfügen; für die Variante Straßen-km zusätzlich **Relationstabelle** in PLZ_Orte R:T |
 | Daten der Excel wiederherstellen | **Beispieldaten laden** |
 
@@ -174,4 +197,4 @@ Abnahme: `make lint test` grün. Kennzahlen und alle Zeilen der Sendungen, Toure
 
 Code: MIT-Lizenz (`LICENSE`). Excel-Mappen, Referenz-CSVs und Routen-Cache sind nicht im Repository.
 
-Postleitzahl- und Ortsdaten: GeoNames, geonames.org, CC BY 4.0. Kartendaten: © OpenStreetMap contributors (ODbL). Routen: © openrouteservice.org by HeiGIT. Schrift: Inter (SIL OFL 1.1). Weitere Komponenten: [THIRD_PARTY.md](THIRD_PARTY.md).
+Postleitzahl- und Ortsdaten: GeoNames, geonames.org, CC BY 4.0. Kartendaten: © OpenStreetMap contributors (ODbL). Routen: © openrouteservice.org by HeiGIT. Schriften: Geist und Instrument Serif, Rückfall Inter (alle SIL OFL 1.1). Weitere Komponenten: [THIRD_PARTY.md](THIRD_PARTY.md).

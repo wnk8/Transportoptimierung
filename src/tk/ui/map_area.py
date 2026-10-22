@@ -39,7 +39,7 @@ from tk.routing import (
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.map_view import MapView, bind_layer, relations, view_for
-from tk.ui.theme import MAP_LINES
+from tk.ui.theme import MAP_LINES, TOKENS
 
 _cache: RouteCache | None = None
 
@@ -450,8 +450,8 @@ class TourView:
                         list(p),
                         {
                             "radius": 7,
-                            "color": "#1F2933",
-                            "fillColor": "#FFFFFF",
+                            "color": TOKENS["text"],
+                            "fillColor": TOKENS["surface"],
                             "fillOpacity": 1,
                             "weight": 2,
                         },
@@ -566,6 +566,13 @@ class MapArea:
 
     async def probe_tiles(self) -> None:
         await self.compare.probe_tiles()
+
+    async def settle(self) -> None:
+        """Nach dem Einblenden des umgebenden Tabs alle sichtbaren Karten neu vermessen."""
+        if self.compare.mode.value != "netz":
+            for m in (self.compare.map_left, self.compare.map_right):
+                await _settle(m)
+        await self._tab_changed(None)
 
     def update(self, result: Result, scenario: str) -> None:
         self.result, self.scenario = result, scenario

@@ -8,6 +8,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
+from tk.agent.trace import Trace
 from tk.models import Assumptions, Result, Shipment
 from tk.scenarios import Model, calculate, load_model, with_changes, workbook_shipments
 from tk.workbook import DATA, DEFAULT_WORKBOOK, load_workbook_data
@@ -64,6 +65,7 @@ class Session:
     scenario: str = "M3"
     result: Result | None = None
     road_km: bool = False
+    agent_trace: Trace | None = None
 
     @property
     def model(self) -> Model:
@@ -85,3 +87,16 @@ class Session:
             result = calculate(self.shipments, road_model)
         self.result = result
         return self.result
+
+
+SESSIONS: dict[str, Session] = {}
+"""Sitzungen je Browser (Cookie-ID), damit Eingabe und Analyse denselben Stand zeigen. Nur im Speicher."""
+
+
+def session_for(browser_id: str, base: BaseData) -> Session:
+    """Sitzung des Browsers; beim ersten Aufruf mit den Beispieldaten der Excel-Mappe."""
+    session = SESSIONS.get(browser_id)
+    if session is None:
+        session = Session(base=base, shipments=list(base.shipments), result=base.result)
+        SESSIONS[browser_id] = session
+    return session
