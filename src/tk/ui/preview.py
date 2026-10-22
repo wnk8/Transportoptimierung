@@ -9,6 +9,7 @@ from __future__ import annotations
 from nicegui import ui
 
 from tk.ui import components
+from tk.ui import format as fmt
 from tk.ui.state import base_data
 from tk.ui.theme import MAP_LINES, STATUS_STYLES, TOKENS, ScenarioToggle, apply_theme, status_chip
 
@@ -85,6 +86,25 @@ def preview_page() -> None:
                 _, num, _ = components.number_field("Gewicht (Pflicht)", "kg", "Bruttogewicht.", minimum=0)
                 num.set_value(-5)
                 num.validate()
+
+        ui.label("Abschnitt und Kennzahlenreihe").classes("tk-section")
+        sec_status, sec_body = components.section(1, "Sendungen", "Sendungen erfassen", "Einleitung des Abschnitts.")
+        with sec_body:
+            ui.button("Sendung hinzufügen", on_click=lambda: None).props("unelevated no-caps color=primary").classes(
+                "tk-cta self-start"
+            )
+        sample = base_data()
+        if sample is not None:
+            m3, ist = sample.result.kpis["M3"], sample.result.kpis["Ist"]
+            sec_status.set_text(f"{fmt.number(sample.result.n_valid)} gültige Zeilen")
+            with ui.element("div").classes("tk-stats"):
+                components.kpi_stat(
+                    "CO₂e (Fzg-km)", fmt.with_unit(m3.co2_fzgkm_kg, "kg"), m3.delta_co2_fzgkm,
+                    f"Ist: {fmt.with_unit(ist.co2_fzgkm_kg, 'kg')}", "mint",
+                )  # fmt: skip
+                components.kpi_stat("Kosten", fmt.with_unit(m3.kosten_eur, "€"), m3.delta_kosten, None, "sky")
+                components.kpi_stat("Fahrzeug-km (Lkw)", fmt.with_unit(m3.lkw_km, "km"), m3.delta_lkw_km, None, "peach")
+                components.kpi_stat("Servicegrad", fmt.percent(m3.servicegrad, 1, False), None, None, "lavender")
 
         ui.label("Kennzahlenkacheln").classes("tk-section")
         data = base_data()

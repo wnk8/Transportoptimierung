@@ -134,7 +134,9 @@ def number_field(
             format="%.6g",
             on_change=on_change,
             validation={bounds_text(minimum, maximum, unit): lambda v: in_bounds(v, minimum, maximum)},
-        ).props(f'dense outlined hide-bottom-space suffix="{html.escape(unit)}" aria-label="{html.escape(label)}"')
+        ).props(
+            f'dense outlined hide-bottom-space suffix="{html.escape(unit)}" aria-label="{html.escape(label)}"'
+        )
         num.classes("w-full")
         hint = ui.label(help_text).classes("tk-help")
     return box, num, hint
@@ -160,3 +162,59 @@ def bounds_text(minimum: float | None, maximum: float | None, unit: str) -> str:
     if maximum is not None:
         return f"Wert bis {show(maximum)} eingeben"
     return "Zahl eingeben"
+
+
+def section(
+    nr: int,
+    kicker: str,
+    title: str,
+    intro: str = "",
+    tone: str = "mint",
+    anchor: str | None = None,
+    delay: int = 0,
+) -> tuple[ui.label, ui.element]:
+    """Nummerierter Abschnitt: Haarlinie, Kicker, Titel mit Punkt und Einleitung links, Inhalt rechts.
+
+    Gibt das Statuslabel (Pille im Pastellton) und die Inhaltsspalte zurück.
+    """
+    sec = ui.element("section").classes(f"tk-sec tk-reveal tk-tone-{tone}").style(f"--delay:{delay}ms")
+    if anchor:
+        sec.props(f'id="{anchor}"')
+    with sec:
+        with ui.element("div").classes("tk-sec-head"):
+            with ui.element("div").classes("tk-kicker tk-kicker-line"):
+                ui.label(f"{nr:02d}")
+                ui.label(kicker)
+            with ui.element("h2").classes("tk-sec-title"):
+                ui.label(title).classes("inline")
+                ui.label(".").classes("inline tk-dot")
+            if intro:
+                ui.label(intro).classes("tk-sec-intro")
+            status = ui.label("").classes("tk-step-status")
+        body = ui.element("div").classes("tk-sec-body")
+    return status, body
+
+
+def kpi_stat(
+    label: str,
+    value: str,
+    delta: float | None = None,
+    meta: str | None = None,
+    tone: str = "mint",
+    on_explain: Callable[[], Any] | None = None,
+    delta_label: str = "gegen Ist",
+) -> None:
+    """Kennzahl ohne Karte: Label mit Pastellpunkt, große Zahl, Delta-Pille mit Vorzeichen und Text, Zusatz, Link."""
+    with ui.element("div").classes(f"tk-stat tk-tone-{tone}"):
+        ui.label(label).classes("tk-stat-label")
+        ui.label(value).classes("tk-stat-value")
+        with ui.element("div").classes("tk-stat-meta"):
+            if delta is not None:
+                css = "down" if delta < 0 else "up" if delta > 0 else "flat"
+                ui.label(f"{fmt.percent(delta)} {delta_label}").classes(f"tk-delta-chip {css}")
+            if meta:
+                ui.label(meta)
+        if on_explain:
+            ui.button("Wie berechnet?", on_click=on_explain).props("flat dense no-caps").classes(
+                "tk-link self-start"
+            )

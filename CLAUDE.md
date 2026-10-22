@@ -35,9 +35,10 @@ Ist 306.924,11 kg | M2 -16,89 % | M3 -53,31 % | Kosten -24,95 % | Fzg-km M3 -67,
 551 Bahnsendungen | Servicegrad M3 75,68 % | 428 Touren, 318 gebündelt
 
 ## Design (heller Modus)
-Tokens und Regeln: docs/Gesamtpaket.md Abschnitt 7. Weiße Seite, Pastelltöne je Kennzahl und
-Schritt, weiche Schatten erlaubt. Keine Verläufe, keine Animation außer 150 ms Hover/Fokus, keine
-Platzhaltertexte, Farbe nie als einzige Information, Textkontrast mindestens 4,5 : 1.
+Tokens und Regeln: docs/Gesamtpaket.md Abschnitt 7. Minimaler Website-Look: Off-White, Schrift
+Geist (lokal), Haarlinien statt Karten, abgestimmte Pastelltöne. Dezente funktionale Animationen
+(Einblenden, Hover), prefers-reduced-motion schaltet sie ab. Keine Verläufe, keine Platzhaltertexte,
+Farbe nie als einzige Information, Textkontrast mindestens 4,5 : 1.
 Kartenlinien: Luftlinie, schematisch. Attribution OSM und GeoNames immer sichtbar.
 
 ## Abnahme

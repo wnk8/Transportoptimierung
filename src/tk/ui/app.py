@@ -23,7 +23,7 @@ from tk.scenarios import calculate
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.analysis_page import AnalysisPage, explain_content
-from tk.ui.layout import SCENARIO_LABEL, footer, header, missing_workbook
+from tk.ui.layout import SCENARIO_LABEL, end, missing_workbook, nav, nav_kpis, scenario_controls
 from tk.ui.map_area import MapArea, route_cache
 from tk.ui.map_view import RELATION_EVENT
 from tk.ui.preview import preview_page
@@ -73,19 +73,21 @@ class Page:
     # ---------- Aufbau ----------
     def build(self, tour: int | None = None) -> None:
         apply_theme()
+        ui.query("body").classes(add="tk-hero-page")
+        self.nav_kpi_box = nav("/")
         with ui.column().classes("tk-page w-full"):
-            self.status_box = header(self.s, "/", self.set_scenario)
-            with ui.row().classes("w-full gap-4 no-wrap items-start tk-two-col"):
-                with ui.column().classes("gap-4 tk-left"):
-                    self._input_card()
-                    self._param_card()
-                with ui.column().classes("gap-4 flex-1 min-w-0 self-stretch"):
-                    self._rail()
-                    with ui.element("div").classes("tk-card w-full"):
-                        assert self.s.result is not None
-                        self.map = MapArea(self, self.s.result)
-            self.summary_box = ui.element("div").classes("tk-card w-full tk-summary")
-            footer(self.s)
+            self._hero()
+            self._input_section()
+            self._param_section()
+            _, map_body = components.section(
+                3, "Karte", "Vorher und nachher", "Relationen als Luftlinie, schematisch. Linie anklicken "
+                "für den Vergleich Ist gegen Plan.", tone="sky", anchor="karte", delay=240,
+            )  # fmt: skip
+            map_body.classes("tk-sec-wide")
+            with map_body:
+                assert self.s.result is not None
+                self.map = MapArea(self, self.s.result)
+            self.summary_box = end(self.s, "/analyse", "Weiter zur Analyse")
         ui.on(RELATION_EVENT, lambda e: self.map.select_relation(str(e.args)))
         self.refresh_all()
         ui.timer(0.5, self.map.probe_tiles, once=True)
@@ -96,47 +98,53 @@ class Page:
         ):
             ui.timer(0.6, lambda: self.map.open_tour(tour), once=True)
 
-    def _rail(self) -> None:
-        with ui.element("div").classes("tk-rail w-full"):
-            with ui.element("div").classes("tk-rail-head"):
-                self.rail_title = ui.label("").classes("tk-step-title")
-                self.rail_note = ui.label("").classes("tk-label")
-            self.kpi_box = ui.element("div").classes("tk-kpi-grid w-full")
-            self.progress = ui.row().classes("w-full items-center gap-2 no-wrap pt-2").props('role="status"')
-            with self.progress:
-                ui.label("Rechnet neu").classes("tk-label")
-                with ui.element("div").classes("tk-progress flex-1"):
-                    ui.element("div")
-            self.progress.set_visibility(False)
+    def _hero(self) -> None:
+        with ui.element("div").classes("tk-hero tk-reveal"):
+            with ui.element("div"):
+                with ui.element("h1").classes("tk-hero-title"):
+                    self.hero_title = ui.label("").classes("inline")
+                    ui.label(".").classes("inline tk-dot")
+                self.hero_sub = ui.label("").classes("tk-hero-sub")
+            self.status_box = scenario_controls(self.s, self.set_scenario)
+        self.kpi_box = ui.element("div").classes("tk-stats tk-reveal").style("--delay:80ms")
+        self.progress = ui.row().classes("w-full items-center gap-3 no-wrap pt-3").props('role="status"')
+        with self.progress:
+            ui.label("Rechnet neu").classes("tk-label")
+            with ui.element("div").classes("tk-progress flex-1"):
+                ui.element("div")
+        self.progress.set_visibility(False)
 
-    def _input_card(self) -> None:
-        with ui.element("div").classes("tk-card w-full flex flex-col gap-3").props('id="schritt-1"'):
-            self.count_label = components.step_header(1, "Sendungen erfassen")
+    def _input_section(self) -> None:
+        self.count_label, body = components.section(
+            1, "Sendungen", "Sendungen erfassen", "Einzeln im Formular, als Tabelle aus Excel oder in Worten "
+            "über den Assistenten.", tone="mint", anchor="schritt-1", delay=120,
+        )  # fmt: skip
+        with body:
             with ui.tabs().props("dense no-caps align=left").classes("w-full") as tabs:
                 t_form = ui.tab("Formular")
                 t_paste = ui.tab("Einfügen / CSV")
                 self.t_agent = ui.tab("Freitext")
-            with ui.tab_panels(tabs, value=t_form).classes("w-full").props("animated=false"):
-                with ui.tab_panel(t_form).classes("p-0"):
+            with ui.tab_panels(tabs, value=t_form).classes("w-full bg-transparent").props("animated=false"):
+                with ui.tab_panel(t_form):
                     self._form()
-                with ui.tab_panel(t_paste).classes("p-0"):
+                with ui.tab_panel(t_paste):
                     self._paste()
-                with ui.tab_panel(self.t_agent).classes("p-0"):
+                with ui.tab_panel(self.t_agent):
                     self.agent_box = ui.column().classes("w-full gap-2")
                     self.build_agent_input(self.agent_box)
             self.input_msg = ui.column().classes("w-full")
             ui.label("Datenbestand").classes("tk-group")
-            with ui.row().classes("gap-2 flex-wrap items-center"):
+            with ui.row().classes("gap-4 flex-wrap items-center"):
                 ui.button("Beispieldaten laden", on_click=self.load_sample).props(
                     "outline no-caps color=primary"
                 )
                 ui.button("Alle entfernen", on_click=self.clear_all).props("flat no-caps color=negative")
-            self.export_box = ui.row().classes("gap-2 flex-wrap")
-            self.build_export(self.export_box)
+                self.export_box = ui.row().classes("gap-2 flex-wrap")
+                self.build_export(self.export_box)
 
     def _form(self) -> None:
         p = self.s.params
-        with ui.column().classes("w-full gap-3 pt-2"):
+        with ui.element("div").classes("tk-grid-2"):
             with ui.element("div").classes("tk-field"):
                 ui.label("Datum (Pflicht)").classes("tk-field-label")
                 self.f_datum = (
@@ -145,43 +153,42 @@ class Page:
                     .classes("w-full")
                 )
                 ui.label("JJJJ-MM-TT oder TT.MM.JJJJ").classes("tk-help")
-            with ui.element("div").classes("grid gap-3 w-full").style("grid-template-columns:1fr 1fr"):
-                with ui.element("div").classes("tk-field"):
-                    ui.label("Start (Pflicht)").classes("tk-field-label")
-                    self.f_start = ui.input().props('dense outlined aria-label="Start"').classes("w-full")
-                    self.f_start_hint = ui.label("PLZ fünfstellig oder Ortsname").classes("tk-help")
-                with ui.element("div").classes("tk-field"):
-                    ui.label("Ziel (Pflicht)").classes("tk-field-label")
-                    self.f_ziel = ui.input().props('dense outlined aria-label="Ziel"').classes("w-full")
-                    self.f_ziel_hint = ui.label("PLZ fünfstellig oder Ortsname").classes("tk-help")
             _, self.f_kg, _ = components.number_field(
                 "Gewicht (Pflicht)", "kg", "Bruttogewicht der Sendung.", minimum=0
             )
-            with (
-                ui.expansion("Optionale Angaben").props("dense").classes("w-full"),
-                ui.column().classes("w-full gap-3 pt-2"),
-            ):
-                with ui.element("div").classes("tk-field"):
-                    ui.label("Sendungs-ID").classes("tk-field-label")
-                    self.f_id = ui.input().props('dense outlined aria-label="Sendungs-ID"').classes("w-full")
-                _, self.f_km, _ = components.number_field(
-                    "Entfernung",
-                    "km",
-                    "Leer: Luftlinie × I01. Ein Wert hier überschreibt die Distanz.",
-                    minimum=0,
-                )
-                _, self.f_pal, _ = components.number_field(
-                        "Paletten", "Pal.",
-                        f"Leer: Gewicht / {_num(p.a14_kg_je_palette)} kg je Palette (A14).", minimum=0,
-                    )  # fmt: skip
-                _, self.f_fr, _ = components.number_field(
-                    "Frachtkosten", "€", "Leer: Modellkosten × C04.", minimum=0
-                )
-            self.f_start.on("blur", lambda: self._hint(self.f_start, self.f_start_hint))
-            self.f_ziel.on("blur", lambda: self._hint(self.f_ziel, self.f_ziel_hint))
-            ui.button("Sendung hinzufügen", on_click=self.add_from_form).props(
-                "unelevated no-caps color=primary"
-            ).classes("w-full")
+            with ui.element("div").classes("tk-field"):
+                ui.label("Start (Pflicht)").classes("tk-field-label")
+                self.f_start = ui.input().props('dense outlined aria-label="Start"').classes("w-full")
+                self.f_start_hint = ui.label("PLZ fünfstellig oder Ortsname").classes("tk-help")
+            with ui.element("div").classes("tk-field"):
+                ui.label("Ziel (Pflicht)").classes("tk-field-label")
+                self.f_ziel = ui.input().props('dense outlined aria-label="Ziel"').classes("w-full")
+                self.f_ziel_hint = ui.label("PLZ fünfstellig oder Ortsname").classes("tk-help")
+        with (
+            ui.expansion("Optionale Angaben").props("dense").classes("w-full pt-2"),
+            ui.element("div").classes("tk-grid-2 pt-2"),
+        ):
+            with ui.element("div").classes("tk-field"):
+                ui.label("Sendungs-ID").classes("tk-field-label")
+                self.f_id = ui.input().props('dense outlined aria-label="Sendungs-ID"').classes("w-full")
+            _, self.f_km, _ = components.number_field(
+                "Entfernung",
+                "km",
+                "Leer: Luftlinie × I01. Ein Wert hier überschreibt die Distanz.",
+                minimum=0,
+            )
+            _, self.f_pal, _ = components.number_field(
+                "Paletten", "Pal.",
+                f"Leer: Gewicht / {_num(p.a14_kg_je_palette)} kg je Palette (A14).", minimum=0,
+            )  # fmt: skip
+            _, self.f_fr, _ = components.number_field(
+                "Frachtkosten", "€", "Leer: Modellkosten × C04.", minimum=0
+            )
+        self.f_start.on("blur", lambda: self._hint(self.f_start, self.f_start_hint))
+        self.f_ziel.on("blur", lambda: self._hint(self.f_ziel, self.f_ziel_hint))
+        ui.button("Sendung hinzufügen", on_click=self.add_from_form).props(
+            "unelevated no-caps color=primary"
+        ).classes("tk-cta self-start")
 
     def _hint(self, field: ui.input, hint: ui.label) -> None:
         text = (field.value or "").strip()
@@ -206,38 +213,46 @@ class Page:
             self.paste_mode = ui.toggle({"append": "Anhängen", "replace": "Ersetzen"}, value="append").props(
                 "dense no-caps unelevated toggle-color=primary"
             )
-            ui.button("Übernehmen", on_click=self.add_from_paste).props("unelevated no-caps color=primary")
+            ui.button("Übernehmen", on_click=self.add_from_paste).props(
+                "unelevated no-caps color=primary"
+            ).classes("tk-cta self-start")
             ui.upload(label="CSV oder XLSX hochladen", auto_upload=True, on_upload=self.upload).props(
                 'accept=".csv,.txt,.xlsx" flat bordered'
             ).classes("w-full")
 
-    def _param_card(self) -> None:
+    def _param_section(self) -> None:
         base = self.s.base.model.params
         current = self.s.params
-        with ui.element("div").classes("tk-card w-full flex flex-col gap-3").props('id="schritt-2"'):
-            self.param_status = components.step_header(2, "Parameter anpassen", tone="lavender")
-            with ui.row().classes("w-full items-center justify-between no-wrap"):
-                ui.label("Jede Änderung rechnet sofort neu. Quelle je Wert: Mauszeiger auf die Beschriftung.").classes(
-                    "tk-help"
-                )
-                ui.button("Zurücksetzen", on_click=self.reset_params).props("flat dense no-caps").classes(
-                    "tk-link"
-                )
+        self.param_status, body = components.section(
+            2, "Parameter", "Parameter anpassen", "Standardwerte aus Assumptions. Jede Änderung rechnet sofort "
+            "neu; Quelle je Wert über den Mauszeiger auf der Beschriftung.", tone="lavender", anchor="schritt-2",
+            delay=180,
+        )  # fmt: skip
+        with body:
+            ui.button("Zurücksetzen", on_click=self.reset_params).props("flat dense no-caps").classes(
+                "tk-link self-start"
+            )
             for group, fields in PARAM_GROUPS:
                 ui.label(group).classes("tk-group")
-                for field, step, help_text in fields:
-                    meta = base.meta[field]
-                    unit = fmt.display_unit(meta.unit)
-                    box, num, hint = components.number_field(
-                        meta.name, unit, "", self._tooltip(field),
-                        value=fmt.to_display(getattr(current, field), meta.unit), step=step,
-                        minimum=MIN_VALUE.get(field, 0.0), maximum=100.0 if unit == "%" else None,
-                        on_change=lambda e, f=field: self.set_param(f, e.value), field_id=meta.id,
-                    )  # fmt: skip
-                    num.props("debounce=400")
-                    self.param_fields[field] = (box, num, hint, help_text.format(a06=_num(base.a06_max_tage)))
-                if group.startswith("Bahn"):
-                    self._traction()
+                with ui.element("div").classes("tk-grid-3"):
+                    for field, step, help_text in fields:
+                        meta = base.meta[field]
+                        unit = fmt.display_unit(meta.unit)
+                        box, num, hint = components.number_field(
+                            meta.name, unit, "", self._tooltip(field),
+                            value=fmt.to_display(getattr(current, field), meta.unit), step=step,
+                            minimum=MIN_VALUE.get(field, 0.0), maximum=100.0 if unit == "%" else None,
+                            on_change=lambda e, f=field: self.set_param(f, e.value), field_id=meta.id,
+                        )  # fmt: skip
+                        num.props("debounce=400")
+                        self.param_fields[field] = (
+                            box,
+                            num,
+                            hint,
+                            help_text.format(a06=_num(base.a06_max_tage)),
+                        )
+                    if group.startswith("Bahn"):
+                        self._traction()
                 if group == "Distanz":
                     self._road()
             self.param_note = ui.label("").classes("tk-note")
@@ -501,49 +516,65 @@ class Page:
 
     def _kpis(self, r: Result) -> None:
         plan = self.s.scenario != "Ist"
-        self.rail_title.set_text(f"Ergebnis {SCENARIO_LABEL[self.s.scenario]}")
-        self.rail_note.set_text(
-            "Veränderung gegen Ist (Einzelversand)" if plan else "Vergleichsbasis, Szenario oben wählen"
-        )
+        k, ist = r.kpis[self.s.scenario], r.kpis["Ist"]
+        if r.n_valid == 0:
+            self.hero_title.set_text("Noch keine Sendungen")
+            self.hero_sub.set_text(
+                "Sendungen erfassen oder Beispieldaten laden, dann rechnet die Seite sofort."
+            )
+        elif plan:
+            self.hero_title.set_text(f"{fmt.percent(k.delta_co2_fzgkm)} CO₂e")
+            self.hero_sub.set_text(
+                f"{SCENARIO_LABEL[self.s.scenario]} gegen Einzelversand: {fmt.with_unit(k.co2_fzgkm_kg, 'kg')} statt "
+                f"{fmt.with_unit(ist.co2_fzgkm_kg, 'kg')}, Kosten {fmt.percent(k.delta_kosten)}, "
+                f"Servicegrad {fmt.percent(k.servicegrad, 1, False)}."
+            )
+        else:
+            self.hero_title.set_text(f"{fmt.with_unit(ist.co2_fzgkm_kg, 'kg')} CO₂e")
+            self.hero_sub.set_text(
+                f"Ist: {fmt.number(r.n_valid)} Sendungen einzeln gefahren. M2 oder M3 wählen für den Vergleich."
+            )
+        nav_kpis(self.nav_kpi_box, r, self.s.scenario)
         self.kpi_box.clear()
         with self.kpi_box:
             if r.n_valid == 0:
-                components.empty_state("Keine gültigen Sendungen.", "Beispieldaten laden", self.load_sample)
                 return
-            k, ist = r.kpis[self.s.scenario], r.kpis["Ist"]
             tiles = [
-                ("CO₂e (Fzg-km)", k.co2_fzgkm_kg, k.delta_co2_fzgkm, "kg", "co2_fzgkm", ist.co2_fzgkm_kg, "mint"),
+                (
+                    "CO₂e (Fzg-km)",
+                    k.co2_fzgkm_kg,
+                    k.delta_co2_fzgkm,
+                    "kg",
+                    "co2_fzgkm",
+                    ist.co2_fzgkm_kg,
+                    "mint",
+                ),
                 ("Kosten", k.kosten_eur, k.delta_kosten, "€", "kosten", ist.kosten_eur, "sky"),
                 ("Fahrzeug-km (Lkw)", k.lkw_km, k.delta_lkw_km, "km", "lkw_km", ist.lkw_km, "peach"),
             ]
             for label, value, delta, unit, key, base, tone in tiles:
-                components.kpi_tile(
-                    label, value, base if plan else None, delta if plan else None, unit,
-                    on_explain=functools.partial(self.open_explain, key), tone=tone,
+                components.kpi_stat(
+                    label, fmt.with_unit(value, unit), delta if plan else None,
+                    f"Ist: {fmt.with_unit(base, unit)}" if plan else None, tone,
+                    on_explain=functools.partial(self.open_explain, key),
                 )  # fmt: skip
-            components.kpi_tile(
-                "Servicegrad", k.servicegrad, None, None, "%", tone="lavender",
-                on_explain=lambda: self.open_explain("servicegrad"),
-                extra=f"Anteil Bahn: {fmt.percent(k.bahn_sendungen / r.n_valid, 1, False)} "
-                f"({fmt.number(k.bahn_sendungen)} Sendungen)",
+            components.kpi_stat(
+                "Servicegrad", fmt.percent(k.servicegrad, 1, False), None,
+                f"Bahn {fmt.percent(k.bahn_sendungen / r.n_valid, 1, False)}, {fmt.number(k.bahn_sendungen)} Sendungen",
+                "lavender", on_explain=lambda: self.open_explain("servicegrad"),
             )  # fmt: skip
 
     def _summary(self, r: Result) -> None:
         self.summary_box.clear()
         passed = sum(1 for c in r.checks if c.status == "OK")
-        with self.summary_box:
+        with self.summary_box, ui.row().classes("items-center gap-4"):
             ui.label(
                 f"{fmt.number(len(r.rows))} Sendungen, {fmt.number(len(r.tours))} Touren, "
-                f"{passed} von {len(r.checks)} Prüfungen bestanden"
-            )
-            ui.button("Zur Analyse", on_click=lambda: ui.navigate.to("/analyse")).props(
-                "outline no-caps color=primary"
+                f"{passed} von {len(r.checks)} Prüfungen bestanden. Tabellen, Szenarienvergleich, "
+                "Erklärungen und Prüfungen auf der Seite Analyse."
             )
             if passed < len(r.checks):
                 ui.link("Offene Prüfungen ansehen", "/analyse?tab=pruefungen").classes("tk-link")
-            ui.label(
-                "Tabellen, Szenarienvergleich, Erklärungen und Prüfungen stehen auf der Seite Analyse."
-            ).classes("tk-label")
 
     def open_explain(self, key: str) -> None:
         r = self.s.result

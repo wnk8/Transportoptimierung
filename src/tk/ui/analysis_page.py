@@ -15,15 +15,15 @@ from tk.scenarios import calculate, parse_change, sensitivity_row, with_changes
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.agent_panel import render_trace
-from tk.ui.layout import SCENARIO_LABEL, footer, header
+from tk.ui.layout import SCENARIO_LABEL, end, nav, nav_kpis, scenario_controls
 from tk.ui.state import Session, reference, snapshot
 from tk.ui.theme import TOKENS, apply_theme, status_chip
 
 PCT_JS = "(v => v.toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 2}).replace('-', '\u2212') + '\u202f%')"
 """Prozent im deutschen Format für ECharts (Dezimalkomma, Minuszeichen, schmales Leerzeichen)."""
 
-M2_BAR = "#8A99AD"
-"""Balkenfarbe M2: gedämpftes Schiefergrau neben dem Akzent für M3 (Beschriftung trägt die Bedeutung)."""
+M2_BAR = "#A79BD6"
+"""Balkenfarbe M2: gedämpftes Lavendel neben dem Akzent für M3 (Beschriftung trägt die Bedeutung)."""
 
 TABS = {
     "sendungen": "Sendungen",
@@ -45,13 +45,28 @@ class AnalysisPage:
 
     def build(self, tab: str | None) -> None:
         apply_theme()
+        self.nav_kpi_box = nav("/analyse")
         with ui.column().classes("tk-page w-full"):
-            self.status_box = header(self.s, "/analyse", self.set_scenario)
-            with ui.element("div").classes("tk-card w-full"):
-                with ui.tabs().props("dense no-caps align=left") as tabs:
-                    handles = {key: ui.tab(key, label) for key, label in TABS.items()}
+            with ui.element("div").classes("tk-hero tk-reveal").style("padding-bottom:24px"):
+                with ui.element("div"):
+                    with ui.element("h1").classes("tk-hero-title"):
+                        ui.label("Analyse").classes("inline")
+                        ui.label(".").classes("inline tk-dot")
+                    ui.label(
+                        "Sendungen, Touren, Szenarienvergleich, Erklärung der Kennzahlen, Prüfungen und "
+                        "Agent-Spur zum aktuellen Stand der Seite Eingabe."
+                    ).classes("tk-hero-sub")
+                self.status_box = scenario_controls(self.s, self.set_scenario)
+            with ui.element("div").classes("w-full tk-reveal").style("--delay:100ms"):
+                with ui.tabs().props("dense no-caps align=left").classes("tk-pilltabs") as tabs:
+                    handles = {
+                        key: ui.tab(key, f"{i:02d}  {label}")
+                        for i, (key, label) in enumerate(TABS.items(), start=1)
+                    }
                 start = handles.get(tab or "", handles["sendungen"])
-                with ui.tab_panels(tabs, value=start).classes("w-full").props("animated=false"):
+                with (
+                    ui.tab_panels(tabs, value=start).classes("w-full bg-transparent").props("animated=false")
+                ):
                     with ui.tab_panel(handles["sendungen"]):
                         self.ship_box = ui.column().classes("w-full gap-2")
                     with ui.tab_panel(handles["touren"]):
@@ -64,7 +79,7 @@ class AnalysisPage:
                         self.check_box = ui.column().classes("w-full gap-2")
                     with ui.tab_panel(handles["agent"]):
                         self.trace_box = ui.column().classes("w-full gap-2")
-            footer(self.s)
+            end(self.s, "/", "Zurück zur Eingabe")
         self.refresh_all()
 
     def set_scenario(self, key: str) -> None:
@@ -78,6 +93,7 @@ class AnalysisPage:
         self.status_box.clear()
         with self.status_box:
             status_chip(r.status)
+        nav_kpis(self.nav_kpi_box, r, self.s.scenario)
         self._shipments_table(r)
         self._tours_table(r)
         self._scenarios(r)
@@ -219,7 +235,7 @@ class AnalysisPage:
 
                 ui.echart({
                     "animation": False,
-                    "textStyle": {"fontFamily": "Inter, system-ui, sans-serif", "color": TOKENS["text"]},
+                    "textStyle": {"fontFamily": "Geist, Inter, system-ui, sans-serif", "color": TOKENS["text"]},
                     "legend": {"top": 0, "left": 0, "itemGap": 16},
                     "grid": {"left": 56, "right": 16, "top": 36, "bottom": 32},
                     "tooltip": {"trigger": "axis", ":valueFormatter": PCT_JS},
