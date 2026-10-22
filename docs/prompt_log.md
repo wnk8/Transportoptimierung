@@ -147,4 +147,4 @@ Weitere Befunde beim Erstellen der Screenshots (22.10.2026):
 - Gemini: Ein Aufruf hing ohne Zeitlimit; jetzt 60 s je Anfrage. Ein Lauf mit vier Modellschritten dauerte in der kostenlosen Stufe bis zu 2 Minuten.
 - Antworten des Modells enthalten Markdown; die Oberfläche zeigt sie jetzt als Markdown, HTML im Modelltext wird maskiert.
 - ECharts-Beschriftungen jetzt im deutschen Zahlenformat.
-Gemessener Straßenfaktor aus 43 Relationen: Σ Straße / Σ Luftlinie = 1,265 (Median 1,255) gegen I01 = 1,22. Beispiel Tour 12: Straßenroute 990,7 km gegen Modell-Tourstrecke 720,1 km (+37,6 %).
+Gemessener Straßenfaktor aus 43 Relationen: Σ Straße / Σ Luftlinie = 1,265 (Median 1,255) gegen I01 = 1,22. Tour 12: Straßenroute 990,7 km gegen Modell-Tourstrecke 720,1 km (+37,6 %).
