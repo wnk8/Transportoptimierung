@@ -345,3 +345,137 @@ def relation_index(result: Result) -> dict[str, list[ShipmentRow]]:
     for r in result.valid_rows:
         out[fold(r.relation or "")].append(r)
     return out
+
+
+@dataclass(slots=True)
+class RouteOption:
+    """Eine Transportvariante für alle Sendungen einer Relation."""
+
+    name: str
+    art: str
+    """``ist``, ``lkw`` (eine Fahrzeugklasse für alle Sendungen), ``bahn``, ``plan``."""
+    fahrten: float
+    lkw_km: float
+    co2_kg: float
+    kosten_eur: float
+    servicegrad: float
+    zusatz_tage: float
+    hinweis: str
+    gewaehlt: bool = False
+
+
+@dataclass(slots=True)
+class RouteOptions:
+    key: str
+    sendungen: int
+    distanz_km: float
+    optionen: list[RouteOption]
+    erklaerung: str
+
+
+def _rail_reason(row: ShipmentRow, params: Assumptions) -> str:
+    assert row.distanz_km is not None and row.kosten_ist is not None and row.kosten_bahn is not None
+    if row.distanz_km <= params.a01_bahn_grenze_km:
+        return "Distanz bis A01"
+    if params.c03_laufzeit_ok != 1:
+        return "Laufzeitregel C03"
+    if row.kosten_bahn > row.kosten_ist * (1 + params.a08_kosten_tol):
+        return "Kosten über A08"
+    return ""
+
+
+def route_options(result: Result, key: str, params: Assumptions) -> RouteOptions:
+    r"""Alle Varianten einer Relation: Ist, jede Lkw-Klasse, Bahn, Plan M2 und M3.
+
+    Lkw-Klasse :math:`v`: je Sendung :math:`n_v = \max(1, \lceil p/p_v\rceil, \lceil kg/kg_v\rceil)`
+    Fahrzeuge über die Sendungsdistanz (wie :func:`vehicle_options`), summiert über alle
+    Sendungen; Kosten als Modellkosten :math:`km \cdot k_v \cdot C_{04}`. Bahn: jede Sendung
+    über die Bahn mit Vor- und Nachlauf (K2.12, Kosten :math:`K(1 + A_{07})`), auch wenn die
+    Bahnprüfung (J2.4) sie ablehnt; der Grund steht im Hinweis. Plan M2 und M3 aus
+    :func:`relation_detail`. Systemgrenze: Sendungen der Relation, Luftlinie mal I01 oder
+    eingegebene Distanz, keine Rückfahrten.
+    """
+    rows = relation_rows(result, key)
+    n = len(rows)
+    ist = relation_detail(result, key, "Ist").ist
+    note = "Excel, Rangregel K2.5 je Sendung"
+    out = [
+        RouteOption(
+            "Ist (Einzelversand)", "ist", ist.fahrten, ist.lkw_km, ist.co2_kg, ist.kosten_eur, 1.0, 0.0, note
+        )
+    ]
+    classes = [
+        [0.0, 0.0, 0.0, 0.0, 0, 0] for _ in params.vehicles
+    ]  # Fahrten, km, CO2e, Kosten, gewählt, mehrfach
+    for row in rows:
+        assert row.paletten is not None and row.distanz_km is not None
+        kg = to_number(row.shipment.gewicht_kg)
+        for acc, opt in zip(
+            classes, vehicle_options(kg, row.paletten, row.distanz_km, params, result.c04), strict=True
+        ):
+            acc[0] += opt.anzahl
+            acc[1] += opt.lkw_km
+            acc[2] += opt.co2_kg
+            acc[3] += opt.kosten_eur
+            acc[4] += int(opt.gewaehlt)
+            acc[5] += int(opt.anzahl > 1)
+    for v, (trips, km, co2, cost, chosen, multi) in zip(params.vehicles, classes, strict=True):
+        parts = [f"im Ist für {int(chosen)} von {n} Sendungen gewählt"]
+        if multi:
+            parts.append(f"{int(multi)} Sendungen brauchen mehrere Fahrzeuge")
+        out.append(RouteOption(f"Alle mit {v.name}", "lkw", trips, km, co2, cost, 1.0, 0.0, "; ".join(parts)))
+    rejected: dict[str, int] = defaultdict(int)
+    for row in rows:
+        reason = _rail_reason(row, params)
+        if reason:
+            rejected[reason] += 1
+    rail_note = (
+        "Bahnprüfung abgelehnt: " + ", ".join(f"{k} ({v} Sendungen)" for k, v in rejected.items())
+        if rejected
+        else "Bahnprüfung für alle Sendungen erfüllt"
+    )
+    out.append(
+        RouteOption(
+            "Alle per Bahn",
+            "bahn",
+            0.0,
+            0.0,
+            math.fsum(
+                emissions.co2_rail(to_number(r.shipment.gewicht_kg), r.distanz_km or 0.0, params)
+                for r in rows
+            ),
+            math.fsum(r.kosten_bahn or 0.0 for r in rows),
+            0.0,
+            params.a05_zusatz_tage,
+            rail_note + "; Lkw nur im Vor- und Nachlauf (A02, im CO₂e enthalten)",
+        )
+    )
+    for scenario in ("M2", "M3"):
+        d = relation_detail(result, key, scenario)
+        out.append(
+            RouteOption(
+                f"Plan {scenario}",
+                "plan",
+                d.plan.fahrten,
+                d.plan.lkw_km,
+                d.plan.co2_kg,
+                d.plan.kosten_eur,
+                1 - d.bahn / n if n else 1.0,
+                params.a05_zusatz_tage if d.bahn else 0.0,
+                d.zusammenfassung,
+                gewaehlt=True,
+            )
+        )
+    return RouteOptions(
+        key=key,
+        sendungen=n,
+        distanz_km=statistics.fmean(r.distanz_km or 0.0 for r in rows) if rows else 0.0,
+        optionen=out,
+        erklaerung=(
+            "Lkw-Klassen: je Sendung n = max(1, ⌈Paletten/Kapazität⌉, ⌈kg/Nutzlast⌉) Fahrzeuge, Kosten "
+            "Modell × C04. Bahn: CO₂e nach K2.8 (Vor- und Nachlauf A02 mit Lkw, Hauptlauf Bahnfaktor C01), "
+            "Kosten Ist × (1 + A07), Zusatzlaufzeit A05. Plan M2 und M3 aus der Excel-Logik. "
+            + COMPARISON_NOTE
+            + "."
+        ),
+    )

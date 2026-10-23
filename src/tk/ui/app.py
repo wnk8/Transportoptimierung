@@ -511,12 +511,12 @@ async def index() -> None:
 
 
 @ui.page("/ergebnis")
-async def ergebnis(tab: str | None = None, tour: int | None = None) -> None:
+async def ergebnis(tab: str | None = None, tour: int | None = None, routen: str | None = None) -> None:
     base = base_data()
     if base is None:
         missing_workbook()
         return
-    ResultsPage(session_for(app.storage.browser["id"], base)).build(tab, tour)
+    ResultsPage(session_for(app.storage.browser["id"], base)).build(tab, tour, routen)
 
 
 @ui.page("/info")

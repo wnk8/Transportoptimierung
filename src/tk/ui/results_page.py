@@ -17,6 +17,7 @@ from tk.ui import format as fmt
 from tk.ui.layout import SCENARIO_LABEL, end, hero, nav, scenario_controls
 from tk.ui.map_area import MapArea
 from tk.ui.map_view import RELATION_EVENT
+from tk.ui.route_compare import keys_from_param
 from tk.ui.state import Session
 from tk.ui.theme import TOKENS, apply_theme, status_chip
 
@@ -36,7 +37,7 @@ class ResultsPage:
     def __init__(self, session: Session) -> None:
         self.s = session
 
-    def build(self, tab: str | None, tour: int | None) -> None:
+    def build(self, tab: str | None, tour: int | None, routen: str | None = None) -> None:
         apply_theme()
         nav("/ergebnis")
         r = self.s.result
@@ -69,6 +70,7 @@ class ResultsPage:
                         self.scen_box = ui.column().classes("w-full gap-3")
             end(self.s)
         ui.on(RELATION_EVENT, lambda e: self.map.select_relation(str(e.args)))
+        self.map.routes.keys = keys_from_param(routen, r)
         self.refresh_all()
         ui.timer(0.5, self.map.probe_tiles, once=True)
         if tour is not None and any(t.tour_nr == tour for t in r.tours):
@@ -82,6 +84,11 @@ class ResultsPage:
         """Tour in der Karte zeigen (Tab Karte, darin Touren)."""
         self.panels.set_value(self.handles["karte"])
         self.map.open_tour(tour_nr)
+
+    def set_route_param(self, value: str) -> None:
+        """Routenauswahl in der Adresse halten (teilen, neu laden), ohne die Seite neu zu laden."""
+        query = "tab=karte" + (f"&routen={value}" if value else "")
+        ui.navigate.history.replace(f"/ergebnis?{query}")
 
     def refresh_road_toggle(self) -> None:
         """Von der Straßenansicht nach dem Abruf neuer Routen aufgerufen; der Schalter liegt auf Rechnen."""

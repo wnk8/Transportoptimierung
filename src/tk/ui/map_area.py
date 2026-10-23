@@ -39,6 +39,7 @@ from tk.routing import (
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.map_view import MapView, bind_layer, relations, view_for
+from tk.ui.route_compare import RouteCompare
 from tk.ui.theme import MAP_LINES, TOKENS
 
 _cache: RouteCache | None = None
@@ -555,6 +556,8 @@ class MapArea:
             with ui.tab_panel(self.t_tour).classes("p-0 pt-2"):
                 self.tours = TourView(result, page)
         ui.separator().classes("my-2")
+        self.routes = RouteCompare(self.compare.set_highlight, page.set_route_param)
+        ui.separator().classes("my-2")
         self.detail = DetailPanel(self.open_tour)
         self._selected: str | None = None
 
@@ -575,6 +578,7 @@ class MapArea:
     def update(self, result: Result, scenario: str) -> None:
         self.result, self.scenario = result, scenario
         self.compare.update(result, scenario)
+        self.routes.update(result, scenario, self.page.s.params)
         self.road.update(result)
         self.tours.update(result)
         if self._selected:
@@ -582,6 +586,7 @@ class MapArea:
 
     def select_relation(self, key: str) -> None:
         self._selected = key
+        self.routes.add(key)
         if any(fold(r.relation or "") == fold(key) for r in self.result.valid_rows):
             self.detail.show(self.result, key, self.scenario, self.page.s.params)
 
