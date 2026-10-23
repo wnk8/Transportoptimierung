@@ -59,6 +59,7 @@ def test_route_colors_at_least_3(color: str) -> None:
 def test_documented_values() -> None:
     """Die in 7.2 genannten Werte sind gerundet korrekt."""
     assert round(contrast(TOKENS["text"], TOKENS["surface"]), 1) == 14.8
+    assert round(contrast(TOKENS["text-soft"], TOKENS["surface"]), 1) == 9.6
     assert round(contrast(TOKENS["muted"], TOKENS["surface"]), 1) == 6.3
     assert round(contrast(TOKENS["accent"], TOKENS["surface"]), 1) == 6.0
     assert round(contrast(TOKENS["base"], TOKENS["surface"]), 1) == 5.9

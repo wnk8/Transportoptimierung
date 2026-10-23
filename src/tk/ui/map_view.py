@@ -395,9 +395,12 @@ def svg_network(
     kx = math.cos(math.radians((lat_min + lat_max) / 2))
     span = max((lon_max - lon_min) * kx, lat_max - lat_min) or 1.0
     scale = min(width, height) - 2 * pad
+    # Center the drawing in the free axis instead of pinning it to the top left corner.
+    off_x = (width - (lon_max - lon_min) * kx / span * scale) / 2
+    off_y = (height - (lat_max - lat_min) / span * scale) / 2
 
     def xy(lat: float, lon: float) -> tuple[float, float]:
-        return pad + (lon - lon_min) * kx / span * scale, pad + (lat_max - lat) / span * scale
+        return off_x + (lon - lon_min) * kx / span * scale, off_y + (lat_max - lat) / span * scale
 
     parts = [
         f'<svg viewBox="0 0 {width} {height}" width="100%" role="img" aria-label="Knoten-Kanten-Ansicht">'
@@ -551,7 +554,9 @@ class MapView:
                 self.title_diff = ui.label("Differenz").classes("tk-label")
                 with ui.element("div").classes("w-full") as self.box_diff:
                     self.map_diff = (
-                        ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:520px")
+                        ui.leaflet(center=center, zoom=zoom)
+                        .classes("w-full")
+                        .style("height:clamp(480px, 64vh, 760px)")
                     )
                 self.hint_diff = ui.label(
                     "Ist gewählt. M2 oder M3 wählen, um die Differenz zu sehen."
@@ -563,7 +568,9 @@ class MapView:
                     # and drops the ones Leaflet added itself (leaflet-container), which hides tiles.
                     with ui.element("div").classes("w-full") as self.box_left:
                         self.map_left = (
-                            ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:420px")
+                            ui.leaflet(center=center, zoom=zoom)
+                            .classes("w-full")
+                            .style("height:clamp(420px, 58vh, 680px)")
                         )
                     self.svg_left = ui.html("").classes("w-full")
                 with ui.column().classes("flex-1 gap-1 min-w-0"):
@@ -572,7 +579,9 @@ class MapView:
                     # and drops the ones Leaflet added itself (leaflet-container), which hides tiles.
                     with ui.element("div").classes("w-full") as self.box_right:
                         self.map_right = (
-                            ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:420px")
+                            ui.leaflet(center=center, zoom=zoom)
+                            .classes("w-full")
+                            .style("height:clamp(420px, 58vh, 680px)")
                         )
                     self.svg_right = ui.html("").classes("w-full")
                     self.hint_right = ui.label(
