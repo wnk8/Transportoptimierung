@@ -1,7 +1,8 @@
 """Design-System (Gesamtpaket Abschnitt 7): Tokens, Schrift, Komponentenklassen, Bewegung.
 
-Minimaler Website-Look: warmes Off-White, Geist, abgestimmte Pastelltöne, Haarlinien statt
-Karten. Dezente Einblend- und Hover-Animationen; ``prefers-reduced-motion`` schaltet sie ab.
+Heller Website-Look über die volle Breite: reines Weiß, Geist, abgestimmte Pastelltöne, Haarlinien
+statt Karten, feine Abstufung der Schrift (Überschrift, Fließtext, Beschriftung). Dezente Einblend-,
+Hover- und Druckanimationen; ``prefers-reduced-motion`` schaltet sie ab.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ TOKENS: dict[str, str] = {
     "line": "#ECECEA",
     "line-strong": "#D9D9D6",
     "text": "#1F2933",
+    "text-soft": "#3A4652",
     "muted": "#56616E",
     "accent": "#1F6F5F",
     "accent-tint": "#E3EEE7",
@@ -46,12 +48,23 @@ MAP_LINES: dict[str, tuple[str, str]] = {
 }
 """Kartenlinien: Farbe und Strichmuster (Muster zusätzlich zur Farbe)."""
 
+START_COLORS: tuple[str, ...] = ("#1F6F8B", "#9A4F2F", "#5B4BB0", "#2D8470", "#8A5A00")
+"""Linienfarbe je Startort (Reihenfolge der Startorte alphabetisch); Szenario über das Muster."""
+
+SELECTION_COLORS: tuple[str, ...] = (
+    "#0072B2", "#C24A00", "#00795A", "#A8327A", "#6E4BB0", "#8A6A00", "#B42318", "#1F6F8B",
+)  # fmt: skip
+"""Ausgewählte Routen: kategoriale Farben (Okabe-Ito, für Kontrast abgedunkelt), überall gleich."""
+
 MAP_BACKGROUND = "#E5E5E5"
 """Bezugsfläche für den Linienkontrast: helle, entsättigte OSM-Kachel nach dem Filter in 7.3."""
 
 TEXT_PAIRS: list[tuple[str, str]] = [
     ("text", "bg"),
     ("text", "surface"),
+    ("text-soft", "bg"),
+    ("text-soft", "canvas"),
+    ("text-soft", "accent-tint"),
     ("muted", "surface"),
     ("muted", "bg"),
     ("text", "canvas"),
@@ -117,6 +130,7 @@ CSS = """
   --font: Geist, Inter, system-ui, sans-serif;
   --serif: "Instrument Serif", Georgia, serif;
   --shadow-sm: 0 1px 2px rgba(31, 41, 51, 0.06);
+  --gutter: clamp(16px, 4vw, 72px);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 %(tones)s
@@ -125,7 +139,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   -webkit-font-smoothing: antialiased; font-feature-settings: "ss01"; }
 .q-field, .q-btn, .q-tab, .q-table, .q-item, .q-chip, .q-menu, .q-tooltip { font-family: var(--font); }
 .nicegui-content { padding: 0; }
-.tk-page { max-width: 1280px; margin: 0 auto; padding: 0 32px 48px; gap: 0; }
+.tk-page { width: 100%%; box-sizing: border-box; padding: 0 var(--gutter) 48px; gap: 0; }
+.tk-prose { color: var(--text-soft); max-width: 68ch; }
 
 /* ---------- Typografie ---------- */
 .tk-title { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
@@ -146,25 +161,45 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .tk-ist { color: var(--base); }
 
 /* ---------- Navigation ---------- */
-.tk-nav { position: sticky; top: 0; z-index: 1100; display: flex; align-items: center; gap: 24px; width: 100%%;
-  height: 72px; box-sizing: border-box; padding: 0 max(32px, calc((100%% - 1280px) / 2 + 32px));
-  background: var(--bg); }
-.tk-wordmark { font-size: 20px; font-weight: 700; letter-spacing: -0.04em; text-decoration: none; color: var(--text); }
-.tk-pagenav { display: flex; gap: 28px; margin-left: auto; }
+.tk-nav { position: sticky; top: 0; z-index: 1100; display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: 24px; width: 100%%; height: 72px; box-sizing: border-box; padding: 0 var(--gutter);
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid transparent; transition: border-color 250ms var(--ease); }
+.tk-nav.is-scrolled { border-bottom-color: var(--line); }
+.tk-brand { display: inline-flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--text);
+  justify-self: start; }
+.tk-wordmark { font-size: 20px; font-weight: 700; letter-spacing: -0.04em; }
+.tk-brand-name { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-soft); }
+.tk-pagenav { display: flex; gap: 32px; justify-self: center; }
 .tk-pagenav a { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; padding: 4px 0;
   background-image: linear-gradient(currentColor, currentColor); background-size: 0%% 1px;
   background-position: 0 100%%; background-repeat: no-repeat;
   transition: color 200ms var(--ease), background-size 250ms var(--ease); }
 .tk-pagenav a:hover { color: var(--text); background-size: 100%% 1px; }
 .tk-pagenav a[aria-current="page"] { color: var(--text); background-size: 100%% 1px; }
+.tk-nav-cta { justify-self: end; }
+
+/* ---------- Schrittleiste ---------- */
+.tk-steps { display: flex; align-items: center; gap: 8px; width: 100%%; padding: 20px 0 0; flex-wrap: wrap; }
+.tk-step { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px;
+  color: var(--muted); font-size: 13px; font-weight: 500; text-decoration: none;
+  transition: background-color 200ms var(--ease), color 200ms var(--ease); }
+.tk-step:hover { background: var(--canvas); color: var(--text); }
+.tk-step-no { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 999px;
+  border: 1px solid var(--line-strong); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tk-step-meta { color: var(--muted); font-weight: 400; }
+.tk-step[aria-current="step"] { color: var(--text); }
+.tk-step[aria-current="step"] .tk-step-no { background: var(--text); border-color: var(--text); color: var(--surface); }
+.tk-step.is-done .tk-step-no { background: var(--accent-tint); border-color: var(--accent-tint); color: var(--accent); }
+.tk-step-sep { width: 24px; height: 1px; background: var(--line-strong); }
 
 /* ---------- Hero ---------- */
 .tk-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end;
-  padding: 96px 0 56px; width: 100%%; }
+  padding: 64px 0 48px; width: 100%%; }
 .tk-hero-kicker { margin-bottom: 20px; }
 .tk-hero-title { font-size: clamp(48px, 6.4vw, 88px); font-weight: 500; line-height: 1; letter-spacing: -0.045em;
   margin: 0; }
-.tk-hero-sub { color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 520px; margin-top: 24px; }
+.tk-hero-sub { color: var(--text-soft); font-size: 17px; line-height: 1.55; max-width: 560px; margin-top: 24px; }
 .tk-hero-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
 
 /* ---------- Kennzahlen ---------- */
@@ -205,7 +240,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   align-items: start; }
 
 /* ---------- Schwebende Leiste (Rechnen) ---------- */
-.tk-dock { position: fixed; left: 50%%; bottom: 24px; transform: translateX(-50%%); z-index: 1200;
+@media (min-width: 1100px) {
+  .tk-has-summary .tk-dock { display: none; }
+  .tk-has-summary .tk-page-dock { padding-bottom: 48px; }
+}
+/* Centered via left/right/margin: the rise animation owns transform. */
+.tk-dock { position: fixed; left: 0; right: 0; margin: 0 auto; bottom: 24px; z-index: 1200;
   display: flex; align-items: center; gap: 20px; padding: 8px 8px 8px 24px; border-radius: 999px;
   background: var(--surface); border: 1px solid var(--line);
   box-shadow: 0 1px 2px rgba(31, 41, 51, 0.06), 0 12px 32px rgba(31, 41, 51, 0.10);
@@ -215,6 +255,84 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 .tk-dock .q-btn { flex-shrink: 0; white-space: nowrap; }
 .tk-dock-info .tk-sep { color: var(--line-strong); }
 .tk-page-dock { padding-bottom: 140px; }
+
+/* ---------- Rechnen: Arbeitsbereich und Zusammenfassung ---------- */
+.tk-work { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 48px; width: 100%%;
+  align-items: start; }
+.tk-work-main { min-width: 0; }
+.tk-summary { position: sticky; top: 96px; margin-top: 48px; display: flex; flex-direction: column; gap: 16px;
+  padding: 24px; border-radius: 12px; background: var(--canvas); }
+.tk-summary-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px;
+  color: var(--text-soft); }
+.tk-summary-row b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tk-summary-big { font-size: 34px; font-weight: 600; letter-spacing: -0.035em; line-height: 1.05;
+  font-variant-numeric: tabular-nums; color: var(--text); }
+.tk-summary .q-btn { width: 100%%; }
+.tk-summary hr { border: 0; border-top: 1px solid var(--line-strong); margin: 0; width: 100%%; }
+.tk-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px;
+  border: 1px dashed var(--line-strong); border-radius: 12px; }
+
+/* ---------- Ergebnis: Werkzeugleiste ---------- */
+.tk-toolbar { position: sticky; top: 72px; z-index: 1000; display: flex; align-items: center; gap: 16px;
+  flex-wrap: wrap; width: 100%%; padding: 12px 0; background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--line); }
+.tk-toolbar-end { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Info: Dokumentationslayout ---------- */
+.tk-docs { display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 48px; width: 100%%;
+  align-items: start; }
+.tk-docs .q-tabs--vertical { position: sticky; top: 96px; border: 0; border-left: 1px solid var(--line); height: auto; }
+.tk-docs .q-tabs--vertical .q-tab--active { color: var(--text); }
+.tk-docs .q-tabs--vertical .q-tab--active .q-tab__label { font-weight: 600; }
+.tk-docs .q-tabs--vertical .q-tab:hover { color: var(--text); }
+.tk-docs .q-tabs--vertical .q-tab { justify-content: flex-start; padding: 0 16px; min-height: 40px; }
+.tk-docs .q-tabs--vertical .q-tab__content { justify-content: flex-start; }
+.tk-docs .q-tabs--vertical .q-tab__indicator { width: 1.5px; left: -1px; right: auto; background: var(--text); }
+.tk-docs .q-tab-panel { padding-top: 0; }
+
+/* ---------- Landing Page ---------- */
+.tk-land-hero { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 64px; align-items: center;
+  width: 100%%; padding: 72px 0 64px; }
+.tk-land-title { font-size: clamp(48px, 5.2vw, 104px); font-weight: 500; line-height: 0.98; letter-spacing: -0.05em;
+  margin: 0; color: var(--text); }
+.tk-land-sub { color: var(--text-soft); font-size: 19px; line-height: 1.55; max-width: 560px; margin-top: 28px; }
+.tk-land-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 36px; }
+.tk-land-note { color: var(--muted); font-size: 13px; margin-top: 16px; }
+.tk-land-visual { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.tk-land-visual-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.tk-land-svg { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--surface); }
+.tk-land-svg svg { display: block; }
+.tk-band { width: 100%%; padding: 72px 0; border-top: 1px solid var(--line); }
+.tk-band-head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 32px; margin-bottom: 40px; }
+.tk-band-head > :first-child { grid-column: span 4; }
+.tk-band-head > :last-child { grid-column: 6 / -1; }
+.tk-band-title { font-size: clamp(30px, 3.2vw, 48px); font-weight: 500; letter-spacing: -0.04em; line-height: 1.05;
+  margin: 0; color: var(--text); }
+.tk-band-lead { color: var(--text-soft); font-size: 17px; line-height: 1.6; max-width: 68ch; }
+.tk-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 32px; row-gap: 48px; width: 100%%; }
+.tk-col { display: flex; flex-direction: column; gap: 10px; padding-top: 20px; border-top: 1px solid var(--line-strong);
+  min-width: 0; }
+.tk-col-no { color: var(--muted); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tk-col-title { display: inline-flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 500;
+  letter-spacing: -0.02em; color: var(--text); margin: 0; }
+.tk-col-title.tk-dotted::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--tone-bg);
+  box-shadow: inset 0 0 0 1.5px var(--tone-ink); flex-shrink: 0; }
+.tk-col-text { color: var(--text-soft); font-size: 15px; line-height: 1.6; }
+.tk-col .tk-link { align-self: flex-start; margin-top: 4px; }
+.tk-stats-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tk-final { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap;
+  width: 100%%; padding: 96px 0 72px; border-top: 1px solid var(--line); }
+
+/* ---------- Footer ---------- */
+.tk-foot { display: grid; grid-template-columns: minmax(0, 4fr) repeat(3, minmax(0, 2fr)); column-gap: 32px;
+  row-gap: 32px; width: 100%%; padding: 48px 0 24px; border-top: 1px solid var(--line); margin-top: 48px; }
+.tk-foot-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.tk-foot-head { color: var(--text); font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.tk-foot-col a, .tk-foot-item { color: var(--muted); font-size: 13px; text-decoration: none; line-height: 1.5; }
+.tk-foot-col a:hover { color: var(--text); }
+.tk-foot-claim { color: var(--text-soft); font-size: 14px; max-width: 36ch; }
+.tk-foot-base { grid-column: 1 / -1; color: var(--muted); font-size: 12px; padding-top: 24px;
+  border-top: 1px solid var(--line); }
 
 /* Alte Kartenklassen bleiben für Dialoge, leere Zustände und die Vorschau. */
 .tk-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
@@ -242,8 +360,15 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 
 /* ---------- Schaltflächen ---------- */
 .q-btn { border-radius: 999px; font-weight: 500; letter-spacing: 0; padding: 6px 18px;
-  transition: transform 200ms var(--ease), background-color 200ms var(--ease); }
-.q-btn--unelevated.bg-primary:hover { transform: translateY(-1px); }
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease), box-shadow 200ms var(--ease); }
+.q-btn--unelevated.bg-primary:hover, .q-btn--outline:hover { transform: translateY(-1px); }
+.q-btn--unelevated.bg-primary:hover { box-shadow: 0 6px 16px rgba(31, 41, 51, 0.16); }
+.q-btn:active { transform: scale(0.97); }
+.tk-btn-lg.q-btn { min-height: 48px; padding: 8px 24px; font-size: 15px; }
+.tk-cta.is-loading { pointer-events: none; overflow: hidden; }
+.tk-cta.is-loading .q-btn__content { opacity: 0.72; }
+.tk-cta.is-loading::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40%%; height: 2px;
+  background: var(--surface); opacity: 0.8; animation: tk-slide 900ms var(--ease) infinite; }
 .q-btn--outline:before { border-color: var(--line-strong) !important; }
 .q-btn--flat { padding: 6px 10px; }
 .tk-cta .q-btn__content::after { content: "\\2192"; margin-left: 10px; transition: transform 200ms var(--ease); }
@@ -294,6 +419,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 /* ---------- Karte und Fortschritt ---------- */
 .leaflet-tile-pane { filter: grayscale(0.85) sepia(0.08) contrast(0.95) brightness(1.04); }
 .leaflet-container { border-radius: 16px; background: var(--canvas); }
+.leaflet-tooltip.tk-map-label { background: rgba(255,255,255,0.85); border: 0; box-shadow: none; padding: 0 4px;
+  font-size: 11px; font-weight: 500; color: var(--text); border-radius: 4px; }
+.leaflet-tooltip.tk-map-label::before { display: none; }
+.leaflet-tooltip.tk-map-start { font-size: 12px; font-weight: 600; }
 .tk-progress { height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
 .tk-progress > div { height: 100%%; width: 40%%; background: var(--text); animation: tk-slide 900ms var(--ease) infinite; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -312,17 +441,33 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 @keyframes tk-pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes tk-slide { from { transform: translateX(-100%%); } to { transform: translateX(250%%); } }
 .tk-reveal { animation: tk-rise 700ms var(--ease) both; animation-delay: var(--delay, 0ms); }
+.tk-js .tk-inview { transition: opacity 700ms var(--ease), transform 700ms var(--ease);
+  transition-delay: var(--delay, 0ms); }
+.tk-js .tk-inview:not(.is-in) { opacity: 0; transform: translateY(16px); }
 .tk-stat-value, .tk-hero-title { animation: tk-pop 450ms var(--ease) both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .tk-js .tk-inview:not(.is-in) { opacity: 1; transform: none; }
 }
 
 /* ---------- Breakpoints ---------- */
 @media (max-width: 1279px) {
-  .tk-page { padding: 0 24px 40px; }
-  .tk-nav { padding: 0 24px; }
+  .tk-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tk-stats-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tk-stats-5 .tk-stat:nth-child(4) { border-left: 0; padding-left: 0; }
+  .tk-stats-5 .tk-stat:nth-child(n+4) { border-top: 1px solid var(--line); }
 }
 @media (max-width: 1099px) {
+  .tk-nav { grid-template-columns: auto 1fr auto; }
+  .tk-brand-name { display: none; }
+  .tk-pagenav { gap: 20px; }
+  .tk-work, .tk-docs, .tk-land-hero { grid-template-columns: 1fr; }
+  .tk-summary { display: none; }
+  .tk-docs .q-tabs--vertical { position: static; border-left: 0; margin-bottom: 24px; }
+  .tk-band-head > :first-child, .tk-band-head > :last-child { grid-column: 1 / -1; }
+  .tk-band-head { row-gap: 16px; }
+  .tk-foot { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tk-foot > :first-child { grid-column: 1 / -1; }
   .tk-sec-head, .tk-sec-body { grid-column: 1 / -1; }
   .tk-sec-head { position: static; }
   .tk-sec-intro { max-width: 640px; }
@@ -333,6 +478,23 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   .tk-hero-side { align-items: flex-start; }
 }
 """
+
+
+SCRIPT = """<script>
+document.documentElement.classList.add('tk-js');
+(() => {
+  const nav = () => document.querySelector('.tk-nav')?.classList.toggle('is-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', nav, {passive: true});
+  const seen = new IntersectionObserver((items) => items.forEach((it) => {
+    if (it.isIntersecting) { it.target.classList.add('is-in'); seen.unobserve(it.target); }
+  }), {rootMargin: '0px 0px -8% 0px'});
+  const watch = () => document.querySelectorAll('.tk-inview:not(.is-in)').forEach((el) => seen.observe(el));
+  new MutationObserver(watch).observe(document.documentElement, {childList: true, subtree: true});
+  watch();
+  window.addEventListener('beforeprint', () => document.querySelectorAll('.tk-inview').forEach((el) => el.classList.add('is-in')));
+})();
+</script>"""
+"""Kopfzeile mit Haarlinie nach dem Scrollen; Abschnitte mit ``tk-inview`` blenden beim Erreichen ein."""
 
 
 def css() -> str:
@@ -354,6 +516,7 @@ def apply_theme() -> None:
         app.add_static_files("/tk-fonts", FONT_DIR)
         _fonts_registered = True
     ui.add_css(css())
+    ui.add_head_html(SCRIPT)
     ui.colors(
         primary=TOKENS["text"],
         secondary=TOKENS["muted"],

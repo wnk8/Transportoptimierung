@@ -14,9 +14,10 @@ from tk.excelfn import general_text, serial_to_date
 from tk.models import Result
 from tk.ui import components
 from tk.ui import format as fmt
-from tk.ui.layout import SCENARIO_LABEL, end, hero, nav, scenario_controls
+from tk.ui.layout import SCENARIO_LABEL, end, hero, nav, scenario_controls, steps
 from tk.ui.map_area import MapArea
 from tk.ui.map_view import RELATION_EVENT
+from tk.ui.route_compare import keys_from_param
 from tk.ui.state import Session
 from tk.ui.theme import TOKENS, apply_theme, status_chip
 
@@ -36,19 +37,28 @@ class ResultsPage:
     def __init__(self, session: Session) -> None:
         self.s = session
 
-    def build(self, tab: str | None, tour: int | None) -> None:
+    def build(self, tab: str | None, tour: int | None, routen: str | None = None) -> None:
         apply_theme()
         nav("/ergebnis")
         r = self.s.result
         assert r is not None
         with ui.column().classes("tk-page w-full"):
-            self.hero_title, self.hero_serif, self.hero_tail, self.hero_sub, side = hero(
-                "Ergebnis", "weniger"
-            )
-            with side:
+            steps(3, self.s)
+            self.hero_title, self.hero_serif, self.hero_tail, self.hero_sub, _ = hero("Ergebnis", "weniger")
+            with (
+                ui.element("div")
+                .classes("tk-toolbar")
+                .props('role="toolbar" aria-label="Szenario und Aktionen"')
+            ):
                 self.status_box = scenario_controls(self.s, self.set_scenario)
-                ui.link("Parameter ändern", "/#schritt-2").classes("tk-link")
-            self.kpi_box = ui.element("div").classes("tk-stats tk-reveal").style("--delay:80ms")
+                with ui.element("div").classes("tk-toolbar-end"):
+                    ui.link("Wie wird gerechnet?", "/info?tab=erklaerung").classes("tk-link")
+                    ui.button(
+                        "Parameter ändern", on_click=lambda: ui.navigate.to("/rechnen#schritt-2")
+                    ).props("outline no-caps color=primary")
+            self.kpi_box = (
+                ui.element("div").classes("tk-stats tk-reveal").style("--delay:80ms; margin-top:32px")
+            )
             with ui.element("div").classes("w-full tk-reveal").style("--delay:160ms; padding-top: 40px"):
                 with ui.tabs().props("dense no-caps align=left").classes("tk-pilltabs") as tabs:
                     self.handles = {key: ui.tab(key, label) for key, label in TABS.items()}
@@ -69,6 +79,7 @@ class ResultsPage:
                         self.scen_box = ui.column().classes("w-full gap-3")
             end(self.s)
         ui.on(RELATION_EVENT, lambda e: self.map.select_relation(str(e.args)))
+        self.map.routes.keys = keys_from_param(routen, r)
         self.refresh_all()
         ui.timer(0.5, self.map.probe_tiles, once=True)
         if tour is not None and any(t.tour_nr == tour for t in r.tours):
@@ -82,6 +93,11 @@ class ResultsPage:
         """Tour in der Karte zeigen (Tab Karte, darin Touren)."""
         self.panels.set_value(self.handles["karte"])
         self.map.open_tour(tour_nr)
+
+    def set_route_param(self, value: str) -> None:
+        """Routenauswahl in der Adresse halten (teilen, neu laden), ohne die Seite neu zu laden."""
+        query = "tab=karte" + (f"&routen={value}" if value else "")
+        ui.navigate.history.replace(f"/ergebnis?{query}")
 
     def refresh_road_toggle(self) -> None:
         """Von der Straßenansicht nach dem Abruf neuer Routen aufgerufen; der Schalter liegt auf Rechnen."""
@@ -160,7 +176,7 @@ class ResultsPage:
         with self.ship_box:
             if not r.rows:
                 components.empty_state(
-                    "Noch keine Sendungen.", "Zur Seite Rechnen", lambda: ui.navigate.to("/")
+                    "Noch keine Sendungen.", "Zur Seite Rechnen", lambda: ui.navigate.to("/rechnen")
                 )
                 return
             rows = []

@@ -4,7 +4,15 @@ from __future__ import annotations
 
 import pytest
 
-from tk.ui.theme import MAP_BACKGROUND, MAP_LINES, STATUS_STYLES, TEXT_PAIRS, TOKENS
+from tk.ui.theme import (
+    MAP_BACKGROUND,
+    MAP_LINES,
+    SELECTION_COLORS,
+    START_COLORS,
+    STATUS_STYLES,
+    TEXT_PAIRS,
+    TOKENS,
+)
 
 
 def luminance(hex_color: str) -> float:
@@ -42,9 +50,16 @@ def test_map_lines_at_least_3(layer: str) -> None:
     assert contrast(color, TOKENS["surface"]) >= 3.0  # SVG-Rückfall auf weißer Fläche
 
 
+@pytest.mark.parametrize("color", START_COLORS + SELECTION_COLORS)
+def test_route_colors_at_least_3(color: str) -> None:
+    assert contrast(color, MAP_BACKGROUND) >= 3.0
+    assert contrast(color, TOKENS["surface"]) >= 3.0
+
+
 def test_documented_values() -> None:
     """Die in 7.2 genannten Werte sind gerundet korrekt."""
     assert round(contrast(TOKENS["text"], TOKENS["surface"]), 1) == 14.8
+    assert round(contrast(TOKENS["text-soft"], TOKENS["surface"]), 1) == 9.6
     assert round(contrast(TOKENS["muted"], TOKENS["surface"]), 1) == 6.3
     assert round(contrast(TOKENS["accent"], TOKENS["surface"]), 1) == 6.0
     assert round(contrast(TOKENS["base"], TOKENS["surface"]), 1) == 5.9

@@ -29,6 +29,15 @@ Keine öffentliche Instanz mit dem kostenlosen Gemini-Schlüssel.
 | 7 | 2 min | Seite Info, Tab Prüfungen (20 Prüfungen, Referenzabgleich), dann Rechnen, Export CSV, in Excel-Testkopie einfügen, eine Zahl nachrechnen | Python ist ein Port der Excel; Abnahme 1e-9 je Kennzahl und je Zeile | Qualität der Rechnung |
 | 8 | 1 min | Freitext ohne Datum oder mit "schätz mal" | Der Agent verweigert die Schätzung ("nicht berechenbar, weil" mit Grund) oder die Antwort wird verworfen. Nur mit Gemini-Schlüssel live; im Demo-Modus die Negativtests in `tests/agent/test_agent.py` zeigen | Verlässlichkeit |
 
+## Routenvergleich (Ergebnis, Tab Karte)
+
+Direktlink mit drei vorgewählten Routen: `/ergebnis?tab=karte&routen=70173-55116,68159-20095,76131-10115`.
+
+1. Szenario M3, Ansicht Nebeneinander: Stuttgart > Mainz bleibt Lkw (kurz), Mannheim > Hamburg geht auf die Bahn.
+2. Diagramm "CO₂e in % von Ist": "Alle per Bahn" wäre für Mainz am sparsamsten, scheitert aber an A01 (Hinweis in der Tabelle).
+3. Größere Fahrzeuge für alle Sendungen erhöhen CO₂e und Kosten: deshalb wählt die Rangregel das kleinste passende Fahrzeug.
+4. Linie in der Karte anklicken fügt die Route hinzu; Chip mit x entfernt sie, die Farben der übrigen bleiben.
+
 ## Vorbereitete Agent-Fälle (Demo-Modus)
 
 Die Schaltflächen im Tab Freitext setzen den Text. Im Demo-Modus wird nur genau dieser Text abgespielt.

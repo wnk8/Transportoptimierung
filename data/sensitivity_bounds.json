@@ -1,0 +1,17 @@
+{
+  "methode": "Morris-Screening (Elementareffekte), SALib; Vergleichsrechnung, nicht Teil der Excel",
+  "standard": "±20 % um den Wert der Excel, wenn keine fachliche Bandbreite belegt ist",
+  "parameter": {
+    "a01_bahn_grenze_km": {"min": 300, "max": 700, "begruendung": "Mindestdistanz Bahn: in der Literatur zum Kombinierten Verkehr üblich zwischen 300 und 600 km; 700 km als obere Prüfgrenze"},
+    "a02_vnl_km": {"min": 50, "max": 150, "begruendung": "Vor- und Nachlauf je Sendung: halbe bis anderthalbfache Setzung der Gruppe (100 km)"},
+    "a07_bahn_aufschlag": {"min": 0.0, "max": 0.2, "begruendung": "Bahnaufschlag: Setzung 0, kein Bahntarif belegt; bis 20 % als Prüfgröße"},
+    "a08_kosten_tol": {"min": 0.0, "max": 0.2, "begruendung": "Kostentoleranz: Setzung 10 %, Bandbreite 0 bis 20 %"},
+    "a09_schwelle": {"min": 0.4, "max": 0.6, "begruendung": "Auslastungsschwelle Bündelung: Standard ±20 %"},
+    "a10_umweg": {"min": 0.1, "max": 0.3, "begruendung": "Umwegzuschlag je zusätzlichem Stopp: halbe bis anderthalbfache Setzung (0,2)"},
+    "a11_alpha": {"min": 0.8, "max": 1.0, "begruendung": "Lastunabhängiger Anteil des Verbrauchs: Setzung 1 (lastunabhängig), Prüfung bis 0,8; Werte über 1 sind nach Prüfregel unzulässig"},
+    "a12_diesel_kg_co2_je_kg": {"min": 3.98, "max": 4.40, "begruendung": "WTW-Faktor Diesel: ±5 %, physikalische Größe mit enger Streuung (GLEC)"},
+    "a14_kg_je_palette": {"min": 214.4, "max": 321.6, "begruendung": "Gewicht je Palette bei fehlender Palettenzahl: Standard ±20 %"},
+    "bahn_elektrisch_g_tkm": {"min": 8.64, "max": 12.96, "begruendung": "Bahnfaktor elektrisch: Standard ±20 % (Strommix, Auslastung)"},
+    "i01_strassenfaktor": {"min": 1.1, "max": 1.4, "begruendung": "Umwegfaktor Straße gegen Luftlinie: empirisch etwa 1,15 bis 1,35 (Straße gegen Luftlinie in der App)"}
+  }
+}

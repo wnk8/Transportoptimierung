@@ -1,8 +1,8 @@
-# Transportkonzept: nachhaltige Transportplanung mit Bündelung und Bahn
+# TK. TourKlima: Transportoptimierung mit Bündelung und Bahn
 
 Weboberfläche und Python-Rechenkern für das Excel-Modell v11 "Nachhaltiges Transportkonzept" (Seminar Planungsprozesse BLO513/WPML733, HWG Ludwigshafen). Die App rechnet drei Szenarien, zeigt sie auf der Karte und erklärt jede Zahl. Die Excel ist maßgeblich: Kennzahlen und alle 2.266 Sendungen stimmen auf 1e-9 überein.
 
-![Seite Ergebnis: 53,3 % weniger CO₂e, Kennzahlen und Karte Vorher gegen Nachher](docs/images/01_uebersicht.png)
+![Startseite TK. TourKlima: Headline, zwei Einstiege, Netz der Beispieldaten und Kennzahlen](docs/images/00_start.png)
 
 | Szenario | Was passiert | CO₂e | Kosten | Lkw-km | Servicegrad |
 |---|---|---:|---:|---:|---:|
@@ -12,7 +12,9 @@ Weboberfläche und Python-Rechenkern für das Excel-Modell v11 "Nachhaltiges Tra
 
 Werte der Beispieldaten (2.266 Sendungen, 3 Startorte, 15 Zielorte).
 
-Die Oberfläche hat drei Seiten: **Rechnen** (Sendungen und Parameter erfassen), **Ergebnis** (Kennzahlen, Karte, Touren, Szenarien) und **Info** (Formeln, Annahmen, Prüfungen, Agent-Spur).
+Die Oberfläche hat vier Seiten: **Start** (`/`, Nutzen, Kennzahlen der Beispieldaten, Ablauf, Einstieg), **Rechnen** (`/rechnen`, Sendungen und Parameter erfassen), **Ergebnis** (Kennzahlen, Karte, Touren, Szenarien) und **Info** (Formeln, Annahmen, Prüfungen, Agent-Spur). Eine Schrittleiste zeigt auf Rechnen, Ergebnis und Info, wo man im Ablauf steht.
+
+![Seite Ergebnis: 53,3 % weniger CO₂e, Kennzahlen und Karte Vorher gegen Nachher](docs/images/01_uebersicht.png)
 
 | Rechnen | Ergebnis | Info |
 |---|---|---|
@@ -49,9 +51,9 @@ Die Oberfläche hat drei Seiten: **Rechnen** (Sendungen und Parameter erfassen),
 
 ### 1. Ausgangslage: Einzelversand (Ist)
 
-Auf der Seite **Rechnen** sind die Beispieldaten der Excel geladen (2.266 Sendungen) und alle Parameter auf den Werten aus Assumptions. **Berechnen** öffnet die Seite **Ergebnis**.
+Die **Startseite** führt mit „Mit Beispieldaten starten“ direkt zum Ergebnis oder mit „Eigene Sendungen erfassen“ zur Seite **Rechnen**. Dort sind die Beispieldaten der Excel geladen (2.266 Sendungen) und alle Parameter auf den Werten aus Assumptions. Rechts läuft eine Zusammenfassung mit (Sendungen, geänderte Parameter, CO₂e und Kosten gegen Ist); **Berechnen und Ergebnis öffnen** führt zur Seite **Ergebnis**.
 
-![Seite Rechnen: Sendungen erfassen, Parameter prüfen, Leiste Berechnen](docs/images/08_rechnen.png)
+![Seite Rechnen: Schrittleiste, Sendungen erfassen, Zusammenfassung mit Berechnen](docs/images/08_rechnen.png)
 
 Umschalter auf **Ist**. Jede Sendung fährt einzeln: 2.266 Fahrten, 306.924 kg CO₂e. Die Linien sind Luftlinien zwischen PLZ-Schwerpunkten (schematisch), die Breite zeigt die Zahl der Sendungen.
 

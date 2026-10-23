@@ -1,8 +1,8 @@
-"""Seite Rechnen: 01 Sendungen, 02 Parameter, schwebende Leiste mit "Berechnen".
+"""Seite Rechnen: 01 Sendungen, 02 Parameter, rechts eine mitlaufende Zusammenfassung mit "Berechnen".
 
-Ergebnisse und Karte stehen auf ``/ergebnis``, Erklärungen und Prüfungen auf ``/info``. Alle Zahlen
-kommen aus ``tk`` (Rechenkern). Beim Start sind die Beispieldaten der Excel-Mappe geladen.
-Start: ``make run`` (http://127.0.0.1:8080).
+Die Startseite steht auf ``/``, Ergebnisse und Karte auf ``/ergebnis``, Erklärungen und Prüfungen auf
+``/info``. Alle Zahlen kommen aus ``tk`` (Rechenkern). Beim Start sind die Beispieldaten der Excel-Mappe
+geladen. Start: ``make run`` (http://127.0.0.1:8080).
 """
 
 from __future__ import annotations
@@ -22,7 +22,8 @@ from tk.scenarios import calculate
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.info_page import InfoPage
-from tk.ui.layout import SCENARIO_LABEL, end, hero, missing_workbook, nav
+from tk.ui.landing_page import LandingPage
+from tk.ui.layout import BRAND, SCENARIO_LABEL, end, hero, missing_workbook, nav, steps
 from tk.ui.map_area import route_cache
 from tk.ui.preview import preview_page
 from tk.ui.results_page import ResultsPage
@@ -72,16 +73,41 @@ class Page:
     # ---------- Aufbau ----------
     def build(self) -> None:
         apply_theme()
-        nav("/")
+        ui.query("body").classes("tk-has-summary")
+        nav("/rechnen")
         with ui.column().classes("tk-page tk-page-dock w-full"):
+            steps(1, self.s)
             title, _, _, sub, _ = hero("Rechnen", "rechnen")
             title.set_text("Transport ")
-            sub.set_text("Sendungen erfassen, Parameter prüfen, berechnen.")
-            self._input_section()
-            self._param_section()
+            sub.set_text(
+                "Sendungen erfassen, Parameter prüfen, berechnen. Die Beispieldaten der Excel v11 sind geladen; "
+                "eigene Sendungen ersetzen oder ergänzen sie."
+            )
+            with ui.element("div").classes("tk-work"):
+                with ui.element("div").classes("tk-work-main"):
+                    self._input_section()
+                    self._param_section()
+                self._summary()
             end(self.s)
         self._dock()
         self.refresh_all()
+
+    def _summary(self) -> None:
+        """Mitlaufende Zusammenfassung ab 1100 px: Datenbestand, Wirkung, Berechnen."""
+        with (
+            ui.element("aside")
+            .classes("tk-summary tk-reveal")
+            .style("--delay:200ms")
+            .props('aria-label="Zusammenfassung"')
+        ):
+            ui.label("Zusammenfassung").classes("tk-kicker")
+            self.sum_box = ui.element("div").classes("flex flex-col gap-3 w-full").props('aria-live="polite"')
+            self.sum_btn = (
+                ui.button("Berechnen und Ergebnis öffnen", on_click=self.go_results)
+                .props("unelevated no-caps color=primary")
+                .classes("tk-cta tk-btn-lg")
+            )
+            ui.link("Wie wird gerechnet?", "/info?tab=erklaerung").classes("tk-link self-start")
 
     def _dock(self) -> None:
         with ui.element("div").classes("tk-dock").props('role="region" aria-label="Berechnen"'):
@@ -96,6 +122,7 @@ class Page:
 
     async def go_results(self) -> None:
         """Offene Neuberechnung abwarten, dann zum Ergebnis mit der Karte."""
+        self.sum_btn.classes(add="is-loading").props("aria-busy=true")
         if self.busy:
             await self.recalculate()
         ui.navigate.to("/ergebnis?tab=karte")
@@ -103,10 +130,12 @@ class Page:
     def _input_section(self) -> None:
         self.count_label, body = components.section(1, "Sendungen", anchor="schritt-1", delay=120)
         with body:
+            self.empty_box = ui.element("div").classes("w-full")
             with ui.tabs().props("dense no-caps align=left").classes("w-full") as tabs:
                 t_form = ui.tab("Formular")
-                t_paste = ui.tab("Einfügen / CSV")
+                self.t_paste = t_paste = ui.tab("Einfügen / CSV")
                 self.t_agent = ui.tab("Freitext")
+            self.input_tabs = tabs
             with ui.tab_panels(tabs, value=t_form).classes("w-full bg-transparent").props("animated=false"):
                 with ui.tab_panel(t_form):
                     self._form()
@@ -447,6 +476,56 @@ class Page:
         self._param_state()
         self.refresh_road_toggle()
         self._dock_state(r)
+        self._summary_state(r)
+        self._empty_state()
+
+    def _empty_state(self) -> None:
+        """Ohne Sendungen: zwei klare Aktionen statt eines leeren Formulars."""
+        self.empty_box.clear()
+        if self.s.shipments:
+            return
+        with self.empty_box, ui.element("div").classes("tk-empty"):
+            ui.label("Noch keine Sendungen.").classes("tk-section")
+            ui.label("Beispieldaten laden oder eine Datei im Schema Input!A:H hochladen.").classes("tk-help")
+            with ui.row().classes("gap-3"):
+                ui.button("Beispieldaten laden", on_click=self.load_sample).props(
+                    "unelevated no-caps color=primary"
+                ).classes("tk-cta")
+                ui.button(
+                    "CSV oder XLSX hochladen", on_click=lambda: self.input_tabs.set_value(self.t_paste)
+                ).props("outline no-caps color=primary")
+
+    def _summary_state(self, r: Result) -> None:
+        k = r.kpis[self.s.scenario]
+        self.sum_box.clear()
+        with self.sum_box:
+            with ui.element("div").classes("tk-summary-row"):
+                ui.label("Sendungen")
+                ui.html(f"<b>{fmt.number(r.n_valid)}</b>")
+            if len(self.s.shipments) != r.n_valid:
+                with ui.element("div").classes("tk-summary-row"):
+                    ui.label("mit Hinweis")
+                    ui.html(f"<b>{fmt.number(len(self.s.shipments) - r.n_valid)}</b>")
+            with ui.element("div").classes("tk-summary-row"):
+                ui.label("Parameter")
+                n = len(self.s.changes)
+                ui.html(f"<b>{'Standard' if n == 0 else f'{n} geändert'}</b>")
+            ui.element("hr")
+            if not r.n_valid:
+                ui.label("Ohne gültige Sendung gibt es kein Ergebnis.").classes("tk-help")
+                return
+            if self.s.scenario == "Ist":
+                ui.label("CO₂e im Ist").classes("tk-label")
+                ui.label(fmt.with_unit(k.co2_fzgkm_kg, "kg")).classes("tk-summary-big")
+                return
+            ui.label(f"CO₂e mit {SCENARIO_LABEL[self.s.scenario]}").classes("tk-label")
+            ui.label(fmt.percent(k.delta_co2_fzgkm)).classes("tk-summary-big")
+            with ui.element("div").classes("tk-summary-row"):
+                ui.label("Kosten gegen Ist")
+                ui.html(f"<b>{fmt.percent(k.delta_kosten)}</b>")
+            with ui.element("div").classes("tk-summary-row"):
+                ui.label("Servicegrad")
+                ui.html(f"<b>{fmt.percent(k.servicegrad, 1, False)}</b>")
 
     def _param_state(self) -> None:
         p, base = self.s.params, self.s.base.model.params
@@ -504,6 +583,15 @@ async def index() -> None:
     if base is None:
         missing_workbook()
         return
+    LandingPage(session_for(app.storage.browser["id"], base)).build()
+
+
+@ui.page("/rechnen")
+async def rechnen() -> None:
+    base = base_data()
+    if base is None:
+        missing_workbook()
+        return
     session = session_for(app.storage.browser["id"], base)
     page = Page(session)
     app.storage.client["page"] = page
@@ -511,12 +599,12 @@ async def index() -> None:
 
 
 @ui.page("/ergebnis")
-async def ergebnis(tab: str | None = None, tour: int | None = None) -> None:
+async def ergebnis(tab: str | None = None, tour: int | None = None, routen: str | None = None) -> None:
     base = base_data()
     if base is None:
         missing_workbook()
         return
-    ResultsPage(session_for(app.storage.browser["id"], base)).build(tab, tour)
+    ResultsPage(session_for(app.storage.browser["id"], base)).build(tab, tour, routen)
 
 
 @ui.page("/info")
@@ -544,7 +632,7 @@ def main() -> None:
 
     load_dotenv()  # GEMINI_API_KEY only from the local .env file
     ui.run(
-        title="Transportkonzept",
+        title=f"TK. {BRAND}, Transportkonzept",
         host=os.environ.get("TK_HOST", "127.0.0.1"),
         port=int(os.environ.get("TK_PORT", "8080")),
         reload=False,

@@ -17,7 +17,8 @@ from tk.scenarios import calculate, parse_change, sensitivity_row, with_changes
 from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.agent_panel import render_trace
-from tk.ui.layout import end, hero, nav
+from tk.ui.layout import end, hero, nav, steps
+from tk.ui.morris_panel import MorrisPanel
 from tk.ui.state import Session, reference, snapshot
 from tk.ui.theme import apply_theme
 
@@ -44,14 +45,15 @@ class InfoPage:
         if key in SPEC:
             self.explain_key = key
         with ui.column().classes("tk-page w-full"):
+            steps(0, self.s)
             title, _, _, sub, _ = hero("Info", "gerechnet")
             title.set_text("So wird ")
             sub.set_text(
                 "Formeln, Annahmen mit Quelle, Prüfungen gegen die Excel v11 und die Werkzeugaufrufe des "
                 "Assistenten zum aktuellen Stand."
             )
-            with ui.element("div").classes("w-full tk-reveal").style("--delay:100ms"):
-                with ui.tabs().props("dense no-caps align=left").classes("tk-pilltabs") as tabs:
+            with ui.element("div").classes("tk-docs tk-reveal").style("--delay:100ms"):
+                with ui.tabs().props('vertical dense no-caps aria-label="Themen"') as tabs:
                     handles = {k: ui.tab(k, label) for k, label in TABS.items()}
                 start = handles.get(tab or "", handles["erklaerung"])
                 with (
@@ -225,6 +227,8 @@ class InfoPage:
 
         ui.button("Mit Python nachrechnen", on_click=recompute).props("outline no-caps color=primary")
         render(None)
+        ui.separator().classes("my-4")
+        MorrisPanel(self.s)
 
 
 def explain_content(key: str, s: Session, r: Result) -> None:

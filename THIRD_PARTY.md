@@ -25,6 +25,9 @@ Stand: 20.10.2026 (Versionen aus `uv.lock`). Lizenzangaben nach Projektseiten; v
 | Zweck | Komponente | Lizenz |
 |---|---|---|
 | Tests | pytest, hypothesis | MIT, MPL-2.0 |
+| Browsertests | pytest-playwright, Playwright (Chromium Headless Shell) | Apache-2.0 |
+| Snapshot-Tests | syrupy | Apache-2.0 |
+| Sensitivität (Morris-Screening, `scripts/make_sensitivity.py`) | SALib 1.6 (mit scipy) | MIT (SALib), BSD-3-Clause (scipy) |
 | Qualität | ruff, mypy, pandas-stubs | MIT, MIT, BSD-3-Clause |
 | Versionskontrolle, CI | git, GitHub, GitHub Actions (`actions/checkout` v7, `astral-sh/setup-uv` v10.3.0, ohne Major-Tag) | GPL-2.0 (git), Nutzungsbedingungen GitHub, MIT |
 | Entwicklungswerkzeug | Claude Code (Anthropic) | Nutzungsbedingungen Anthropic |
@@ -40,4 +43,4 @@ Stand: 20.10.2026 (Versionen aus `uv.lock`). Lizenzangaben nach Projektseiten; v
 
 | OpenRouteService (HeiGIT), Profil driving-hgv, Standard-Plan (laut Anbieter 2.000 Directions je Tag, 40 je Minute) | Straßenrouten zur Darstellung und Variante "Straßen-km"; einmal abgerufen, lokal in `data/routes/routes.json` (nicht versioniert) | Attribution "© openrouteservice.org by HeiGIT, Daten © OpenStreetMap contributors (ODbL)" in der Ansicht; Nutzungsbedingungen von ORS; Schlüssel nur in `.env` |
 
-Nicht verwendet: Nominatim, OSRM, OpenFreeMap, PMTiles.
+Nicht verwendet: Nominatim, OSRM, OpenFreeMap, PMTiles. Geprüft und verworfen (23.10.2026): formulas und pycel (Excel nachrechnen; beide scheitern an den dynamischen Namensbereichen und Tabellenbezügen der v11), pandera (keine pandas-Grenze im Code), Leaflet.PolylineOffset und Leaflet.TextPath (Bögen und Tooltips reichen).

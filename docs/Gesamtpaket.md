@@ -289,10 +289,11 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 
 ### 7.1 Leitsätze
 
-1. Weiße Minimal-Website (Vorbild: siiimple.com, Kategorie „white“): reines Weiß, schwarze Schrift, sehr viel Leerraum, Haarlinien statt Karten, kleine Textlinks. Pastelltöne (Salbei, Himmel, Pfirsich, Lavendel, Butter, Rosé) nur als Punkte, Delta-Pillen und geänderte Felder; Schrift darauf immer im passenden dunklen Ton. Farbe ist nie die einzige Information.
+0. Marke: Wortmarke „TK.“ mit dem Namen **TourKlima** (Touren bündeln, Klimawirkung senken), Claim „Die Transportoptimierung für weniger CO₂e.“ Name als Konstante `BRAND` in `ui/layout.py`.
+1. Weiße Minimal-Website über die volle Bildschirmbreite (Vorbilder: siiimple.com „white“, Squarespace „Popular Designs“, Lovable-Templates): reines Weiß, sehr viel Leerraum, Haarlinien statt Karten, strenges Raster. Hierarchie der Schrift in feinen Stufen: Überschriften `--text`, Fließtext `--text-soft`, Beschriftungen `--muted`. Keine dunklen Bänder, keine Fotos, keine Blöcke ohne Aufgabe; einzige Fläche ist `--canvas` für die Zusammenfassung auf Rechnen und Umschalter. Pastelltöne (Salbei, Himmel, Pfirsich, Lavendel, Butter, Rosé) nur als Punkte, Delta-Pillen und geänderte Felder; Schrift darauf immer im passenden dunklen Ton. Farbe ist nie die einzige Information.
 2. Tiefgrün `--accent` für Reduktion, Akzentpunkt und Fokus; dunkle Tinte `--text` für primäre Aktionen (Pille mit Pfeil). Die Vergleichsbasis (Ist) erhält Pfirsich, Bahn Himmelblau.
 3. Hierarchie durch Typografie: übergroße Headline aus Geist mit einem kursiven Serif-Wort (Instrument Serif) und Akzentpunkt, nummerierte Abschnitte „01 Sendungen“.
-4. Drei Seiten, je eine Aufgabe. Rechnen: nur Sendungen und Parameter, „Berechnen“ leitet weiter. Ergebnis: Kennzahlen, Karte und Tabellen. Info: Erklärung, Annahmen und Quellen, Prüfungen, Sensitivität, Agent-Spur.
+4. Vier Seiten, je eine Aufgabe. Start (`/`): Nutzen, Kennzahlen der Beispieldaten, Ablauf, Funktionen, Methodik, zwei Einstiege. Rechnen (`/rechnen`): nur Sendungen und Parameter, „Berechnen“ leitet weiter. Ergebnis: Kennzahlen, Karte und Tabellen. Info: Erklärung, Annahmen und Quellen, Prüfungen, Sensitivität, Agent-Spur.
 5. Bewegung dezent und funktional: Abschnitte blenden beim Laden ein, neu berechnete Zahlen gleiten ein, Pfeile und Unterstriche reagieren auf Hover (200 bis 700 ms). `prefers-reduced-motion: reduce` schaltet jede Bewegung ab.
 6. Jedes Element hat eine Funktion. Keine Illustrationen, Verläufe, Icons ohne Beschriftung, Emojis, Platzhaltertexte.
 
@@ -305,7 +306,8 @@ Regel: `src/tk` (Kern) kennt weder UI noch Agent. Jede Funktion J2.x aus `Assump
 | `--canvas` | `#F5F5F4` | Umschalter, Hover, Tabellenzeilen | Text 13,5 : 1; `--muted` 5,8 : 1 |
 | `--line` | `#ECECEA` | Haarlinien zwischen Abschnitten und Kennzahlen | trägt keine Information |
 | `--line-strong` | `#D9D9D6` | Rahmen von Eingabefeldern | trägt keine Information |
-| `--text` | `#1F2933` | Fließtext, Zahlen, primäre Schaltfläche | 14,8 : 1 auf Weiß; Weiß darauf 14,8 : 1 |
+| `--text` | `#1F2933` | Überschriften, Zahlen, primäre Schaltfläche | 14,8 : 1 auf Weiß; Weiß darauf 14,8 : 1 |
+| `--text-soft` | `#3A4652` | Fließtext, Einleitungen, Markenname | 9,6 : 1 auf Weiß; 8,8 : 1 auf `--canvas` |
 | `--muted` | `#56616E` | Beschriftungen, Einheiten, Kicker | 6,3 : 1 auf Weiß, mindestens 5,1 : 1 auf jedem Pastellton |
 | `--accent` | `#1F6F5F` | Reduktion, Akzentpunkt, Fokus | 6,0 : 1 auf Weiß |
 | `--accent-tint` | `#E3EEE7` | Salbei: CO₂e, Abschnitt 01, Reduktion, geänderte Felder | Text 12,4 : 1; `--accent` darauf 5,0 : 1 |
@@ -334,7 +336,7 @@ Regeln: Auf Tönen dunkler Text. Weißer Text nur auf `--accent`, `--text` und `
 |---|---|
 | Schrift | Geist (variabel, lokal, SIL OFL), Rückfall Inter und `system-ui`; ein Wort je Headline in Instrument Serif kursiv (lokal, SIL OFL; ohne Sonderzeichen wie ₂, die die Schrift nicht enthält); Zahlen mit `font-variant-numeric: tabular-nums` |
 | Größen | Headline 48 bis 88 px / 500, Laufweite −0,045 em; Abschnittstitel 22 px / 500 mit Nummer 13 px; Kennzahl 30 bis 40 px / 600; Fließtext 15 px / 400; Einleitung 17 px in `--muted`, höchstens 520 px breit; Beschriftung 13 px / 500; Kicker 12 px, Großbuchstaben, Laufweite +0,08 em |
-| Raster | Inhalt höchstens 1280 px, 12 Spalten, Abstand 32 px; Hero 96 px oben; Abschnitte 48 px oben und unten; Abschnittskopf 3 Spalten (bleibt beim Scrollen stehen), Inhalt 9 Spalten |
+| Raster | Volle Breite mit Rand `--gutter` = `clamp(16px, 4vw, 72px)`, Fließtext höchstens 68 Zeichen breit; 12 Spalten, Abstand 32 px; Abstände nur aus 8, 16, 24, 32, 48, 72, 96 px; Hero 64 px oben; Abschnitte 48 px oben und unten; Abschnittskopf 3 Spalten (bleibt beim Scrollen stehen), Inhalt 9 Spalten |
 | Form | Keine Karten auf der Seite, Gliederung durch 1 px Haarlinien `--line`. Eingaben Radius 12 px; primäre Schaltfläche schwarze Pille mit Pfeil, sonst Textlinks; Umschalter, Status und Deltas als Pillen. Schatten nur für aktive Pillen (`0 1px 2px`) und die schwebende Leiste |
 | Zahlenformat | deutsch: Tausenderpunkt, Dezimalkomma, Einheit mit schmalem Leerzeichen (`306.924 kg CO2e`); Prozent mit Vorzeichen (`−53,3 %`) |
 | Fokus | 2 px Ring in `--accent`, nie entfernen |
@@ -362,10 +364,19 @@ Der Filter auf der Kachelebene dämpft die Standardkarte, ohne Anbieter oder Att
 
 ### 7.4 Layout
 
-Drei Seiten mit derselben Kopfzeile (Wortmarke „TK.“, Textlinks Rechnen, Ergebnis, Info; aktive Seite unterstrichen):
+Vier Seiten mit derselben Kopfzeile über die volle Breite: links Wortmarke „TK.“ mit „TourKlima“, mittig Textlinks Produkt, Rechnen, Ergebnis, Info (aktive Seite unterstrichen), rechts die Hauptaktion als Pille („Jetzt optimieren“, auf Rechnen „Zum Ergebnis“). Nach dem Scrollen erhält die Kopfzeile eine Haarlinie. Rechnen, Ergebnis und Info zeigen darunter die Schrittleiste 1 Sendungen, 2 Parameter, 3 Ergebnis mit Status als Text. Der Footer hat vier Spalten: Marke, Produkt, Methodik, Daten mit Attribution und Datenstand.
 
 ```
-/            RECHNEN
+/            START
+             Weniger Fahrten, weniger Emissionen.   | Netz der Beispieldaten (Vorher: Ist | Nachher: M3)
+             ( Mit Beispieldaten starten → )  ( Eigene Sendungen erfassen )
+             CO2e | Kosten | Fahrzeug-km | Servicegrad (M3 gegen Ist, Beispieldaten)
+             Ablauf 01 02 03 | Funktionen (6) | Methodik | Bereit für den ersten Plan?
+```
+
+
+```
+/rechnen     RECHNEN
              Transport rechnen.          (rechnen kursiv, Serif)
              Sendungen erfassen, Parameter prüfen, berechnen.
              ---------------------------------------------------------------
@@ -373,21 +384,25 @@ Drei Seiten mit derselben Kopfzeile (Wortmarke „TK.“, Textlinks Rechnen, Erg
              ---------------------------------------------------------------
              02 Parameter   | BAHNVERLAGERUNG A01 A02 A05 A04 | BÜNDELUNG A10 A09
                             | KOSTEN A08 | DISTANZ I01, Straßen-km
-             ( 2.266 Sendungen / M3 Bahn + Bündelung / CO2e −53,3 %   Berechnen → )  schwebend
+             rechts mitlaufend: Zusammenfassung (Sendungen, Parameter, CO2e Δ, Kosten Δ, Servicegrad,
+             Berechnen und Ergebnis öffnen →); unter 1100 px stattdessen die schwebende Leiste
 
-/ergebnis    ERGEBNIS                                ( Ist | M2 | M3 )  ● Plan zulässig
-             53,3 % weniger CO2e.                     Parameter ändern
+/ergebnis    ERGEBNIS
+             53,3 % weniger CO2e.
+             ( Ist | M2 | M3 )  ● Plan zulässig            Wie wird gerechnet?  ( Parameter ändern )  mitlaufend
              CO2e | Kosten | Fahrzeug-km | Servicegrad   (Wie berechnet? führt zu Info)
              ( Karte ) Sendungen  Touren  Szenarien
 
 /info        INFO
              So wird gerechnet.
-             ( Erklärung ) Annahmen und Quellen  Prüfungen  Sensitivität  Agent-Spur
+             Seitennavigation links: Erklärung | Annahmen und Quellen | Prüfungen | Sensitivität | Agent-Spur
 ```
 
 „Berechnen“ wartet eine laufende Neuberechnung ab und öffnet `/ergebnis?tab=karte`. Tabs per `?tab=`: Ergebnis `karte|sendungen|touren|szenarien` (dazu `?tour=N`), Info `erklaerung|annahmen|pruefungen|sensitivitaet|agent` (dazu `?k=` für die Kennzahl). `/analyse` leitet auf `/ergebnis` weiter. Alle Seiten teilen den Stand je Browser (Sendungen, Parameter, Szenario, Agent-Spur).
 
-Breakpoints: Abschnittskopf und Inhalt nebeneinander ab 1100 px, darunter untereinander; Kennzahlen vierspaltig ab 1100 px, darunter 2 × 2. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
+Reaktive Schaltflächen: Hover hebt um 1 px, Druck skaliert auf 0,97, Pfeil gleitet nach rechts; während einer Rechnung zeigt die Schaltfläche einen Fortschrittsbalken (`is-loading`, `aria-busy`). Abschnitte der Startseite blenden beim Erreichen ein (`tk-inview`); ohne JavaScript und bei `prefers-reduced-motion` sind sie sofort sichtbar.
+
+Breakpoints: Abschnittskopf und Inhalt nebeneinander ab 1100 px, darunter untereinander; Zusammenfassung auf Rechnen und Seitennavigation auf Info ab 1100 px; Kennzahlen vierspaltig ab 1100 px, darunter 2 × 2; Funktionsraster drei Spalten ab 1280 px, darunter zwei. Mindestbreite 1024 px (Präsentationsbeamer), Mobilgeräte sind nicht Ziel.
 
 ### 7.5 Komponenten
 

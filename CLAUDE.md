@@ -35,11 +35,12 @@ Ist 306.924,11 kg | M2 -16,89 % | M3 -53,31 % | Kosten -24,95 % | Fzg-km M3 -67,
 551 Bahnsendungen | Servicegrad M3 75,68 % | 428 Touren, 318 gebündelt
 
 ## Design (heller Modus)
-Tokens und Regeln: docs/Gesamtpaket.md Abschnitt 7. Weiße Minimal-Website (siiimple.com, white):
-reines Weiß, Geist plus ein kursives Wort in Instrument Serif (beide lokal), Haarlinien statt Karten,
-Pastell nur als Punkte und Pillen. Drei Seiten: Rechnen (/), Ergebnis (/ergebnis), Info (/info).
-Dezente funktionale Animationen, prefers-reduced-motion schaltet sie ab. Keine Verläufe, keine
-Platzhaltertexte, Farbe nie als einzige Information, Textkontrast mindestens 4,5 : 1.
+Tokens und Regeln: docs/Gesamtpaket.md Abschnitt 7. Marke "TK. TourKlima" (BRAND in ui/layout.py).
+Weiße Minimal-Website über die volle Breite: reines Weiß, Geist plus ein kursives Wort in Instrument
+Serif (beide lokal), Haarlinien statt Karten, Pastell nur als Punkte und Pillen, Schrift in Stufen
+text, text-soft, muted. Vier Seiten: Start (/), Rechnen (/rechnen), Ergebnis (/ergebnis), Info (/info).
+Dezente funktionale Animationen, prefers-reduced-motion schaltet sie ab. Keine Verläufe, keine dunklen
+Bänder, keine Platzhaltertexte, Farbe nie als einzige Information, Textkontrast mindestens 4,5 : 1.
 Kartenlinien: Luftlinie, schematisch. Attribution OSM und GeoNames immer sichtbar.
 
 ## Abnahme
