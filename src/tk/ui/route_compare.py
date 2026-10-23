@@ -12,12 +12,12 @@ from urllib.parse import quote
 
 from nicegui import ui
 
-from tk.compare import RouteOptions, relation_detail, route_options
-from tk.excelfn import fold
-from tk.models import Assumptions, Result
+from tk.compare import RouteOptions, custom_bundle, relation_detail, route_options
+from tk.excelfn import fold, serial_to_date
+from tk.models import Assumptions, Result, Tour
 from tk.ui import components
 from tk.ui import format as fmt
-from tk.ui.map_view import RelationView, relations, short_name, start_colors
+from tk.ui.map_view import RelationView, draw_tour, relations, short_name, start_colors
 from tk.ui.theme import MAP_LINES, SELECTION_COLORS, TOKENS
 
 MAX_ROUTES = len(SELECTION_COLORS)
@@ -155,9 +155,19 @@ def sankey_chart(result: Result, scenario: str, sources: list[tuple[str, str, li
 class RouteCompare:
     """Auswahl von bis zu acht Routen und Vergleich ihrer Varianten."""
 
-    def __init__(self, on_highlight: Callable[[dict[str, str]], None], on_url: Callable[[str], None]) -> None:
+    def __init__(
+        self,
+        on_highlight: Callable[[dict[str, str]], None],
+        on_url: Callable[[str], None],
+        on_tour: Callable[[int], None],
+    ) -> None:
         self.on_highlight = on_highlight
         self.on_url = on_url
+        self.on_tour = on_tour
+        self.bundle_mode = "auto"
+        self.window_mode = "tag"
+        self.window_days = 2
+        self._tour_layers: list[object] = []
         self.result: Result | None = None
         self.scenario = "M3"
         self.params: Assumptions | None = None
@@ -278,6 +288,167 @@ class RouteCompare:
                 f"height:{max(180, 60 * len(groups)):.0f}px"
             )
             ui.label(series[0][2].erklaerung).classes("tk-label")
+            ui.separator().classes("my-2")
+            self.bundle_box = ui.column().classes("w-full gap-3")
+        self._render_bundle()
+
+    def _bundle_tours(self, result: Result) -> list[Tour]:
+        """Excel-Touren mit mindestens einer Sendung der gewählten Routen."""
+        wanted = {fold(k) for k in self.keys}
+        nrs = {
+            line.tour_nr
+            for line in result.tour_lines
+            if fold(result.rows[line.input_pos - 1].relation or "") in wanted
+        }
+        return sorted((t for t in result.tours if t.tour_nr in nrs), key=lambda t: (-t.gebuendelt, t.tour_nr))
+
+    def _render_bundle(self) -> None:
+        result, params = self.result, self.params
+        if result is None or params is None or not self.keys:
+            return
+        scenario = "M3" if self.scenario == "M3" else "M2"
+        self.bundle_box.clear()
+        with self.bundle_box:
+            with ui.row().classes("w-full items-center justify-between gap-2"):
+                ui.label("Bündelung der gewählten Routen").classes("tk-section")
+                ui.toggle(
+                    {"auto": f"Automatisch ({scenario})", "eigen": "Eigene Gruppe"},
+                    value=self.bundle_mode,
+                    on_change=lambda e: self._set_bundle(mode=e.value),
+                ).props("dense no-caps unelevated toggle-color=primary")
+            if self.bundle_mode == "auto":
+                tours = self._bundle_tours(result)
+                bundled = [t for t in tours if t.gebuendelt]
+                ui.label(
+                    f"{len(tours)} Touren der Excel enthalten Sendungen der gewählten Routen, davon {len(bundled)} "
+                    "gebündelt. Touren entstehen je Tag und Startort (Next-Fit) und können Sendungen anderer "
+                    "Relationen enthalten."
+                ).classes("tk-label")
+
+                def buttons(items: list[Tour]) -> None:
+                    with ui.row().classes("gap-1 flex-wrap"):
+                        for t in items:
+                            ui.button(
+                                f"Tour {t.tour_nr}: {t.sendungen} Sendungen, {t.fahrzeug}",
+                                on_click=lambda _e, n=t.tour_nr: self.on_tour(n),
+                            ).props("outline dense no-caps color=primary")
+
+                buttons(bundled[:12])
+                if len(bundled) > 12:
+                    with ui.expansion(f"{len(bundled) - 12} weitere Touren").props("dense").classes("w-full"):
+                        buttons(bundled[12:])
+                return
+            self._render_custom(result, params, scenario)
+
+    def _set_bundle(
+        self, mode: str | None = None, window: str | None = None, days: int | None = None
+    ) -> None:
+        if mode is not None:
+            self.bundle_mode = mode
+        if window is not None:
+            self.window_mode = window
+        if days is not None:
+            self.window_days = int(days)
+        self._render_bundle()
+
+    def _render_custom(self, result: Result, params: Assumptions, scenario: str) -> None:
+        with ui.row().classes("w-full items-center gap-4 flex-wrap"):
+            ui.label("Bündelungsregel").classes("tk-label")
+            ui.toggle(
+                {"tag": "Gleicher Tag", "fenster": "Zeitfenster"},
+                value=self.window_mode,
+                on_change=lambda e: self._set_bundle(window=e.value),
+            ).props("dense no-caps unelevated toggle-color=primary")
+            if self.window_mode == "fenster":
+                ui.slider(
+                    min=1,
+                    max=5,
+                    step=1,
+                    value=self.window_days,
+                    on_change=lambda e: self._set_bundle(days=e.value),
+                ).props("label-always markers snap").style("width:180px")
+                ui.label(f"Block von {self.window_days + 1} Tagen").classes("tk-label")
+        days = self.window_days if self.window_mode == "fenster" else 0
+        b = custom_bundle(result, self.keys, params, scenario, days)
+        if len(b.startorte) > 1:
+            components.note(
+                "Bündel nur je Startort (Definition M2): die gewählten Routen bilden "
+                f"{len(b.startorte)} getrennte Gruppen ({', '.join(short_name(s) for s in b.startorte)})."
+            )
+        rows = []
+        for name, t in (("Ist (Einzelversand)", b.ist), (f"Automatisch ({b.szenario})", b.automatisch),
+                        ("Eigene Gruppe", b.eigen)):  # fmt: skip
+            rows.append(
+                {
+                    "v": name,
+                    "f": fmt.number(t.fahrten, 1),
+                    "km": fmt.number(t.lkw_km, 0),
+                    "co2": fmt.number(t.co2_kg, 1),
+                    "k": fmt.number(t.kosten_eur, 2),
+                    "d": fmt.percent(t.co2_kg / b.ist.co2_kg - 1) if b.ist.co2_kg else "",
+                }
+            )
+        cols = [
+            ("v", "Variante", "left"), ("f", "Lkw-Fahrten", "right"), ("km", "Lkw-km", "right"),
+            ("co2", "CO₂e kg", "right"), ("k", "Kosten €", "right"), ("d", "Δ CO₂e gegen Ist", "right"),
+        ]  # fmt: skip
+        ui.table(
+            columns=[{"name": c, "label": lab, "field": c, "align": a} for c, lab, a in cols],
+            rows=rows,
+            row_key="v",
+        ).props("dense flat hide-bottom").classes("w-full")
+        shift = (
+            "keine Verschiebung"
+            if b.verschiebung_max == 0
+            else f"Verschiebung bis {b.verschiebung_max} Tag(e), im Mittel {fmt.number(b.verschiebung_mittel, 2)} Tage"
+        )
+        ui.label(
+            f"{b.sendungen} Sendungen, {b.gebuendelt} gebündelte Touren; Servicefolge: {shift} "
+            "(Sendung wartet bis zum letzten Versandtag ihrer Tour)."
+        )
+        ui.label(b.erklaerung).classes("tk-label")
+        tours = [t for t in b.touren if t.tour.gebuendelt]
+        if not tours:
+            components.empty_state("Keine Tour erfüllt die Bündelungsbedingungen (K2.15).")
+            return
+        options = {
+            i: f"Tour {i + 1}: {short_name(t.tour.start)}, {t.tour.sendungen} Sendungen, {t.tour.stopps} Stopps, "
+            f"{t.tour.fahrzeug}"
+            for i, t in enumerate(tours)
+        }
+        ui.select(
+            options, value=0, label="Eigene Tour ansehen", on_change=lambda e: show(int(e.value))
+        ).props("dense outlined").style("min-width:360px")
+        with ui.row().classes("w-full items-start gap-4 no-wrap tk-two-col"):
+            with ui.column().classes("flex-1 min-w-0 gap-1"):
+                tour_map = ui.leaflet(center=(49.5, 9.0), zoom=6).classes("w-full").style("height:380px")
+            side = ui.column().classes("gap-2").style("width:380px;flex-shrink:0")
+
+        def show(i: int) -> None:
+            for layer in self._tour_layers:
+                tour_map.remove_layer(layer)  # type: ignore[arg-type]
+            t = tours[i]
+            points = [(lat, lon) for _, lat, lon in t.stopps]
+            labels = [name for name, _, _ in t.stopps]
+            per_stop = {fold(k): v for k, v in t.sendungen_je_ziel.items()}
+            self._tour_layers = draw_tour(tour_map, points, labels, per_stop, None)
+            side.clear()
+            with side:
+                ui.label(f"Eigene Tour {i + 1}").classes("tk-section")
+                first, last = min(t.tage), max(t.tage)
+                ui.label(
+                    f"{t.tour.sendungen} Sendungen aus {len(set(t.tage))} Versandtag(en) "
+                    f"({serial_to_date(first):%d.%m.%Y} bis {serial_to_date(last):%d.%m.%Y}), "
+                    f"{fmt.with_unit(t.tour.gewicht_kg, 'kg', 0)}, {fmt.number(t.tour.paletten)} Paletten, {t.tour.fahrzeug}."
+                )
+                ui.label(
+                    f"Tour {fmt.with_unit(t.tour.lkw_km, 'km', 1)} statt {fmt.with_unit(t.tour.max_distanz_km, 'km', 1)} "
+                    f"längste Einzelstrecke; CO₂e {fmt.with_unit(t.tour.co2, 'kg', 1)} statt "
+                    f"{fmt.with_unit(t.tour.co2_einzel, 'kg', 1)} einzeln."
+                ).classes("tk-label")
+
+        self._tour_layers = []
+        show(0)
 
     def _table(self, label: str, color: str, opts: RouteOptions) -> None:
         best_co2 = min(o.co2_kg for o in opts.optionen)

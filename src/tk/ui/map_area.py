@@ -38,9 +38,9 @@ from tk.routing import (
 )
 from tk.ui import components
 from tk.ui import format as fmt
-from tk.ui.map_view import MapView, bind_layer, relations, view_for
+from tk.ui.map_view import MapView, bind_layer, draw_tour, relations, view_for
 from tk.ui.route_compare import RouteCompare
-from tk.ui.theme import MAP_LINES, TOKENS
+from tk.ui.theme import MAP_LINES
 
 _cache: RouteCache | None = None
 
@@ -414,64 +414,10 @@ class TourView:
             self.map.remove_layer(layer)  # type: ignore[arg-type]
         self._layers = []
         route = route_cache().get(points) if len(points) >= 2 else None
-        if points:
-            start = points[0]
-            per_stop: dict[str, int] = {}
-            for row in comp.sendungen:
-                per_stop[fold(row.ziel_label or "")] = per_stop.get(fold(row.ziel_label or ""), 0) + 1
-            ist_color, _ = MAP_LINES["ist"]
-            for name, p in zip(labels[1:], points[1:], strict=True):
-                n = per_stop.get(fold(name), 1)
-                self._layers.append(
-                    self.map.generic_layer(
-                        name="polyline",
-                        args=[
-                            [list(start), list(p)],
-                            {"color": ist_color, "weight": 1.5 + 2 * n, "opacity": 0.6},
-                        ],
-                    )
-                )
-            if route is not None:
-                color, _ = MAP_LINES["lkw"]
-                plan_layer = self.map.generic_layer(
-                    name="polyline", args=[route.geometry, {"color": color, "weight": 4}]
-                )
-            else:
-                color, dash = MAP_LINES["luft"]
-                plan_layer = self.map.generic_layer(
-                    name="polyline",
-                    args=[[list(p) for p in points], {"color": color, "weight": 3, "dashArray": dash}],
-                )
-            self._layers.append(plan_layer)
-            markers = []
-            for i, (name, p) in enumerate(zip(labels, points, strict=True)):
-                marker = self.map.generic_layer(
-                    name="circleMarker",
-                    args=[
-                        list(p),
-                        {
-                            "radius": 7,
-                            "color": TOKENS["text"],
-                            "fillColor": TOKENS["surface"],
-                            "fillOpacity": 1,
-                            "weight": 2,
-                        },
-                    ],
-                )
-                markers.append((marker, f"{'Start' if i == 0 else i}: {name}"))
-                self._layers.append(marker)
-
-            async def bind() -> None:
-                await self.map.initialized()
-                for marker, text in markers:
-                    marker.run_method("bindTooltip", text, {"permanent": True, "direction": "right"})
-                lats = [p[0] for p in points]
-                lons = [p[1] for p in points]
-                self.map.run_map_method(
-                    "fitBounds", [[min(lats), min(lons)], [max(lats), max(lons)]], {"padding": [40, 40]}
-                )
-
-            ui.timer(0.2, bind, once=True)
+        per_stop: dict[str, int] = {}
+        for row in comp.sendungen:
+            per_stop[fold(row.ziel_label or "")] = per_stop.get(fold(row.ziel_label or ""), 0) + 1
+        self._layers = draw_tour(self.map, points, labels, per_stop, route)
         self.side.clear()
         with self.side:
             ui.label(f"Tour {tour.tour_nr}, Start {tour.start}").classes("tk-section")
@@ -556,7 +502,7 @@ class MapArea:
             with ui.tab_panel(self.t_tour).classes("p-0 pt-2"):
                 self.tours = TourView(result, page)
         ui.separator().classes("my-2")
-        self.routes = RouteCompare(self.compare.set_highlight, page.set_route_param)
+        self.routes = RouteCompare(self.compare.set_highlight, page.set_route_param, self.open_tour)
         ui.separator().classes("my-2")
         self.detail = DetailPanel(self.open_tour)
         self._selected: str | None = None

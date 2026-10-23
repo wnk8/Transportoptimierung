@@ -12,6 +12,7 @@ import html
 import json
 import math
 from dataclasses import dataclass
+from typing import Any
 
 from nicegui import ui
 
@@ -422,6 +423,72 @@ def svg_network(
         )
     parts.append("</svg>")
     return "".join(parts)
+
+
+def draw_tour(
+    m: ui.leaflet,
+    points: list[tuple[float, float]],
+    labels: list[str],
+    per_stop: dict[str, int],
+    route: Any | None,
+) -> list[object]:
+    """Ist als Stern vom Start zu jedem Ziel (Breite: Sendungen je Ziel), Plan als Tour mit Stopps.
+
+    ``per_stop`` zählt Sendungen je gefaltetem Zielnamen; ``route`` ist eine Straßenroute aus dem
+    Cache oder ``None`` (dann schematisch). Gibt die Ebenen zurück, damit der Aufrufer sie entfernt.
+    """
+    layers: list[object] = []
+    if not points:
+        return layers
+    start = points[0]
+    ist_color, _ = MAP_LINES["ist"]
+    for name, p in zip(labels[1:], points[1:], strict=True):
+        n = per_stop.get(fold(name), 1)
+        layers.append(
+            m.generic_layer(
+                name="polyline",
+                args=[[list(start), list(p)], {"color": ist_color, "weight": 1.5 + 2 * n, "opacity": 0.6}],
+            )
+        )
+    if route is not None:
+        color, _ = MAP_LINES["lkw"]
+        layers.append(m.generic_layer(name="polyline", args=[route.geometry, {"color": color, "weight": 4}]))
+    else:
+        color, dash = MAP_LINES["luft"]
+        layers.append(
+            m.generic_layer(
+                name="polyline",
+                args=[[list(p) for p in points], {"color": color, "weight": 3, "dashArray": dash}],
+            )
+        )
+    markers = []
+    for i, (name, p) in enumerate(zip(labels, points, strict=True)):
+        marker = m.generic_layer(
+            name="circleMarker",
+            args=[
+                list(p),
+                {
+                    "radius": 7,
+                    "color": TOKENS["text"],
+                    "fillColor": TOKENS["surface"],
+                    "fillOpacity": 1,
+                    "weight": 2,
+                },
+            ],
+        )
+        markers.append((marker, f"{'Start' if i == 0 else i}: {name}"))
+        layers.append(marker)
+
+    async def bind() -> None:
+        await m.initialized()
+        for marker, text in markers:
+            marker.run_method("bindTooltip", text, {"permanent": True, "direction": "right"})
+        lats = [p[0] for p in points]
+        lons = [p[1] for p in points]
+        m.run_map_method("fitBounds", [[min(lats), min(lons)], [max(lats), max(lons)]], {"padding": [40, 40]})
+
+    ui.timer(0.2, bind, once=True)
+    return layers
 
 
 def view_for(

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import pytest
 
 from tests.conftest import needs_excel
 from tests.refdata import model_and_result
-from tk.compare import relation_detail, relation_rows, route_options, vehicle_options
+from tk.compare import custom_bundle, relation_detail, relation_rows, route_options, vehicle_options
 from tk.excelfn import to_number
 
 
@@ -123,3 +124,55 @@ def test_route_colors_stay_when_others_are_removed() -> None:
     assert after == {"b": before["b"], "c": before["c"]}
     rc.keys = ["b", "c", "d"]
     assert rc.colors()["d"] == before["a"]
+
+
+def _start_keys(result: Any, index: int = 0) -> list[str]:
+    start = result.routes[index].start
+    return [r.key for r in result.routes if r.start == start]
+
+
+@needs_excel
+@pytest.mark.parametrize("scenario", ["M2", "M3"])
+def test_custom_bundle_same_day_reproduces_excel(scenario: str) -> None:
+    model, result = model_and_result()
+    keys = _start_keys(result)
+    bundle = custom_bundle(result, keys, model.params, scenario, 0)
+    start = result.routes[0].start
+    assert bundle.gebuendelt == sum(t.gebuendelt for t in result.tours if t.start == start)
+    assert bundle.eigen.co2_kg == pytest.approx(bundle.automatisch.co2_kg, abs=1e-9)
+    assert bundle.eigen.lkw_km == pytest.approx(bundle.automatisch.lkw_km, abs=1e-9)
+    assert bundle.eigen.kosten_eur == pytest.approx(bundle.automatisch.kosten_eur, abs=1e-9)
+    assert bundle.verschiebung_max == 0
+
+
+@needs_excel
+def test_custom_bundle_does_not_touch_result() -> None:
+    model, result = model_and_result()
+    before = [(r.gruppe, r.tour_nr, r.lkw_km_plan) for r in result.valid_rows]
+    tours_before = len(result.tours)
+    custom_bundle(result, _start_keys(result), model.params, "M2", 3)
+    assert [(r.gruppe, r.tour_nr, r.lkw_km_plan) for r in result.valid_rows] == before
+    assert len(result.tours) == tours_before
+
+
+@needs_excel
+def test_time_window_trades_km_for_days() -> None:
+    model, result = model_and_result()
+    keys = _start_keys(result)
+    same_day = custom_bundle(result, keys, model.params, "M2", 0)
+    window = custom_bundle(result, keys, model.params, "M2", 2)
+    assert window.eigen.lkw_km <= same_day.eigen.lkw_km
+    assert 0 < window.verschiebung_max <= 2
+    assert window.sendungen == same_day.sendungen == sum(r.sendungen for r in result.routes if r.key in keys)
+
+
+@needs_excel
+def test_custom_bundle_subset_lists_starts() -> None:
+    model, result = model_and_result()
+    keys = [
+        _start_keys(result, 0)[0],
+        next(r.key for r in result.routes if r.start != result.routes[0].start),
+    ]
+    bundle = custom_bundle(result, keys, model.params, "M2", 0)
+    assert len(bundle.startorte) == 2
+    assert all(t.tour.start in bundle.startorte for t in bundle.touren)

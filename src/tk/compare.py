@@ -7,14 +7,17 @@ Excel; die gewählte Variante ist immer die der Excel (Rangregel K2.5, Bündelun
 
 from __future__ import annotations
 
+import copy
 import math
 import statistics
 from collections import defaultdict
 from dataclasses import dataclass, field
 
 from tk import costs, emissions
+from tk.bundling import assign_groups, build_tours
 from tk.excelfn import fold, roundup0, to_number
 from tk.models import Assumptions, Result, ShipmentRow, Tour, TourLine
+from tk.routing import nearest_neighbor_order
 from tk.vehicle import pick_vehicle
 
 COMPARISON_NOTE = "Vergleichsrechnung, nicht Teil der Excel"
@@ -477,5 +480,140 @@ def route_options(result: Result, key: str, params: Assumptions) -> RouteOptions
             "Kosten Ist × (1 + A07), Zusatzlaufzeit A05. Plan M2 und M3 aus der Excel-Logik. "
             + COMPARISON_NOTE
             + "."
+        ),
+    )
+
+
+@dataclass(slots=True)
+class BundleTotals:
+    fahrten: float
+    lkw_km: float
+    co2_kg: float
+    kosten_eur: float
+
+
+@dataclass(slots=True)
+class CustomTour:
+    tour: Tour
+    stopps: list[tuple[str, float, float]]
+    """Start, dann Ziele (Name, Breite, Länge) in der Reihenfolge "nächster Nachbar" (Darstellung)."""
+    sendungen_je_ziel: dict[str, int]
+    tage: list[int]
+    """Versanddaten (Excel-Serienzahl) der Sendungen der Tour."""
+
+
+@dataclass(slots=True)
+class CustomBundle:
+    keys: list[str]
+    szenario: str
+    fenster_tage: int
+    sendungen: int
+    ist: BundleTotals
+    automatisch: BundleTotals
+    eigen: BundleTotals
+    touren: list[CustomTour]
+    gebuendelt: int
+    verschiebung_max: int
+    verschiebung_mittel: float
+    startorte: list[str]
+    erklaerung: str
+
+
+def custom_bundle(
+    result: Result, keys: list[str], params: Assumptions, scenario: str = "M2", fenster_tage: int = 0
+) -> CustomBundle:
+    r"""Eigene Bündelung nur der gewählten Relationen, wahlweise über ein Zeitfenster.
+
+    Kopien der Sendungen der gewählten Relationen durchlaufen dieselbe Tourbildung wie M2
+    (:func:`assign_groups`, :func:`build_tours`: Next-Fit je Gruppe, Tour-km
+    :math:`d_{\max}(1 + A_{10}(s-1))`, Entscheidung K2.15). Gruppe = Tag (``fenster_tage = 0``)
+    oder Block von :math:`w+1` Tagen, je Startort. Sendungen, die die Bahnprüfung bestehen, fahren
+    in M3 Bahn und sind nie bündelbar (wie Excel). Verschiebung je Sendung einer gebündelten Tour:
+    letzter Versandtag der Tour minus eigener Versandtag. Das Ergebnis der Excel bleibt unverändert.
+    """
+    plan_scenario = "M3" if scenario == "M3" else "M2"
+    wanted = {fold(k) for k in keys}
+    originals = [r for r in result.valid_rows if fold(r.relation or "") in wanted]
+    rows = copy.deepcopy(originals)
+    assign_groups(rows, fenster_tage)
+    lines, tours = build_tours(rows, params, result.c04)
+    by_pos = {line.input_pos: line for line in lines}
+    trips = km = co2 = cost = 0.0
+    for i, row in enumerate(rows, start=1):
+        line = by_pos.get(i)
+        if plan_scenario == "M3" and row.bahn == "Ja":
+            co2 += row.co2_bahn or 0.0
+            cost += row.kosten_bahn or 0.0
+        elif line is not None:
+            trips += line.fahrzeuge_plan or 0
+            km += line.lkw_km_plan or 0.0
+            co2 += line.co2_plan or 0.0
+            cost += line.kosten_plan or 0.0
+        else:
+            trips += row.fahrzeuge_n or 0
+            km += row.lkw_km_ist or 0.0
+            co2 += row.co2_ist_fzgkm or 0.0
+            cost += row.kosten_ist or 0.0
+    ist = BundleTotals(
+        float(sum(r.fahrzeuge_n or 0 for r in originals)),
+        math.fsum(r.lkw_km_ist or 0.0 for r in originals),
+        math.fsum(r.co2_ist_fzgkm or 0.0 for r in originals),
+        math.fsum(r.kosten_ist or 0.0 for r in originals),
+    )
+    autos = [relation_detail(result, k, plan_scenario).plan for k in keys]
+    auto = BundleTotals(
+        math.fsum(a.fahrten for a in autos),
+        math.fsum(a.lkw_km for a in autos),
+        math.fsum(a.co2_kg for a in autos),
+        math.fsum(a.kosten_eur for a in autos),
+    )
+    members: dict[int, list[ShipmentRow]] = defaultdict(list)
+    for line in lines:
+        members[line.tour_nr].append(rows[line.input_pos - 1])
+    shifts: list[int] = []
+    custom: list[CustomTour] = []
+    for tour in sorted(tours, key=lambda t: (-t.gebuendelt, -t.sendungen, t.tour_nr)):
+        ms = members[tour.tour_nr]
+        days = [m.datum_serial or 0 for m in ms]
+        if tour.gebuendelt:
+            shifts += [max(days) - d for d in days]
+        head = ms[0]
+        per_stop: dict[str, int] = defaultdict(int)
+        coords: dict[str, tuple[float, float]] = {}
+        for m in ms:
+            label = m.ziel_label or ""
+            per_stop[label] += 1
+            if m.ziel_lat is not None and m.ziel_lon is not None:
+                coords.setdefault(label, (m.ziel_lat, m.ziel_lon))
+        start = (head.start_lat or 0.0, head.start_lon or 0.0)
+        order = nearest_neighbor_order(start, list(coords.items()))
+        custom.append(
+            CustomTour(
+                tour=tour,
+                stopps=[(head.start_label or "", *start), *[(n, p[0], p[1]) for n, p in order]],
+                sendungen_je_ziel=dict(per_stop),
+                tage=days,
+            )
+        )
+    rule = "je Tag" if fenster_tage == 0 else f"je Block von {fenster_tage + 1} Tagen"
+    return CustomBundle(
+        keys=list(keys),
+        szenario=plan_scenario,
+        fenster_tage=fenster_tage,
+        sendungen=len(rows),
+        ist=ist,
+        automatisch=auto,
+        eigen=BundleTotals(trips, km, co2, cost),
+        touren=custom,
+        gebuendelt=sum(1 for t in tours if t.gebuendelt),
+        verschiebung_max=max(shifts, default=0),
+        verschiebung_mittel=statistics.fmean(shifts) if shifts else 0.0,
+        startorte=sorted({r.start_label or "" for r in rows}),
+        erklaerung=(
+            f"Eigene Gruppe: nur die gewählten Relationen, Gruppe {rule} und Startort, "
+            "Next-Fit in das größte Fahrzeug, Tour-km = längste Distanz × (1 + A10 × (Stopps − 1)), "
+            "Bündelung nur wenn K2.15 erfüllt. Automatisch: Ergebnis der Excel für dieselben Sendungen "
+            "(Sammeltouren anteilig nach tkm, auch mit Sendungen anderer Relationen). "
+            f"{COMPARISON_NOTE}."
         ),
     )

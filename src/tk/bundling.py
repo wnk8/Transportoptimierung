@@ -19,18 +19,24 @@ GROUP_FACTOR = 10_000
 """Gruppe = Datum x 10.000 + Startort-Nr. (Definition, Assumptions K3.7)."""
 
 
-def assign_groups(rows: list[ShipmentRow]) -> None:
+def assign_groups(rows: list[ShipmentRow], window_days: int = 0) -> None:
     r"""Gruppe und Rang je bündelbarer Sendung (Register K2.13, Input AP bis AS).
 
     .. math:: \text{Gruppe} = \text{Datum}\cdot 10\,000 + \text{Position der Start-Zuordnung}
 
     Rang in der Gruppe: Entfernung absteigend, bei Gleichstand Eingabereihenfolge.
+
+    ``window_days`` > 0 ist eine Vergleichsrechnung (nicht Excel): Das Datum wird auf Blöcke von
+    ``window_days + 1`` Tagen gerastert, :math:`\lfloor \text{Datum}/(w+1)\rfloor (w+1)`, sodass
+    Sendungen aus mehreren Tagen eine Gruppe bilden. Mit 0 gilt die Excel-Regel unverändert.
     """
     first = first_positions([r.start_label for r in rows])
+    block = window_days + 1
     for row, pos in zip(rows, first, strict=True):
         if row.ok:
             assert row.datum_serial is not None and pos is not None
-            row.gruppe = row.datum_serial * GROUP_FACTOR + pos + 1
+            day = row.datum_serial // block * block
+            row.gruppe = day * GROUP_FACTOR + pos + 1
             row.buendelbar = 1 if row.bahn == "Nein" and row.fahrzeuge_n == 1 else 0
     by_group: dict[int, list[ShipmentRow]] = defaultdict(list)
     for row in rows:
