@@ -46,6 +46,14 @@ MAP_LINES: dict[str, tuple[str, str]] = {
 }
 """Kartenlinien: Farbe und Strichmuster (Muster zusätzlich zur Farbe)."""
 
+START_COLORS: tuple[str, ...] = ("#1F6F8B", "#9A4F2F", "#5B4BB0", "#2D8470", "#8A5A00")
+"""Linienfarbe je Startort (Reihenfolge der Startorte alphabetisch); Szenario über das Muster."""
+
+SELECTION_COLORS: tuple[str, ...] = (
+    "#0072B2", "#C24A00", "#00795A", "#A8327A", "#6E4BB0", "#8A6A00", "#B42318", "#1F6F8B",
+)  # fmt: skip
+"""Ausgewählte Routen: kategoriale Farben (Okabe-Ito, für Kontrast abgedunkelt), überall gleich."""
+
 MAP_BACKGROUND = "#E5E5E5"
 """Bezugsfläche für den Linienkontrast: helle, entsättigte OSM-Kachel nach dem Filter in 7.3."""
 
@@ -294,6 +302,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
 /* ---------- Karte und Fortschritt ---------- */
 .leaflet-tile-pane { filter: grayscale(0.85) sepia(0.08) contrast(0.95) brightness(1.04); }
 .leaflet-container { border-radius: 16px; background: var(--canvas); }
+.leaflet-tooltip.tk-map-label { background: rgba(255,255,255,0.85); border: 0; box-shadow: none; padding: 0 4px;
+  font-size: 11px; font-weight: 500; color: var(--text); border-radius: 4px; }
+.leaflet-tooltip.tk-map-label::before { display: none; }
+.leaflet-tooltip.tk-map-start { font-size: 12px; font-weight: 600; }
 .tk-progress { height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
 .tk-progress > div { height: 100%%; width: 40%%; background: var(--text); animation: tk-slide 900ms var(--ease) infinite; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

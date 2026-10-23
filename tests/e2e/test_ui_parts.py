@@ -15,7 +15,8 @@ import pytest
 from tests.conftest import ROOT, needs_excel
 from tests.refdata import model_and_result
 from tk.ui import format as fmt
-from tk.ui.map_view import line_specs, relations, svg_network, view_for
+from tk.ui.map_view import DIMMED_OPACITY, arc, line_specs, nodes, relations, svg_network, view_for
+from tk.ui.theme import START_COLORS
 
 
 def test_german_number_format() -> None:
@@ -69,11 +70,34 @@ def test_before_and_after_share_one_width_scale() -> None:
         assert (weight <= before[key]) == (rel.lkw_km_plan <= rel.lkw_km_ist)
 
 
+def test_arc_starts_and_ends_at_the_nodes() -> None:
+    points = arc(48.8, 9.2, 50.0, 8.3, 0.12)
+    assert points[0] == [48.8, 9.2]
+    assert points[-1] == pytest.approx([50.0, 8.3])
+    assert points[len(points) // 2] != pytest.approx([49.4, 8.75])
+
+
+@needs_excel
+def test_start_filter_colors_and_highlight() -> None:
+    _, result = model_and_result()
+    stuttgart = next(r.start for r in relations(result, "Ist") if "Stuttgart" in r.start)
+    only = line_specs(result, "Ist", "vorher", start=stuttgart)
+    assert len(only) == 15
+    assert {o["color"] for _, o, _, _ in only} <= set(START_COLORS)
+    assert len(nodes(result, stuttgart)) == 16
+    key = only[0][3]
+    marked = line_specs(result, "M3", "vorher", highlight={key: "#0072B2"})
+    chosen = [o for _, o, _, k in marked if k == key]
+    others = [o for _, o, _, k in marked if k != key]
+    assert chosen[0]["color"] == "#0072B2" and chosen[0]["opacity"] == 0.9
+    assert all(o["opacity"] == DIMMED_OPACITY for o in others)
+
+
 @needs_excel
 def test_svg_fallback_contains_nodes_and_edges() -> None:
     _, result = model_and_result()
     svg = svg_network(result, "M3", "nachher")
-    assert svg.startswith("<svg") and svg.count("<line") >= 45 and "Hamburg" in svg
+    assert svg.startswith("<svg") and svg.count("<polyline") >= 45 and "Hamburg" in svg
 
 
 def test_view_for_germany() -> None:

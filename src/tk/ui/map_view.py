@@ -20,13 +20,18 @@ from tk.excelfn import fold
 from tk.models import Result
 from tk.ui import format as fmt
 from tk.ui.layout import SCENARIO_LABEL
-from tk.ui.theme import MAP_LINES, TOKENS
+from tk.ui.theme import MAP_LINES, START_COLORS, TOKENS
 
 GERMANY_CENTER = (51.1, 10.2)
 TILE_PROBE = "https://a.tile.osm.org/6/33/21.png"
 """Eine Kachel desselben Servers wie die Karte (NiceGUI-Standard: tile.osm.org, OpenStreetMap)."""
-RAIL_OFFSET = 0.012
-"""Seitlicher Versatz der Bahnlinie (Anteil der Linienlänge), damit Lkw und Bahn sichtbar bleiben."""
+ROAD_BULGE = 0.12
+"""Bogenhöhe der Lkw-Linie (Anteil der Linienlänge); Bögen trennen Linien aus demselben Startort."""
+RAIL_BULGE = 0.24
+"""Bogenhöhe der Bahnlinie: weiter außen als Lkw, damit beide Linien einer Relation sichtbar bleiben."""
+ARC_POINTS = 16
+DIMMED_OPACITY = 0.15
+"""Deckkraft nicht ausgewählter Linien, solange Routen ausgewählt sind."""
 
 
 @dataclass(slots=True)
@@ -133,11 +138,22 @@ def _popup(rel: RelationView, scenario: str) -> str:
     return f"<b>{title}</b><table style='font-size:12px;margin-top:4px'>{body}</table>"
 
 
-def _rail_path(rel: RelationView) -> list[list[float]]:
-    dlat, dlon = rel.lat2 - rel.lat1, rel.lon2 - rel.lon1
-    length = math.hypot(dlat, dlon) or 1.0
-    off_lat, off_lon = -dlon / length * RAIL_OFFSET * length, dlat / length * RAIL_OFFSET * length
-    return [[rel.lat1 + off_lat, rel.lon1 + off_lon], [rel.lat2 + off_lat, rel.lon2 + off_lon]]
+def arc(lat1: float, lon1: float, lat2: float, lon2: float, bulge: float) -> list[list[float]]:
+    r"""Quadratischer Bézier-Bogen von A nach B (schematisch, keine Route).
+
+    .. math:: P(t) = (1-t)^2 A + 2t(1-t) C + t^2 B, \quad C = M + b\,(-\Delta\varphi, \Delta\lambda)
+
+    mit Mittelpunkt :math:`M` und Bogenhöhe :math:`b`; die Ausbuchtung liegt immer links der Fahrtrichtung.
+    """
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    c_lat = (lat1 + lat2) / 2 + bulge * dlon
+    c_lon = (lon1 + lon2) / 2 - bulge * dlat
+    points = []
+    for i in range(ARC_POINTS + 1):
+        t = i / ARC_POINTS
+        a, b, c = (1 - t) ** 2, 2 * t * (1 - t), t**2
+        points.append([a * lat1 + b * c_lat + c * lat2, a * lon1 + b * c_lon + c * lon2])
+    return points
 
 
 Spec = tuple[list[list[float]], dict[str, object], str, str]
@@ -153,64 +169,138 @@ def bind_layer(layer: object, tooltip: str, key: str, event: str = RELATION_EVEN
     layer.run_method(":on", "'click'", f"() => emitEvent({json.dumps(event)}, {json.dumps(key)})")  # type: ignore[attr-defined]
 
 
-def line_specs(result: Result, scenario: str, side: str) -> list[Spec]:
+def start_colors(rels: list[RelationView]) -> dict[str, str]:
+    """Farbe je Startort; Startorte alphabetisch, damit eine Farbe bei jeder Rechnung gleich bleibt."""
+    starts = sorted({r.start for r in rels})
+    return {s: START_COLORS[i % len(START_COLORS)] for i, s in enumerate(starts)}
+
+
+def short_name(label: str) -> str:
+    """ "70173 Stuttgart" wird "Stuttgart"."""
+    return label.split(" ", 1)[-1]
+
+
+def line_specs(
+    result: Result,
+    scenario: str,
+    side: str,
+    color_by: str = "start",
+    start: str | None = None,
+    highlight: dict[str, str] | None = None,
+) -> list[Spec]:
     """Linien einer Karte: (Koordinaten, Leaflet-Optionen, Tooltip-HTML, Relationsschlüssel).
 
     Breite links und rechts aus derselben Größe (Lkw-km je Relation) mit gemeinsamem
     Maximum, damit eine dünnere Linie rechts tatsächlich weniger Lkw-km bedeutet. Die
     Bahnlinie zeigt die Lkw-km, die von der Straße verlagert werden. Bei Szenario Ist
     gibt es kein Nachher.
+
+    ``color_by``: ``"start"`` färbt nach Startort (Bahn gestrichelt), ``"szenario"`` nach
+    Ist, Lkw und Bahn wie bisher. ``start`` beschränkt auf einen Startort. ``highlight``
+    ordnet ausgewählten Relationen eine Farbe zu; alle anderen Linien treten zurück.
     """
     if side == "nachher" and scenario == "Ist":
         return []
     rels = relations(result, scenario)
     km_max = max((max(r.lkw_km_ist, r.lkw_km_plan) for r in rels), default=0.0)
+    by_start = start_colors(rels)
+    picked = {fold(k): c for k, c in (highlight or {}).items()}
+    _, dash = MAP_LINES["bahn"]
     specs: list[Spec] = []
-    if side == "vorher":
-        color, _ = MAP_LINES["ist"]
-        for rel in rels:
-            opts = {"color": color, "weight": _width(rel.lkw_km_ist, km_max), "opacity": 0.9}
-            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, _popup(rel, scenario), rel.key))
-        return specs
-    lkw, _ = MAP_LINES["lkw"]
-    bahn, dash = MAP_LINES["bahn"]
     for rel in rels:
+        if start is not None and rel.start != start:
+            continue
+        chosen = picked.get(fold(rel.key))
+        opacity = 0.9 if not picked or chosen else DIMMED_OPACITY
+
+        def color(kind: str, rel: RelationView = rel, chosen: str | None = chosen) -> str:
+            if chosen:
+                return chosen
+            return by_start[rel.start] if color_by == "start" else MAP_LINES[kind][0]
+
         popup = _popup(rel, scenario)
+        extra = 1.5 if chosen else 0.0
+        if side == "vorher":
+            opts: dict[str, object] = {
+                "color": color("ist"),
+                "weight": _width(rel.lkw_km_ist, km_max) + extra,
+                "opacity": opacity,
+            }
+            specs.append((arc(rel.lat1, rel.lon1, rel.lat2, rel.lon2, ROAD_BULGE), opts, popup, rel.key))
+            continue
         if rel.lkw_km_plan > 0:
-            opts = {"color": lkw, "weight": _width(rel.lkw_km_plan, km_max), "opacity": 0.9}
-            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, popup, rel.key))
+            opts = {
+                "color": color("lkw"),
+                "weight": _width(rel.lkw_km_plan, km_max) + extra,
+                "opacity": opacity,
+            }
+            specs.append((arc(rel.lat1, rel.lon1, rel.lat2, rel.lon2, ROAD_BULGE), opts, popup, rel.key))
         if rel.n_bahn > 0:
             opts = {
-                "color": bahn,
-                "weight": _width(rel.lkw_km_bahn, km_max),
+                "color": color("bahn"),
+                "weight": _width(rel.lkw_km_bahn, km_max) + extra,
                 "dashArray": dash,
-                "opacity": 0.95,
+                "opacity": opacity,
             }
-            specs.append((_rail_path(rel), opts, popup, rel.key))
+            specs.append((arc(rel.lat1, rel.lon1, rel.lat2, rel.lon2, RAIL_BULGE), opts, popup, rel.key))
     return specs
 
 
-def legend(scenario: str) -> None:
-    items = [("ist", "Ist, Einzelversand")]
-    if scenario != "Ist":
-        items.append(("lkw", f"{scenario}, Lkw"))
-    if scenario == "M3":
-        items.append(("bahn", "M3, Bahn, gestrichelt (Breite: verlagerte Lkw-km)"))
+Node = tuple[str, float, float, str]
+"""Knoten: Name, Breite, Länge, Farbe (Startort) oder leer (Ziel)."""
+
+
+def nodes(result: Result, start: str | None = None) -> list[Node]:
+    """Startorte (farbig) und Ziele der sichtbaren Relationen."""
+    rels = [r for r in relations(result, "Ist") if start is None or r.start == start]
+    colors = start_colors(relations(result, "Ist"))
+    out: dict[str, Node] = {}
+    for r in rels:
+        out.setdefault(r.start, (r.start, r.lat1, r.lon1, colors[r.start]))
+    for r in rels:
+        out.setdefault(r.ziel, (r.ziel, r.lat2, r.lon2, ""))
+    return list(out.values())
+
+
+def legend(scenario: str, color_by: str = "start", starts: dict[str, str] | None = None) -> None:
+    def swatch(color: str, dash: str, text: str) -> None:
+        with ui.row().classes("items-center gap-1"):
+            ui.html(
+                f'<svg width="36" height="10" aria-hidden="true"><line x1="0" y1="5" x2="36" y2="5" '
+                f'stroke="{color}" stroke-width="4" stroke-dasharray="{dash}"/></svg>'
+            )
+            ui.label(text).classes("tk-label")
+
     with ui.row().classes("items-center gap-4 flex-wrap"):
-        for key, text in items:
-            color, dash = MAP_LINES[key]
-            with ui.row().classes("items-center gap-1"):
-                ui.html(
-                    f'<svg width="36" height="10" aria-hidden="true"><line x1="0" y1="5" x2="36" y2="5" '
-                    f'stroke="{color}" stroke-width="4" stroke-dasharray="{dash}"/></svg>'
-                )
-                ui.label(text).classes("tk-label")
+        if color_by == "start" and starts:
+            for name, color in starts.items():
+                swatch(color, "", f"Start {short_name(name)}")
+            if scenario == "M3":
+                swatch(TOKENS["muted"], MAP_LINES["bahn"][1], "Bahn, gestrichelt (Breite: verlagerte Lkw-km)")
+        else:
+            items = [("ist", "Ist, Einzelversand")]
+            if scenario != "Ist":
+                items.append(("lkw", f"{scenario}, Lkw"))
+            if scenario == "M3":
+                items.append(("bahn", "M3, Bahn, gestrichelt (Breite: verlagerte Lkw-km)"))
+            for key, text in items:
+                color, dash = MAP_LINES[key]
+                swatch(color, dash, text)
         ui.label("Breite: Lkw-km je Relation, gleiche Skala links und rechts").classes("tk-label")
         ui.label("Luftlinie, schematisch").classes("tk-label")
 
 
-def svg_network(result: Result, scenario: str, side: str, width: int = 520, height: int = 420) -> str:
-    """Knoten-Kanten-Ansicht ohne Kacheln (Rückfall bei fehlendem Netz)."""
+def svg_network(
+    result: Result,
+    scenario: str,
+    side: str,
+    width: int = 520,
+    height: int = 420,
+    color_by: str = "start",
+    start: str | None = None,
+    highlight: dict[str, str] | None = None,
+) -> str:
+    """Knoten-Kanten-Ansicht ohne Kacheln (Rückfall bei fehlendem Netz), gleiche Linien wie die Karte."""
     rels = relations(result, scenario)
     if not rels:
         return ""
@@ -229,25 +319,23 @@ def svg_network(result: Result, scenario: str, side: str, width: int = 520, heig
         f'<svg viewBox="0 0 {width} {height}" width="100%" role="img" aria-label="Knoten-Kanten-Ansicht">'
     ]
     parts.append(f'<rect width="{width}" height="{height}" fill="{TOKENS["surface"]}"/>')
-    for coords, opts, popup, _key in line_specs(result, scenario, side):
-        (a, b), (c, d) = xy(*coords[0]), xy(*coords[1])
+    for coords, opts, popup, _key in line_specs(result, scenario, side, color_by, start, highlight):
+        points = " ".join(f"{x:.1f},{y:.1f}" for x, y in (xy(lat, lon) for lat, lon in coords))
         dash = opts.get("dashArray", "")
         title = html.escape(popup.split("</b>")[0].replace("<b>", ""))
         parts.append(
-            f'<line x1="{a:.1f}" y1="{b:.1f}" x2="{c:.1f}" y2="{d:.1f}" stroke="{opts["color"]}" '
-            f'stroke-width="{float(str(opts["weight"])):.1f}" stroke-dasharray="{dash}" stroke-linecap="round">'
-            f"<title>{title}</title></line>"
+            f'<polyline points="{points}" fill="none" stroke="{opts["color"]}" '
+            f'stroke-opacity="{opts["opacity"]}" stroke-width="{float(str(opts["weight"])):.1f}" '
+            f'stroke-dasharray="{dash}" stroke-linecap="round"><title>{title}</title></polyline>'
         )
-    nodes: dict[str, tuple[float, float]] = {}
-    for r in rels:
-        nodes.setdefault(r.start, (r.lat1, r.lon1))
-        nodes.setdefault(r.ziel, (r.lat2, r.lon2))
-    for name, (lat, lon) in nodes.items():
+    for name, lat, lon, color in nodes(result, start):
         x, y = xy(lat, lon)
-        label = html.escape(name.split(" ", 1)[-1])
-        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{TOKENS["text"]}"/>')
+        r = 6 if color else 4
+        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{color or TOKENS["text"]}"/>')
+        weight = "600" if color else "400"
         parts.append(
-            f'<text x="{x + 6:.1f}" y="{y - 6:.1f}" font-size="11" fill="{TOKENS["text"]}">{label}</text>'
+            f'<text x="{x + 7:.1f}" y="{y - 6:.1f}" font-size="11" font-weight="{weight}" '
+            f'fill="{TOKENS["text"]}">{html.escape(short_name(name))}</text>'
         )
     parts.append("</svg>")
     return "".join(parts)
@@ -287,6 +375,8 @@ class MapView:
         self.offline = False
         self._layers: dict[str, list[object]] = {"vorher": [], "nachher": []}
         self._syncing = False
+        self.highlight: dict[str, str] = {}
+        """Ausgewählte Relationen und ihre Farbe (Routenvergleich)."""
         self.root = ui.column().classes("w-full gap-2")
         with self.root:
             with ui.row().classes("w-full items-center justify-between"):
@@ -296,6 +386,17 @@ class MapView:
                     value="karte",
                     on_change=lambda _: self._apply_mode(),
                 ).props("dense no-caps unelevated toggle-color=primary")
+            with ui.row().classes("w-full items-center gap-4 flex-wrap"):
+                self.start_filter = ui.toggle(
+                    {"": "Alle Startorte"}, value="", on_change=lambda _: self.render()
+                ).props("dense no-caps unelevated toggle-color=primary")
+                with ui.row().classes("items-center gap-2"):
+                    ui.label("Farbe nach").classes("tk-label")
+                    self.color_by = ui.toggle(
+                        {"start": "Startort", "szenario": "Szenario"},
+                        value="start",
+                        on_change=lambda _: self.render(),
+                    ).props("dense no-caps unelevated toggle-color=primary")
             with ui.row().classes("w-full gap-2 no-wrap tk-two-col"):
                 with ui.column().classes("flex-1 gap-1 min-w-0"):
                     self.title_left = ui.label("Vorher: Ist").classes("tk-label")
@@ -400,29 +501,76 @@ class MapView:
         self._visibility()
         self.render()
 
+    def set_highlight(self, highlight: dict[str, str]) -> None:
+        self.highlight = dict(highlight)
+        self.render()
+
+    def _sync_start_options(self) -> None:
+        assert self.result is not None
+        starts = sorted({r.start for r in relations(self.result, "Ist")})
+        options = {"": "Alle Startorte"} | {s: short_name(s) for s in starts}
+        if options != self.start_filter.options:
+            self.start_filter.set_options(
+                options, value=self.start_filter.value if self.start_filter.value in options else ""
+            )
+
     def render(self) -> None:
         if self.result is None:
             return
+        self._sync_start_options()
+        color_by = str(self.color_by.value)
+        start = str(self.start_filter.value) or None
         self.title_left.set_text("Vorher: Ist (Einzelversand)")
         self.title_right.set_text(
             "Nachher" if self.scenario == "Ist" else f"Nachher: {SCENARIO_LABEL[self.scenario]}"
         )
         self.legend_box.clear()
         with self.legend_box:
-            legend(self.scenario)
+            legend(self.scenario, color_by, start_colors(relations(self.result, "Ist")))
         if self.mode.value == "netz":
-            self.svg_left.set_content(svg_network(self.result, self.scenario, "vorher"))
-            self.svg_right.set_content(svg_network(self.result, self.scenario, "nachher"))
+            for side, box in (("vorher", self.svg_left), ("nachher", self.svg_right)):
+                box.set_content(
+                    svg_network(
+                        self.result,
+                        self.scenario,
+                        side,
+                        color_by=color_by,
+                        start=start,
+                        highlight=self.highlight,
+                    )
+                )
             return
         pending: list[tuple[ui.leaflet, object, str, str]] = []
+        labels: list[tuple[object, str, bool]] = []
         for side, m in (("vorher", self.map_left), ("nachher", self.map_right)):
             for layer in self._layers[side]:
                 m.remove_layer(layer)  # type: ignore[arg-type]
             self._layers[side] = []
-            for coords, opts, popup, key in line_specs(self.result, self.scenario, side):
+            specs = line_specs(self.result, self.scenario, side, color_by, start, self.highlight)
+            for coords, opts, popup, key in specs:
                 layer = m.generic_layer(name="polyline", args=[coords, opts])
                 self._layers[side].append(layer)
                 pending.append((m, layer, popup, key))
+            if not specs:
+                continue
+            for name, lat, lon, color in nodes(self.result, start):
+                is_start = bool(color)
+                marker = m.generic_layer(
+                    name="circleMarker",
+                    args=[
+                        [lat, lon],
+                        {
+                            "radius": 7 if is_start else 4,
+                            "color": TOKENS["surface"],
+                            "weight": 2 if is_start else 1,
+                            "fillColor": color or TOKENS["text"],
+                            "fillOpacity": 1,
+                            "interactive": False,
+                        },
+                    ],
+                )
+                self._layers[side].append(marker)
+                labels.append((marker, short_name(name), is_start))
 
         async def bind() -> None:
             # Tooltips and clicks can only be bound once the layers exist in the browser (spike S14).
@@ -437,6 +585,13 @@ class MapView:
             for _, layer, popup, key in pending:
                 bind_layer(
                     layer, popup + "<div style='margin-top:4px'>Klick: Vergleich Ist gegen Plan</div>", key
+                )
+            for marker, text, is_start in labels:
+                css = "tk-map-label tk-map-start" if is_start else "tk-map-label"
+                marker.run_method(  # type: ignore[attr-defined]
+                    "bindTooltip",
+                    text,
+                    {"permanent": True, "direction": "right", "offset": [6, 0], "className": css},
                 )
 
         ui.timer(0.1, bind, once=True)
