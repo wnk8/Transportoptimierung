@@ -35,7 +35,7 @@ Die Oberfläche hat vier Seiten: **Start** (`/`, Nutzen, Kennzahlen der Beispiel
 
 | Bereich | Was die App zeigt |
 |---|---|
-| Oberfläche | weiße Minimal-Website mit drei Seiten, schwebende Leiste "Berechnen", auch auf dem Smartphone bedienbar |
+| Oberfläche | Marke TK. TourKlima, weiße Website über die volle Breite mit Startseite und drei Arbeitsseiten, Schrittleiste, mitlaufende Zusammenfassung "Berechnen", auch auf dem Smartphone bedienbar |
 | Szenarien | Umschalter Ist, M2, M3; Status-Chip wie das Cockpit der Excel ("Plan zulässig") |
 | Karte Vorher/Nachher | Luftlinien je Relation, Breite nach Sendungen bzw. tkm, Bahn gestrichelt |
 | Relationsdetail | Klick auf eine Linie: Ist gegen Plan, beteiligte Sammeltouren, "Warum dieses Fahrzeug?" |
@@ -101,7 +101,7 @@ Im Tab **Freitext** eine Sendung in Worten beschreiben. Der Assistent übernimmt
 
 ### Auf dem Smartphone
 
-Alle drei Seiten passen sich der Bildschirmbreite an; Kennzahlen stehen dann zu zweit nebeneinander, der Szenario-Umschalter rückt unter die Überschrift.
+Alle Seiten passen sich der Bildschirmbreite an. Auf dem Smartphone bleiben die vier Seitenlinks in der Kopfzeile, die Schrittleiste zeigt nur die Schritte, Kennzahlen stehen zu zweit nebeneinander, und statt der Zusammenfassung erscheint unten die Leiste "Berechnen".
 
 <p>
   <img src="docs/images/10_mobil_rechnen.png" alt="Seite Rechnen auf dem Smartphone" width="260">

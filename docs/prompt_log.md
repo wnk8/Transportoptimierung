@@ -228,3 +228,9 @@ Umsetzung: Marke „TK. TourKlima“ (`BRAND` in `ui/layout.py`). Neue Startseit
 Befund: Die schwebende Leiste stand schon vorher rechts versetzt, weil ihre Einblendanimation das `translateX(-50 %)` überschrieb; jetzt zentriert über `left`, `right` und `margin`. Die Knoten-Kanten-Grafik wird nun mittig gezeichnet, deshalb ist der SVG-Snapshot neu erzeugt.
 Gate: ruff, ruff format und mypy grün, pytest 210 bestanden, Browsertests 4 bestanden.
 Browserprüfung (1024, 1440, 1920 px): kein horizontales Scrollen, Start mit Beispieldaten öffnet das Ergebnis mit Karte, Zusammenfassung und Leiste je nach Breite.
+
+## README-Bilder neu und Smartphone-Ansicht (23.10.2026)
+Auftrag: alle Bilder der README an das neue Design anpassen.
+Umsetzung: Alle zwölf Bilder in `docs/images` neu aufgenommen, Desktop 1440 px mit doppelter Pixeldichte, Smartphone 390 px mit dreifacher Dichte; Assistent im Demo-Modus (aufgezeichneter Ablauf, kein Aufruf an Gemini).
+Befund: Unter 700 px war die Kopfzeile mit vier Links und Hauptaktion breiter als der Bildschirm (Seite 449 statt 390 px breit, herausgezoomt), die Schrittleiste brach in drei Zeilen. Neu: Hauptaktion und Schrittstatus unter 700 px ausgeblendet, Leiste "Berechnen" zeigt nur die CO₂e-Wirkung, Umschalter dürfen umbrechen. Seitenbreite jetzt 390 px auf Start, Rechnen, Ergebnis und Info.
+Gate: ruff, ruff format und mypy grün, pytest 210 bestanden.
