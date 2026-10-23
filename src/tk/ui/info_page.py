@@ -18,6 +18,7 @@ from tk.ui import components
 from tk.ui import format as fmt
 from tk.ui.agent_panel import render_trace
 from tk.ui.layout import end, hero, nav
+from tk.ui.morris_panel import MorrisPanel
 from tk.ui.state import Session, reference, snapshot
 from tk.ui.theme import apply_theme
 
@@ -225,6 +226,8 @@ class InfoPage:
 
         ui.button("Mit Python nachrechnen", on_click=recompute).props("outline no-caps color=primary")
         render(None)
+        ui.separator().classes("my-4")
+        MorrisPanel(self.s)
 
 
 def explain_content(key: str, s: Session, r: Result) -> None:

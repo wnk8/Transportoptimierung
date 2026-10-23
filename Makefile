@@ -7,6 +7,12 @@ run:
 test:
 	uv run pytest -q
 
+e2e:
+	uv run pytest -q -m e2e
+
+sensitivity:
+	uv run python scripts/make_sensitivity.py
+
 lint:
 	uv run ruff check .
 	uv run mypy src
@@ -14,7 +20,7 @@ lint:
 reference:
 	uv run python scripts/make_reference.py
 
-.PHONY: run test lint reference routes
+.PHONY: run test e2e lint reference routes sensitivity
 routes:
 	uv run python scripts/make_routes.py
 

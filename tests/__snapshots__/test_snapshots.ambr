@@ -1,0 +1,663 @@
+# serializer version: 1
+# name: test_custom_bundle_snapshot
+  dict({
+    0: dict({
+      'automatisch': dict({
+        'co2_kg': 11650.275619,
+        'fahrten': 58.643066,
+        'kosten_eur': 28157.424143,
+        'lkw_km': 25199.977955,
+      }),
+      'eigen': dict({
+        'co2_kg': 12637.425368,
+        'fahrten': 102.0,
+        'kosten_eur': 32645.408563,
+        'lkw_km': 32223.416672,
+      }),
+      'gebuendelt': 33,
+      'ist': dict({
+        'co2_kg': 15478.845093,
+        'fahrten': 155.0,
+        'kosten_eur': 39053.65,
+        'lkw_km': 40930.998473,
+      }),
+      'verschiebung_max': 0,
+      'verschiebung_mittel': 0.0,
+    }),
+    2: dict({
+      'automatisch': dict({
+        'co2_kg': 11650.275619,
+        'fahrten': 58.643066,
+        'kosten_eur': 28157.424143,
+        'lkw_km': 25199.977955,
+      }),
+      'eigen': dict({
+        'co2_kg': 12177.153542,
+        'fahrten': 86.0,
+        'kosten_eur': 31111.596497,
+        'lkw_km': 29588.577182,
+      }),
+      'gebuendelt': 34,
+      'ist': dict({
+        'co2_kg': 15478.845093,
+        'fahrten': 155.0,
+        'kosten_eur': 39053.65,
+        'lkw_km': 40930.998473,
+      }),
+      'verschiebung_max': 2,
+      'verschiebung_mittel': 0.339806,
+    }),
+  })
+# ---
+# name: test_line_specs_snapshot
+  dict({
+    'diff': list([
+      tuple(
+        '70173 Stuttgart > 55116 Mainz',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 4.675686,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 55116 Mainz',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 3.931504,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 30159 Hannover',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 5.822457,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 30159 Hannover',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 4.979124,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 79098 Freiburg im Breisgau',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 4.076931,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 79098 Freiburg im Breisgau',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 3.445211,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 50667 Köln',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 5.244879,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 50667 Köln',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 4.219252,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 01067 Dresden',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 6.34954,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 01067 Dresden',
+        dict({
+          'color': '#2F6FA8',
+          'dashArray': '8 6',
+          'opacity': 0.95,
+          'weight': 6.34954,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 28195 Bremen',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 6.434895,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 28195 Bremen',
+        dict({
+          'color': '#2F6FA8',
+          'dashArray': '8 6',
+          'opacity': 0.95,
+          'weight': 6.434895,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 10115 Berlin',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 7.002549,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 10115 Berlin',
+        dict({
+          'color': '#2F6FA8',
+          'dashArray': '8 6',
+          'opacity': 0.95,
+          'weight': 7.002549,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 20095 Hamburg',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 6.536901,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 20095 Hamburg',
+        dict({
+          'color': '#2F6FA8',
+          'dashArray': '8 6',
+          'opacity': 0.95,
+          'weight': 6.536901,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 90402 Nürnberg',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 4.381568,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 90402 Nürnberg',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 3.540446,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 93047 Regensburg',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 4.658589,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 93047 Regensburg',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 3.964583,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 44135 Dortmund',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 5.902378,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 44135 Dortmund',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 4.490844,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 60311 Frankfurt am Main',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 4.105214,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 60311 Frankfurt am Main',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 3.48643,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 40213 Düsseldorf',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 5.279935,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 40213 Düsseldorf',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 4.283497,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 04109 Leipzig',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 5.978791,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 04109 Leipzig',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 4.63295,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 80331 München',
+        dict({
+          'color': '#56616E',
+          'opacity': 0.22,
+          'weight': 4.881401,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 80331 München',
+        dict({
+          'color': '#2D8470',
+          'dashArray': '',
+          'opacity': 0.95,
+          'weight': 4.139956,
+        }),
+      ),
+    ]),
+    'nachher': list([
+      tuple(
+        '70173 Stuttgart > 55116 Mainz',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 3.931504,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 30159 Hannover',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.979124,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 79098 Freiburg im Breisgau',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 3.445211,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 50667 Köln',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.219252,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 01067 Dresden',
+        dict({
+          'color': '#9A4F2F',
+          'dashArray': '8 6',
+          'opacity': 0.9,
+          'weight': 6.34954,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 28195 Bremen',
+        dict({
+          'color': '#9A4F2F',
+          'dashArray': '8 6',
+          'opacity': 0.9,
+          'weight': 6.434895,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 10115 Berlin',
+        dict({
+          'color': '#9A4F2F',
+          'dashArray': '8 6',
+          'opacity': 0.9,
+          'weight': 7.002549,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 20095 Hamburg',
+        dict({
+          'color': '#9A4F2F',
+          'dashArray': '8 6',
+          'opacity': 0.9,
+          'weight': 6.536901,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 90402 Nürnberg',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 3.540446,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 93047 Regensburg',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 3.964583,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 44135 Dortmund',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.490844,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 60311 Frankfurt am Main',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 3.48643,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 40213 Düsseldorf',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.283497,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 04109 Leipzig',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.63295,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 80331 München',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.139956,
+        }),
+      ),
+    ]),
+    'vorher': list([
+      tuple(
+        '70173 Stuttgart > 55116 Mainz',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.675686,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 30159 Hannover',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 5.822457,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 79098 Freiburg im Breisgau',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.076931,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 50667 Köln',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 5.244879,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 01067 Dresden',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 6.34954,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 28195 Bremen',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 6.434895,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 10115 Berlin',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 7.002549,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 20095 Hamburg',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 6.536901,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 90402 Nürnberg',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.381568,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 93047 Regensburg',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.658589,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 44135 Dortmund',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 5.902378,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 60311 Frankfurt am Main',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.105214,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 40213 Düsseldorf',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 5.279935,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 04109 Leipzig',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 5.978791,
+        }),
+      ),
+      tuple(
+        '70173 Stuttgart > 80331 München',
+        dict({
+          'color': '#9A4F2F',
+          'opacity': 0.9,
+          'weight': 4.881401,
+        }),
+      ),
+    ]),
+  })
+# ---
+# name: test_route_options_snapshot
+  list([
+    dict({
+      'art': 'ist',
+      'co2_kg': 4392.033898,
+      'fahrten': 63.0,
+      'gewaehlt': False,
+      'hinweis': 'Excel, Rangregel K2.5 je Sendung',
+      'kosten_eur': 10101.31,
+      'lkw_km': 11657.662065,
+      'name': 'Ist (Einzelversand)',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+    dict({
+      'art': 'lkw',
+      'co2_kg': 4459.60365,
+      'fahrten': 66.0,
+      'gewaehlt': False,
+      'hinweis': 'im Ist für 60 von 63 Sendungen gewählt; 3 Sendungen brauchen mehrere Fahrzeuge',
+      'kosten_eur': 12475.515695,
+      'lkw_km': 12212.78883,
+      'name': 'Alle mit Sprinter (3,5t)',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+    dict({
+      'art': 'lkw',
+      'co2_kg': 7094.823989,
+      'fahrten': 63.0,
+      'gewaehlt': False,
+      'hinweis': 'im Ist für 3 von 63 Sendungen gewählt',
+      'kosten_eur': 15224.723124,
+      'lkw_km': 11657.662065,
+      'name': 'Alle mit Lkw 7,5t',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+    dict({
+      'art': 'lkw',
+      'co2_kg': 8513.788786,
+      'fahrten': 63.0,
+      'gewaehlt': False,
+      'hinweis': 'im Ist für 0 von 63 Sendungen gewählt',
+      'kosten_eur': 16129.162121,
+      'lkw_km': 11657.662065,
+      'name': 'Alle mit Lkw 12t',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+    dict({
+      'art': 'lkw',
+      'co2_kg': 13176.101693,
+      'fahrten': 63.0,
+      'gewaehlt': False,
+      'hinweis': 'im Ist für 0 von 63 Sendungen gewählt',
+      'kosten_eur': 16882.861286,
+      'lkw_km': 11657.662065,
+      'name': 'Alle mit Sattelzug 40t',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+    dict({
+      'art': 'bahn',
+      'co2_kg': 945.430252,
+      'fahrten': 0.0,
+      'gewaehlt': False,
+      'hinweis': 'Bahnprüfung abgelehnt: Distanz bis A01 (63 Sendungen); Lkw nur im Vor- und Nachlauf (A02, im CO₂e enthalten)',
+      'kosten_eur': 10101.31,
+      'lkw_km': 0.0,
+      'name': 'Alle per Bahn',
+      'servicegrad': 0.0,
+      'zusatz_tage': 1.0,
+    }),
+    dict({
+      'art': 'plan',
+      'co2_kg': 3234.631934,
+      'fahrten': 21.570896,
+      'gewaehlt': True,
+      'hinweis': '63 Sendungen, im Ist 63 Einzelfahrten; 49 in 39 Sammeltour(en); 14 bleiben Einzelfahrt.',
+      'kosten_eur': 7507.630479,
+      'lkw_km': 6834.182645,
+      'name': 'Plan M2',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+    dict({
+      'art': 'plan',
+      'co2_kg': 3234.631934,
+      'fahrten': 21.570896,
+      'gewaehlt': True,
+      'hinweis': '63 Sendungen, im Ist 63 Einzelfahrten; 49 in 39 Sammeltour(en); 14 bleiben Einzelfahrt.',
+      'kosten_eur': 7507.630479,
+      'lkw_km': 6834.182645,
+      'name': 'Plan M3',
+      'servicegrad': 1.0,
+      'zusatz_tage': 0.0,
+    }),
+  ])
+# ---
+# name: test_svg_network_snapshot
+  '<svg viewBox="0 0 520 420" width="100%" role="img" aria-label="Knoten-Kanten-Ansicht"><rect width="520" height="420" fill="#FFFFFF"/><polyline points="133.1,332.3 130.3,328.4 127.5,324.4 124.8,320.3 122.2,316.1 119.7,311.7 117.2,307.3 114.9,302.7 112.6,298.1 110.5,293.4 108.4,288.5 106.4,283.5 104.5,278.5 102.7,273.3 101.0,268.0 99.4,262.6 97.9,257.2" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="3.9" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 55116 Mainz</title></polyline><polyline points="133.1,332.3 132.5,318.1 132.2,303.9 132.1,289.8 132.2,275.7 132.7,261.7 133.4,247.8 134.3,233.9 135.5,220.1 137.0,206.3 138.8,192.7 140.8,179.1 143.0,165.5 145.6,152.0 148.3,138.6 151.4,125.2 154.7,111.9" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="5.0" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 30159 Hannover</title></polyline><polyline points="133.1,332.3 130.3,336.5 127.5,340.4 124.6,344.3 121.6,347.9 118.6,351.4 115.5,354.8 112.3,358.0 109.1,361.1 105.9,364.0 102.6,366.7 99.2,369.3 95.8,371.8 92.3,374.0 88.8,376.2 85.2,378.2 81.5,380.0" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="3.4" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 79098 Freiburg im Breisgau</title></polyline><polyline points="133.1,332.3 126.6,326.0 120.2,319.4 113.9,312.5 107.8,305.3 101.9,297.9 96.1,290.3 90.5,282.4 85.0,274.2 79.7,265.8 74.6,257.1 69.6,248.2 64.7,239.0 60.1,229.6 55.6,219.9 51.2,210.0 47.0,199.8" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="4.2" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 50667 Köln</title></polyline><polyline points="133.1,332.3 141.6,315.8 150.5,300.3 159.7,285.8 169.2,272.4 179.0,260.0 189.2,248.7 199.7,238.4 210.5,229.1 221.7,220.9 233.2,213.7 245.0,207.6 257.2,202.5 269.7,198.5 282.5,195.5 295.7,193.6 309.1,192.7" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="6.3" stroke-dasharray="8 6" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 01067 Dresden</title></polyline><polyline points="133.1,332.3 127.5,316.5 122.5,300.6 118.1,284.6 114.3,268.4 111.2,252.2 108.7,236.0 106.8,219.6 105.5,203.1 104.9,186.6 104.9,169.9 105.5,153.2 106.8,136.3 108.7,119.4 111.2,102.4 114.3,85.3 118.1,68.1" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="6.4" stroke-dasharray="8 6" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 28195 Bremen</title></polyline><polyline points="133.1,332.3 139.2,310.7 145.8,290.1 153.0,270.4 160.7,251.7 169.0,233.9 177.8,217.1 187.1,201.3 197.0,186.4 207.5,172.5 218.5,159.6 230.0,147.6 242.1,136.6 254.7,126.5 267.9,117.5 281.6,109.4 295.9,102.2" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="7.0" stroke-dasharray="8 6" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 10115 Berlin</title></polyline><polyline points="133.1,332.3 129.9,312.7 127.4,293.1 125.6,273.8 124.5,254.7 124.1,235.8 124.3,217.0 125.3,198.5 126.9,180.1 129.3,161.9 132.3,143.9 136.1,126.1 140.5,108.5 145.6,91.1 151.4,73.9 157.9,56.8 165.1,40.0" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="6.5" stroke-dasharray="8 6" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 20095 Hamburg</title></polyline><polyline points="133.1,332.3 137.4,328.1 141.6,324.1 145.9,320.3 150.3,316.8 154.7,313.4 159.2,310.3 163.7,307.3 168.3,304.6 172.9,302.2 177.6,299.9 182.3,297.8 187.0,296.0 191.9,294.4 196.7,293.0 201.6,291.8 206.6,290.9" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="3.5" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 90402 Nürnberg</title></polyline><polyline points="133.1,332.3 140.0,328.9 147.0,325.8 153.9,323.0 160.9,320.6 167.9,318.5 174.9,316.7 181.9,315.3 189.0,314.2 196.1,313.4 203.1,313.0 210.2,312.9 217.3,313.1 224.5,313.7 231.6,314.6 238.8,315.8 246.0,317.4" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="4.0" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 93047 Regensburg</title></polyline><polyline points="133.1,332.3 127.5,323.3 122.1,314.1 116.9,304.7 111.9,295.1 107.1,285.3 102.4,275.3 98.0,265.1 93.8,254.7 89.8,244.2 86.0,233.4 82.3,222.4 78.9,211.3 75.7,199.9 72.7,188.3 69.8,176.6 67.2,164.6" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="4.5" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 44135 Dortmund</title></polyline><polyline points="133.1,332.3 131.2,327.7 129.4,322.9 127.6,318.1 126.0,313.2 124.4,308.3 123.0,303.3 121.7,298.3 120.4,293.2 119.2,288.1 118.2,282.9 117.2,277.6 116.4,272.3 115.6,266.9 114.9,261.5 114.4,256.0 113.9,250.4" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="3.5" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 60311 Frankfurt am Main</title></polyline><polyline points="133.1,332.3 126.0,325.0 119.0,317.5 112.2,309.6 105.6,301.4 99.1,293.0 92.9,284.3 86.8,275.4 80.9,266.1 75.1,256.6 69.6,246.8 64.2,236.7 59.0,226.4 54.0,215.8 49.1,204.9 44.5,193.7 40.0,182.2" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="4.3" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 40213 Düsseldorf</title></polyline><polyline points="133.1,332.3 139.5,319.8 146.0,307.6 152.7,295.7 159.6,284.2 166.6,273.1 173.9,262.4 181.4,252.0 189.0,242.0 196.8,232.3 204.8,223.1 213.0,214.1 221.4,205.6 230.0,197.4 238.7,189.6 247.7,182.2 256.8,175.1" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="4.6" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 04109 Leipzig</title></polyline><polyline points="133.1,332.3 139.3,332.7 145.3,333.4 151.4,334.3 157.4,335.5 163.3,337.0 169.2,338.8 175.1,340.8 180.9,343.1 186.7,345.7 192.4,348.5 198.0,351.7 203.7,355.1 209.2,358.7 214.8,362.7 220.2,366.9 225.7,371.4" fill="none" stroke="#9A4F2F" stroke-opacity="0.9" stroke-width="4.1" stroke-dasharray="" stroke-linecap="round"><title>70173 Stuttgart &amp;gt; 80331 München</title></polyline><circle cx="133.1" cy="332.3" r="6" fill="#9A4F2F"/><text x="140.1" y="326.3" font-size="11" font-weight="600" fill="#1F2933">Stuttgart</text><circle cx="97.9" cy="257.2" r="4" fill="#1F2933"/><text x="104.9" y="251.2" font-size="11" font-weight="400" fill="#1F2933">Mainz</text><circle cx="154.7" cy="111.9" r="4" fill="#1F2933"/><text x="161.7" y="105.9" font-size="11" font-weight="400" fill="#1F2933">Hannover</text><circle cx="81.5" cy="380.0" r="4" fill="#1F2933"/><text x="88.5" y="374.0" font-size="11" font-weight="400" fill="#1F2933">Freiburg im Breisgau</text><circle cx="47.0" cy="199.8" r="4" fill="#1F2933"/><text x="54.0" y="193.8" font-size="11" font-weight="400" fill="#1F2933">Köln</text><circle cx="309.1" cy="192.7" r="4" fill="#1F2933"/><text x="316.1" y="186.7" font-size="11" font-weight="400" fill="#1F2933">Dresden</text><circle cx="118.1" cy="68.1" r="4" fill="#1F2933"/><text x="125.1" y="62.1" font-size="11" font-weight="400" fill="#1F2933">Bremen</text><circle cx="295.9" cy="102.2" r="4" fill="#1F2933"/><text x="302.9" y="96.2" font-size="11" font-weight="400" fill="#1F2933">Berlin</text><circle cx="165.1" cy="40.0" r="4" fill="#1F2933"/><text x="172.1" y="34.0" font-size="11" font-weight="400" fill="#1F2933">Hamburg</text><circle cx="206.6" cy="290.9" r="4" fill="#1F2933"/><text x="213.6" y="284.9" font-size="11" font-weight="400" fill="#1F2933">Nürnberg</text><circle cx="246.0" cy="317.4" r="4" fill="#1F2933"/><text x="253.0" y="311.4" font-size="11" font-weight="400" fill="#1F2933">Regensburg</text><circle cx="67.2" cy="164.6" r="4" fill="#1F2933"/><text x="74.2" y="158.6" font-size="11" font-weight="400" fill="#1F2933">Dortmund</text><circle cx="113.9" cy="250.4" r="4" fill="#1F2933"/><text x="120.9" y="244.4" font-size="11" font-weight="400" fill="#1F2933">Frankfurt am Main</text><circle cx="40.0" cy="182.2" r="4" fill="#1F2933"/><text x="47.0" y="176.2" font-size="11" font-weight="400" fill="#1F2933">Düsseldorf</text><circle cx="256.8" cy="175.1" r="4" fill="#1F2933"/><text x="263.8" y="169.1" font-size="11" font-weight="400" fill="#1F2933">Leipzig</text><circle cx="225.7" cy="371.4" r="4" fill="#1F2933"/><text x="232.7" y="365.4" font-size="11" font-weight="400" fill="#1F2933">München</text></svg>'
+# ---

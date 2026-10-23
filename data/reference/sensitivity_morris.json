@@ -1,0 +1,349 @@
+{
+ "trajektorien": 20,
+ "stufen": 4,
+ "laeufe": 240,
+ "seed": 1,
+ "basis": {
+  "delta_co2_m3": -0.533120205179515,
+  "delta_kosten_m3": -0.24945269891684974,
+  "servicegrad_m3": 0.7568402471315092
+ },
+ "effekte": {
+  "delta_co2_m3": [
+   {
+    "parameter": "a01_bahn_grenze_km",
+    "kennung": "A01",
+    "name": "Bahn-Mindestdistanz (Ø Sendungsdistanz)",
+    "min": 300.0,
+    "max": 700.0,
+    "mu_star": 0.2641250562952873,
+    "sigma": 0.2876543454037512,
+    "mu_star_conf": 0.12980485764063823
+   },
+   {
+    "parameter": "a10_umweg",
+    "kennung": "A10",
+    "name": "Umweg-Zuschlag je zusätzlichem Stopp (Bündelung)",
+    "min": 0.1,
+    "max": 0.3,
+    "mu_star": 0.20073579120287252,
+    "sigma": 0.0912746615456942,
+    "mu_star_conf": 0.03776534421901857
+   },
+   {
+    "parameter": "a07_bahn_aufschlag",
+    "kennung": "A07",
+    "name": "Bahn-Kostenaufschlag auf die Ist-Frachtkosten",
+    "min": 0.0,
+    "max": 0.2,
+    "mu_star": 0.12551392882319384,
+    "sigma": 0.23775138241689395,
+    "mu_star_conf": 0.11300388542768346
+   },
+   {
+    "parameter": "a08_kosten_tol",
+    "kennung": "A08",
+    "name": "Zulässige Kostensteigerung je Maßnahme",
+    "min": 0.0,
+    "max": 0.2,
+    "mu_star": 0.11906035800029616,
+    "sigma": 0.16403144571111442,
+    "mu_star_conf": 0.07056320557232802
+   },
+   {
+    "parameter": "a11_alpha",
+    "kennung": "A11",
+    "name": "Lastunabhängiger Verbrauchsanteil (α)",
+    "min": 0.8,
+    "max": 1.0,
+    "mu_star": 0.07217017306401988,
+    "sigma": 0.026422517196488197,
+    "mu_star_conf": 0.009736273253286647
+   },
+   {
+    "parameter": "i01_strassenfaktor",
+    "kennung": "I01",
+    "name": "Straßenfaktor (Straßenentfernung / Luftlinie)",
+    "min": 1.1,
+    "max": 1.4,
+    "mu_star": 0.0501898316865159,
+    "sigma": 0.07042652492092835,
+    "mu_star_conf": 0.02421320185723576
+   },
+   {
+    "parameter": "a02_vnl_km",
+    "kennung": "A02",
+    "name": "Lkw-Vor- und Nachlauf je Bahnverlagerung (gesamt)",
+    "min": 50.0,
+    "max": 150.0,
+    "mu_star": 0.013960250628243678,
+    "sigma": 0.02094777473993438,
+    "mu_star_conf": 0.007921333935759172
+   },
+   {
+    "parameter": "bahn_elektrisch_g_tkm",
+    "kennung": "B3.5",
+    "name": "Bahn (elektrische Traktion)",
+    "min": 8.64,
+    "max": 12.96,
+    "mu_star": 0.0008223753145385371,
+    "sigma": 0.0010374679072419114,
+    "mu_star_conf": 0.000411340571022194
+   },
+   {
+    "parameter": "a12_diesel_kg_co2_je_kg",
+    "kennung": "A12",
+    "name": "Emissionsfaktor Diesel (WTW)",
+    "min": 3.98,
+    "max": 4.4,
+    "mu_star": 0.0008197695419807332,
+    "sigma": 0.0024192856595884743,
+    "mu_star_conf": 0.0011419467970767345
+   },
+   {
+    "parameter": "a09_schwelle",
+    "kennung": "A09",
+    "name": "Schwelle für schlecht ausgelastete Touren",
+    "min": 0.4,
+    "max": 0.6,
+    "mu_star": 0.0005661237053117968,
+    "sigma": 0.0003591307270381217,
+    "mu_star_conf": 0.00013572469763812163
+   },
+   {
+    "parameter": "a14_kg_je_palette",
+    "kennung": "A14",
+    "name": "Standardwert kg je Palette (wenn Paletten fehlen)",
+    "min": 214.4,
+    "max": 321.6,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   }
+  ],
+  "delta_kosten_m3": [
+   {
+    "parameter": "a10_umweg",
+    "kennung": "A10",
+    "name": "Umweg-Zuschlag je zusätzlichem Stopp (Bündelung)",
+    "min": 0.1,
+    "max": 0.3,
+    "mu_star": 0.25596380969332105,
+    "sigma": 0.12131849598084067,
+    "mu_star_conf": 0.047796483474191076
+   },
+   {
+    "parameter": "a01_bahn_grenze_km",
+    "kennung": "A01",
+    "name": "Bahn-Mindestdistanz (Ø Sendungsdistanz)",
+    "min": 300.0,
+    "max": 700.0,
+    "mu_star": 0.14754507399039457,
+    "sigma": 0.20024604053940404,
+    "mu_star_conf": 0.07726991034571164
+   },
+   {
+    "parameter": "a07_bahn_aufschlag",
+    "kennung": "A07",
+    "name": "Bahn-Kostenaufschlag auf die Ist-Frachtkosten",
+    "min": 0.0,
+    "max": 0.2,
+    "mu_star": 0.10595864571835759,
+    "sigma": 0.16638552325984085,
+    "mu_star_conf": 0.058650793827800536
+   },
+   {
+    "parameter": "a08_kosten_tol",
+    "kennung": "A08",
+    "name": "Zulässige Kostensteigerung je Maßnahme",
+    "min": 0.0,
+    "max": 0.2,
+    "mu_star": 0.09948553664705131,
+    "sigma": 0.16909640667306408,
+    "mu_star_conf": 0.07001870157261782
+   },
+   {
+    "parameter": "a11_alpha",
+    "kennung": "A11",
+    "name": "Lastunabhängiger Verbrauchsanteil (α)",
+    "min": 0.8,
+    "max": 1.0,
+    "mu_star": 0.0409922504669726,
+    "sigma": 0.03234782223681041,
+    "mu_star_conf": 0.014951118838960926
+   },
+   {
+    "parameter": "i01_strassenfaktor",
+    "kennung": "I01",
+    "name": "Straßenfaktor (Straßenentfernung / Luftlinie)",
+    "min": 1.1,
+    "max": 1.4,
+    "mu_star": 0.03936144285436879,
+    "sigma": 0.05915849497916047,
+    "mu_star_conf": 0.022195669325873617
+   },
+   {
+    "parameter": "a09_schwelle",
+    "kennung": "A09",
+    "name": "Schwelle für schlecht ausgelastete Touren",
+    "min": 0.4,
+    "max": 0.6,
+    "mu_star": 0.0007100983317034181,
+    "sigma": 0.0003684442882954597,
+    "mu_star_conf": 0.0001289327921515192
+   },
+   {
+    "parameter": "a02_vnl_km",
+    "kennung": "A02",
+    "name": "Lkw-Vor- und Nachlauf je Bahnverlagerung (gesamt)",
+    "min": 50.0,
+    "max": 150.0,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a12_diesel_kg_co2_je_kg",
+    "kennung": "A12",
+    "name": "Emissionsfaktor Diesel (WTW)",
+    "min": 3.98,
+    "max": 4.4,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a14_kg_je_palette",
+    "kennung": "A14",
+    "name": "Standardwert kg je Palette (wenn Paletten fehlen)",
+    "min": 214.4,
+    "max": 321.6,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "bahn_elektrisch_g_tkm",
+    "kennung": "B3.5",
+    "name": "Bahn (elektrische Traktion)",
+    "min": 8.64,
+    "max": 12.96,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   }
+  ],
+  "servicegrad_m3": [
+   {
+    "parameter": "a01_bahn_grenze_km",
+    "kennung": "A01",
+    "name": "Bahn-Mindestdistanz (Ø Sendungsdistanz)",
+    "min": 300.0,
+    "max": 700.0,
+    "mu_star": 0.2860326566637247,
+    "sigma": 0.2985775540120122,
+    "mu_star_conf": 0.12782029191301397
+   },
+   {
+    "parameter": "a07_bahn_aufschlag",
+    "kennung": "A07",
+    "name": "Bahn-Kostenaufschlag auf die Ist-Frachtkosten",
+    "min": 0.0,
+    "max": 0.2,
+    "mu_star": 0.12031112091791704,
+    "sigma": 0.22457060252246763,
+    "mu_star_conf": 0.10676690695177288
+   },
+   {
+    "parameter": "a08_kosten_tol",
+    "kennung": "A08",
+    "name": "Zulässige Kostensteigerung je Maßnahme",
+    "min": 0.0,
+    "max": 0.2,
+    "mu_star": 0.10879302736098855,
+    "sigma": 0.16505423342076056,
+    "mu_star_conf": 0.06955017382477219
+   },
+   {
+    "parameter": "i01_strassenfaktor",
+    "kennung": "I01",
+    "name": "Straßenfaktor (Straßenentfernung / Luftlinie)",
+    "min": 1.1,
+    "max": 1.4,
+    "mu_star": 0.058351721094439556,
+    "sigma": 0.0752921176002358,
+    "mu_star_conf": 0.02576875421576652
+   },
+   {
+    "parameter": "a02_vnl_km",
+    "kennung": "A02",
+    "name": "Lkw-Vor- und Nachlauf je Bahnverlagerung (gesamt)",
+    "min": 50.0,
+    "max": 150.0,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a09_schwelle",
+    "kennung": "A09",
+    "name": "Schwelle für schlecht ausgelastete Touren",
+    "min": 0.4,
+    "max": 0.6,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a10_umweg",
+    "kennung": "A10",
+    "name": "Umweg-Zuschlag je zusätzlichem Stopp (Bündelung)",
+    "min": 0.1,
+    "max": 0.3,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a11_alpha",
+    "kennung": "A11",
+    "name": "Lastunabhängiger Verbrauchsanteil (α)",
+    "min": 0.8,
+    "max": 1.0,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a12_diesel_kg_co2_je_kg",
+    "kennung": "A12",
+    "name": "Emissionsfaktor Diesel (WTW)",
+    "min": 3.98,
+    "max": 4.4,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "a14_kg_je_palette",
+    "kennung": "A14",
+    "name": "Standardwert kg je Palette (wenn Paletten fehlen)",
+    "min": 214.4,
+    "max": 321.6,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   },
+   {
+    "parameter": "bahn_elektrisch_g_tkm",
+    "kennung": "B3.5",
+    "name": "Bahn (elektrische Traktion)",
+    "min": 8.64,
+    "max": 12.96,
+    "mu_star": 0.0,
+    "sigma": 0.0,
+    "mu_star_conf": 0.0
+   }
+  ]
+ }
+}

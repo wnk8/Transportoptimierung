@@ -48,12 +48,13 @@ module = "tk.*"
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["openpyxl.*", "nicegui.*", "pandas.*"]
+module = ["openpyxl.*", "nicegui.*", "pandas.*", "SALib.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -m 'not e2e'"
+markers = ["e2e: Browsertests mit Playwright (make e2e), nicht im schnellen Lauf"]
 pythonpath = ["src", "."]
 
 [dependency-groups]
@@ -62,5 +63,8 @@ dev = [
     "mypy>=2.4.0",
     "pandas-stubs>=3.0.5.260914",
     "pytest>=9.1.1",
+    "pytest-playwright>=0.10.0",
     "ruff>=0.17.1",
+    "salib>=1.6.0",
+    "syrupy>=6.1.1",
 ]
