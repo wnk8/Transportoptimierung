@@ -15,9 +15,11 @@ from dataclasses import dataclass
 
 from nicegui import ui
 
+from tk.compare import relation_detail
 from tk.excelfn import fold
 from tk.models import Result
 from tk.ui import format as fmt
+from tk.ui.layout import SCENARIO_LABEL
 from tk.ui.theme import MAP_LINES, TOKENS
 
 GERMANY_CENTER = (51.1, 10.2)
@@ -47,6 +49,12 @@ class RelationView:
     co2_plan: float
     kosten_ist: float
     kosten_plan: float
+    lkw_km_ist: float
+    lkw_km_plan: float
+    lkw_km_bahn: float
+    """Ist-Lkw-km der Sendungen, die im Plan auf die Bahn gehen (Breite der Bahnlinie)."""
+    fahrten_ist: float
+    fahrten_plan: float
 
 
 def relations(result: Result, scenario: str) -> list[RelationView]:
@@ -65,6 +73,7 @@ def relations(result: Result, scenario: str) -> list[RelationView]:
             return getattr(r, "co2_plan_fzgkm", 0.0) or 0.0, getattr(r, "kosten_plan", 0.0) or 0.0
 
         plans = [plan(r) for r in members]
+        detail = relation_detail(result, route.key, scenario)
         out.append(
             RelationView(
                 key=route.key,
@@ -85,6 +94,11 @@ def relations(result: Result, scenario: str) -> list[RelationView]:
                 co2_plan=math.fsum(p[0] for p in plans),
                 kosten_ist=route.kosten_ist,
                 kosten_plan=math.fsum(p[1] for p in plans),
+                lkw_km_ist=detail.ist.lkw_km,
+                lkw_km_plan=detail.plan.lkw_km,
+                lkw_km_bahn=math.fsum(r.lkw_km_ist or 0.0 for r in rail),
+                fahrten_ist=detail.ist.fahrten,
+                fahrten_plan=detail.plan.fahrten,
             )
         )
     return out
@@ -100,6 +114,10 @@ def _popup(rel: RelationView, scenario: str) -> str:
         ("Sendungen", fmt.number(rel.sendungen)),
         ("Gewicht", fmt.with_unit(rel.gewicht_t, "t", 1)),
         ("Distanz", f"{fmt.with_unit(rel.distanz_km, 'km', 1)} ({rel.quelle})"),
+        ("Lkw-Fahrten Ist", fmt.number(rel.fahrten_ist, 1)),
+        (f"Lkw-Fahrten {scenario}", fmt.number(rel.fahrten_plan, 1)),
+        ("Lkw-km Ist", fmt.with_unit(rel.lkw_km_ist, "km")),
+        (f"Lkw-km {scenario}", fmt.with_unit(rel.lkw_km_plan, "km")),
         ("CO₂e Ist", fmt.with_unit(rel.co2_ist, "kg")),
         (f"CO₂e {scenario}", fmt.with_unit(rel.co2_plan, "kg")),
         ("Δ CO₂e", fmt.percent(delta)),
@@ -136,36 +154,48 @@ def bind_layer(layer: object, tooltip: str, key: str, event: str = RELATION_EVEN
 
 
 def line_specs(result: Result, scenario: str, side: str) -> list[Spec]:
-    """Linien einer Karte: (Koordinaten, Leaflet-Optionen, Tooltip-HTML, Relationsschlüssel)."""
+    """Linien einer Karte: (Koordinaten, Leaflet-Optionen, Tooltip-HTML, Relationsschlüssel).
+
+    Breite links und rechts aus derselben Größe (Lkw-km je Relation) mit gemeinsamem
+    Maximum, damit eine dünnere Linie rechts tatsächlich weniger Lkw-km bedeutet. Die
+    Bahnlinie zeigt die Lkw-km, die von der Straße verlagert werden. Bei Szenario Ist
+    gibt es kein Nachher.
+    """
+    if side == "nachher" and scenario == "Ist":
+        return []
     rels = relations(result, scenario)
+    km_max = max((max(r.lkw_km_ist, r.lkw_km_plan) for r in rels), default=0.0)
     specs: list[Spec] = []
-    if side == "vorher" or scenario == "Ist":
-        n_max = max((r.sendungen for r in rels), default=0)
+    if side == "vorher":
         color, _ = MAP_LINES["ist"]
         for rel in rels:
-            opts = {"color": color, "weight": _width(rel.sendungen, n_max), "opacity": 0.9}
-            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, _popup(rel, "Ist"), rel.key))
+            opts = {"color": color, "weight": _width(rel.lkw_km_ist, km_max), "opacity": 0.9}
+            specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, _popup(rel, scenario), rel.key))
         return specs
-    t_max = max((max(r.tkm_lkw, r.tkm_bahn) for r in rels), default=0.0)
     lkw, _ = MAP_LINES["lkw"]
     bahn, dash = MAP_LINES["bahn"]
     for rel in rels:
         popup = _popup(rel, scenario)
-        if rel.tkm_lkw > 0:
-            opts = {"color": lkw, "weight": _width(rel.tkm_lkw, t_max), "opacity": 0.9}
+        if rel.lkw_km_plan > 0:
+            opts = {"color": lkw, "weight": _width(rel.lkw_km_plan, km_max), "opacity": 0.9}
             specs.append(([[rel.lat1, rel.lon1], [rel.lat2, rel.lon2]], opts, popup, rel.key))
-        if rel.tkm_bahn > 0:
-            opts = {"color": bahn, "weight": _width(rel.tkm_bahn, t_max), "dashArray": dash, "opacity": 0.95}
+        if rel.n_bahn > 0:
+            opts = {
+                "color": bahn,
+                "weight": _width(rel.lkw_km_bahn, km_max),
+                "dashArray": dash,
+                "opacity": 0.95,
+            }
             specs.append((_rail_path(rel), opts, popup, rel.key))
     return specs
 
 
 def legend(scenario: str) -> None:
-    items = [("ist", "Ist, Einzelversand (Breite: Sendungen)")]
+    items = [("ist", "Ist, Einzelversand")]
     if scenario != "Ist":
-        items.append(("lkw", f"{scenario}, Lkw (Breite: tkm)"))
+        items.append(("lkw", f"{scenario}, Lkw"))
     if scenario == "M3":
-        items.append(("bahn", "M3, Bahn, gestrichelt (Breite: tkm)"))
+        items.append(("bahn", "M3, Bahn, gestrichelt (Breite: verlagerte Lkw-km)"))
     with ui.row().classes("items-center gap-4 flex-wrap"):
         for key, text in items:
             color, dash = MAP_LINES[key]
@@ -175,6 +205,7 @@ def legend(scenario: str) -> None:
                     f'stroke="{color}" stroke-width="4" stroke-dasharray="{dash}"/></svg>'
                 )
                 ui.label(text).classes("tk-label")
+        ui.label("Breite: Lkw-km je Relation, gleiche Skala links und rechts").classes("tk-label")
         ui.label("Luftlinie, schematisch").classes("tk-label")
 
 
@@ -268,16 +299,26 @@ class MapView:
             with ui.row().classes("w-full gap-2 no-wrap tk-two-col"):
                 with ui.column().classes("flex-1 gap-1 min-w-0"):
                     self.title_left = ui.label("Vorher: Ist").classes("tk-label")
-                    self.map_left = (
-                        ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:420px")
-                    )
+                    # Toggle a wrapper, never the map: set_visibility rewrites the element's classes
+                    # and drops the ones Leaflet added itself (leaflet-container), which hides tiles.
+                    with ui.element("div").classes("w-full") as self.box_left:
+                        self.map_left = (
+                            ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:420px")
+                        )
                     self.svg_left = ui.html("").classes("w-full")
                 with ui.column().classes("flex-1 gap-1 min-w-0"):
                     self.title_right = ui.label("Nachher").classes("tk-label")
-                    self.map_right = (
-                        ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:420px")
-                    )
+                    # Toggle a wrapper, never the map: set_visibility rewrites the element's classes
+                    # and drops the ones Leaflet added itself (leaflet-container), which hides tiles.
+                    with ui.element("div").classes("w-full") as self.box_right:
+                        self.map_right = (
+                            ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:420px")
+                        )
                     self.svg_right = ui.html("").classes("w-full")
+                    self.hint_right = ui.label(
+                        "Ist gewählt. M2 oder M3 wählen, um Vorher und Nachher zu vergleichen."
+                    ).classes("tk-note")
+                    self.hint_right.set_visibility(False)
             self.legend_box = ui.row().classes("w-full")
             self.notice = ui.label("").classes("tk-note")
             self.notice.set_visibility(False)
@@ -327,25 +368,45 @@ class MapView:
             self.notice.set_visibility(True)
 
     def _apply_mode(self) -> None:
-        net = self.mode.value == "netz"
-        for m in (self.map_left, self.map_right):
-            m.set_visibility(not net)
-            if not net and self._ready:
-                m.run_map_method("invalidateSize")
-        for s in (self.svg_left, self.svg_right):
-            s.set_visibility(net)
+        self._visibility()
         self.render()
+
+    def _visibility(self) -> None:
+        """Karte oder SVG je Modus; bei Szenario Ist bleibt die rechte Seite ein Hinweis."""
+        net = self.mode.value == "netz"
+        no_plan = self.scenario == "Ist"
+        boxes = (
+            (self.box_left, self.map_left, not net),
+            (self.box_right, self.map_right, not net and not no_plan),
+        )
+        for box, m, show in boxes:
+            was_hidden = not box.visible
+            box.set_visibility(show)
+            if show and self._ready and was_hidden:
+                # Leaflet measures 0 x 0 while hidden; re-measure once the container is visible
+                # and align it with the left map, which stayed visible.
+                ui.timer(0.3, lambda m=m: self._remeasure(m), once=True)
+        self.svg_left.set_visibility(net)
+        self.svg_right.set_visibility(net and not no_plan)
+        self.hint_right.set_visibility(no_plan)
+
+    def _remeasure(self, m: ui.leaflet) -> None:
+        ref = self.map_left if m is not self.map_left else self.map_right
+        m.run_map_method("invalidateSize")
+        m.run_map_method("setView", list(ref.center), ref.zoom)
 
     def update(self, result: Result, scenario: str) -> None:
         self.result, self.scenario = result, scenario
+        self._visibility()
         self.render()
 
     def render(self) -> None:
         if self.result is None:
             return
-        right = self.scenario if self.scenario != "Ist" else "Ist"
         self.title_left.set_text("Vorher: Ist (Einzelversand)")
-        self.title_right.set_text(f"Nachher: {right}")
+        self.title_right.set_text(
+            "Nachher" if self.scenario == "Ist" else f"Nachher: {SCENARIO_LABEL[self.scenario]}"
+        )
         self.legend_box.clear()
         with self.legend_box:
             legend(self.scenario)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 import socket
 import subprocess
@@ -38,6 +39,34 @@ def test_map_lines_encode_scenarios() -> None:
     assert sum(r.sendungen for r in rels) == 2266
     m2 = line_specs(result, "M2", "nachher")
     assert not [o for _, o, _, _ in m2 if o.get("dashArray")]
+
+
+@needs_excel
+def test_no_after_map_for_ist() -> None:
+    _, result = model_and_result()
+    assert line_specs(result, "Ist", "nachher") == []
+    assert len(line_specs(result, "Ist", "vorher")) == 45
+
+
+@needs_excel
+@pytest.mark.parametrize("scenario", ["Ist", "M2", "M3"])
+def test_relation_truck_km_add_up_to_kpi(scenario: str) -> None:
+    _, result = model_and_result()
+    rels = relations(result, scenario)
+    assert math.fsum(r.lkw_km_plan for r in rels) == pytest.approx(result.kpis[scenario].lkw_km, abs=1e-6)
+    assert math.fsum(r.lkw_km_ist for r in rels) == pytest.approx(result.kpis["Ist"].lkw_km, abs=1e-6)
+
+
+@needs_excel
+def test_before_and_after_share_one_width_scale() -> None:
+    _, result = model_and_result()
+    before = {key: o["weight"] for _, o, _, key in line_specs(result, "M2", "vorher")}
+    plan = line_specs(result, "M2", "nachher")
+    after = {key: o["weight"] for _, o, _, key in plan if not o.get("dashArray")}
+    rels = {r.key: r for r in relations(result, "M2")}
+    for key, weight in after.items():
+        rel = rels[key]
+        assert (weight <= before[key]) == (rel.lkw_km_plan <= rel.lkw_km_ist)
 
 
 @needs_excel

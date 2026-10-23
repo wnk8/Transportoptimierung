@@ -179,3 +179,10 @@ Auftrag: Repository auf GitHub pushen und die Darstellung des Repositorys mit be
 Umsetzung: Alle Bilder in `docs/images` neu aufgenommen im weißen Drei-Seiten-Design, mit doppelter Pixeldichte (2880 px breit) und auf den relevanten Ausschnitt zugeschnitten: Ergebnis mit Karte, Relation Stuttgart > Mainz, Tour 12, Straße gegen Luftlinie, Erklärung, Szenarien, Assistent mit echter Gemini-Antwort, neu Rechnen, Prüfungen und zwei Smartphone-Ansichten (390 px). Farben auf 256 reduziert, Dateigröße etwa halbiert. README: Übersicht der drei Seiten als Bildreihe, Abschnitt "Auf dem Smartphone", Schriften korrigiert (Geist, Instrument Serif, Rückfall Inter).
 Gate: ruff und mypy grün, pytest 164 bestanden.
 Befund: Der Assistent braucht mit Gemini bis zu 80 s für eine Antwort; die Oberfläche zeigt so lange "Agent arbeitet".
+
+## Karte Phase 1: Vorher/Nachher vergleichbar (23.10.2026)
+Auftrag: Audit der Kartenansicht; Vorher und Nachher sahen gleich aus. Plan mit sechs Phasen von der Gruppe freigegeben (Routenvergleich, Farbcodierung, eigene Gruppen, Open-Source-Bausteine).
+Befund: Bei Szenario Ist zeichnete die rechte Karte erneut Ist. Bei M2 und M3 maß die Linienbreite links Sendungen und rechts tkm, also zwei verschiedene Größen.
+Umsetzung: Bei Ist zeigt die rechte Seite einen Hinweis statt einer Kopie. Linienbreite links und rechts jetzt Lkw-km je Relation mit gemeinsamem Maximum; die Bahnlinie zeigt die verlagerten Lkw-km. Tooltip mit Lkw-Fahrten und Lkw-km Ist gegen Plan. `RelationView` nutzt `relation_detail`, damit es keine zweite Rechenlogik gibt. Fehler behoben: `set_visibility` auf `ui.leaflet` löschte die von Leaflet gesetzten Klassen, die Karte blieb danach ohne Kacheln; jetzt wird ein umschließender Container umgeschaltet.
+Gate: ruff und mypy grün, pytest 169 bestanden (neu: kein Nachher bei Ist, Σ Lkw-km je Relation = Kennzahl Fahrzeug-km für Ist, M2, M3, gemeinsame Breitenskala).
+Browserprüfung (1400 × 1000): M3 zeigt dünnere Lkw-Linien und gestrichelte Bahn, Ist zeigt den Hinweis, Wechsel Ist zu M2 zeigt die rechte Karte mit Kacheln und gleichem Ausschnitt.
