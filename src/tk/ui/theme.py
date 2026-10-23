@@ -477,6 +477,23 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); font
   .tk-hero { grid-template-columns: 1fr; }
   .tk-hero-side { align-items: flex-start; }
 }
+@media (max-width: 699px) {
+  .tk-nav { grid-template-columns: auto 1fr; height: 60px; }
+  .tk-nav-cta { display: none; }
+  .tk-pagenav { gap: 14px; justify-self: end; }
+  .tk-pagenav a { font-size: 13px; }
+  .tk-toolbar { top: 60px; }
+  .tk-steps { flex-wrap: nowrap; gap: 4px; }
+  .tk-step { padding-right: 8px; gap: 6px; }
+  .tk-step-meta { display: none; }
+  .tk-step-sep { width: 12px; }
+  .tk-segment button { padding: 7px 10px; }
+  .tk-stats-5, .tk-cols { grid-template-columns: 1fr; }
+  .tk-foot { grid-template-columns: 1fr; }
+  .tk-dock { padding-left: 16px; gap: 12px; }
+  .tk-dock-info > :not(:last-child) { display: none; }
+  .q-btn-toggle { flex-wrap: wrap; }
+}
 """
 
 
