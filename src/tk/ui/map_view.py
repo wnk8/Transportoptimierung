@@ -246,6 +246,89 @@ def line_specs(
     return specs
 
 
+CHANGE_TOLERANCE = 0.005
+"""Unter 0,5 % Änderung der Lkw-km gilt eine Relation als unverändert (nur Darstellung)."""
+
+CHANGE_STYLES: dict[str, tuple[str, str, str]] = {
+    "weniger": (MAP_LINES["lkw"][0], "", "Lkw, weniger km"),
+    "gleich": (TOKENS["muted"], "2 6", "Lkw, unverändert, gepunktet"),
+    "mehr": (MAP_LINES["auswahl"][0], "", "Lkw, mehr km"),
+}
+"""Differenzansicht: Farbe, Muster und Text je Veränderungsklasse der Lkw-km."""
+
+
+def change_class(ist: float, plan: float) -> str:
+    if ist <= 0 or abs(plan / ist - 1) < CHANGE_TOLERANCE:
+        return "gleich"
+    return "weniger" if plan < ist else "mehr"
+
+
+def diff_specs(
+    result: Result, scenario: str, start: str | None = None, highlight: dict[str, str] | None = None
+) -> list[Spec]:
+    """Differenzansicht: je Relation heller Ist-Bogen, darüber Plan-Bogen und Bahnbogen.
+
+    Breiten wie in :func:`line_specs` (Lkw-km, gemeinsames Maximum); die Farbe zeigt die
+    Veränderungsklasse, nicht den Startort. Ausgewählte Relationen bleiben kräftig.
+    """
+    if scenario == "Ist":
+        return []
+    rels = relations(result, scenario)
+    km_max = max((max(r.lkw_km_ist, r.lkw_km_plan) for r in rels), default=0.0)
+    picked = {fold(k) for k in (highlight or {})}
+    bahn, dash = MAP_LINES["bahn"]
+    specs: list[Spec] = []
+    for rel in rels:
+        if start is not None and rel.start != start:
+            continue
+        dim = bool(picked) and fold(rel.key) not in picked
+        popup = _popup(rel, scenario)
+        road = arc(rel.lat1, rel.lon1, rel.lat2, rel.lon2, ROAD_BULGE)
+        ghost = {
+            "color": TOKENS["muted"],
+            "weight": _width(rel.lkw_km_ist, km_max),
+            "opacity": DIMMED_OPACITY / 2 if dim else 0.22,
+        }
+        specs.append((road, ghost, popup, rel.key))
+        opacity = DIMMED_OPACITY if dim else 0.95
+        if rel.lkw_km_plan > 0:
+            color, pattern, _ = CHANGE_STYLES[change_class(rel.lkw_km_ist, rel.lkw_km_plan)]
+            opts: dict[str, object] = {
+                "color": color,
+                "weight": _width(rel.lkw_km_plan, km_max),
+                "dashArray": pattern,
+                "opacity": opacity,
+            }
+            specs.append((road, opts, popup, rel.key))
+        if rel.n_bahn > 0:
+            opts = {
+                "color": bahn,
+                "weight": _width(rel.lkw_km_bahn, km_max),
+                "dashArray": dash,
+                "opacity": opacity,
+            }
+            specs.append((arc(rel.lat1, rel.lon1, rel.lat2, rel.lon2, RAIL_BULGE), opts, popup, rel.key))
+    return specs
+
+
+def diff_legend(scenario: str) -> None:
+    def swatch(color: str, dash: str, text: str, opacity: float = 1.0) -> None:
+        with ui.row().classes("items-center gap-1"):
+            ui.html(
+                f'<svg width="36" height="10" aria-hidden="true"><line x1="0" y1="5" x2="36" y2="5" '
+                f'stroke="{color}" stroke-opacity="{opacity}" stroke-width="6" stroke-dasharray="{dash}"/></svg>'
+            )
+            ui.label(text).classes("tk-label")
+
+    with ui.row().classes("items-center gap-4 flex-wrap"):
+        swatch(TOKENS["muted"], "", "Ist, hell (Breite: Ist-Lkw-km)", 0.3)
+        for color, pattern, text in CHANGE_STYLES.values():
+            swatch(color, pattern, text)
+        if scenario == "M3":
+            swatch(*MAP_LINES["bahn"], "Bahn, gestrichelt (Breite: verlagerte Lkw-km)")
+        ui.label("Luftlinie, schematisch").classes("tk-label")
+
+
 Node = tuple[str, float, float, str]
 """Knoten: Name, Breite, Länge, Farbe (Startort) oder leer (Ziel)."""
 
@@ -373,7 +456,7 @@ class MapView:
         self.result: Result | None = None
         self.scenario = "M3"
         self.offline = False
-        self._layers: dict[str, list[object]] = {"vorher": [], "nachher": []}
+        self._layers: dict[str, list[object]] = {"vorher": [], "nachher": [], "diff": []}
         self._syncing = False
         self.highlight: dict[str, str] = {}
         """Ausgewählte Relationen und ihre Farbe (Routenvergleich)."""
@@ -382,7 +465,7 @@ class MapView:
             with ui.row().classes("w-full items-center justify-between"):
                 ui.label("Karte").classes("tk-section")
                 self.mode = ui.toggle(
-                    {"karte": "Karte", "netz": "Knoten-Kanten"},
+                    {"karte": "Nebeneinander", "diff": "Differenz", "netz": "Knoten-Kanten"},
                     value="karte",
                     on_change=lambda _: self._apply_mode(),
                 ).props("dense no-caps unelevated toggle-color=primary")
@@ -390,14 +473,23 @@ class MapView:
                 self.start_filter = ui.toggle(
                     {"": "Alle Startorte"}, value="", on_change=lambda _: self.render()
                 ).props("dense no-caps unelevated toggle-color=primary")
-                with ui.row().classes("items-center gap-2"):
+                with ui.row().classes("items-center gap-2") as self.color_row:
                     ui.label("Farbe nach").classes("tk-label")
                     self.color_by = ui.toggle(
                         {"start": "Startort", "szenario": "Szenario"},
                         value="start",
                         on_change=lambda _: self.render(),
                     ).props("dense no-caps unelevated toggle-color=primary")
-            with ui.row().classes("w-full gap-2 no-wrap tk-two-col"):
+            with ui.column().classes("w-full gap-1") as self.diff_col:
+                self.title_diff = ui.label("Differenz").classes("tk-label")
+                with ui.element("div").classes("w-full") as self.box_diff:
+                    self.map_diff = (
+                        ui.leaflet(center=center, zoom=zoom).classes("w-full").style("height:520px")
+                    )
+                self.hint_diff = ui.label(
+                    "Ist gewählt. M2 oder M3 wählen, um die Differenz zu sehen."
+                ).classes("tk-note")
+            with ui.row().classes("w-full gap-2 no-wrap tk-two-col") as self.pair:
                 with ui.column().classes("flex-1 gap-1 min-w-0"):
                     self.title_left = ui.label("Vorher: Ist").classes("tk-label")
                     # Toggle a wrapper, never the map: set_visibility rewrites the element's classes
@@ -473,12 +565,17 @@ class MapView:
         self.render()
 
     def _visibility(self) -> None:
-        """Karte oder SVG je Modus; bei Szenario Ist bleibt die rechte Seite ein Hinweis."""
-        net = self.mode.value == "netz"
+        """Karte, Differenz oder SVG je Modus; bei Szenario Ist zeigt die Planseite einen Hinweis."""
+        mode = self.mode.value
+        net, diff = mode == "netz", mode == "diff"
         no_plan = self.scenario == "Ist"
+        self.pair.set_visibility(not diff)
+        self.diff_col.set_visibility(diff)
+        self.hint_diff.set_visibility(no_plan)
         boxes = (
-            (self.box_left, self.map_left, not net),
-            (self.box_right, self.map_right, not net and not no_plan),
+            (self.box_left, self.map_left, mode == "karte"),
+            (self.box_right, self.map_right, mode == "karte" and not no_plan),
+            (self.box_diff, self.map_diff, diff and not no_plan),
         )
         for box, m, show in boxes:
             was_hidden = not box.visible
@@ -495,6 +592,13 @@ class MapView:
         ref = self.map_left if m is not self.map_left else self.map_right
         m.run_map_method("invalidateSize")
         m.run_map_method("setView", list(ref.center), ref.zoom)
+
+    async def settle(self) -> None:
+        """Nach dem Einblenden des umgebenden Tabs die sichtbaren Karten neu vermessen."""
+        visible = {"karte": (self.map_left, self.map_right), "diff": (self.map_diff,)}
+        for m in visible.get(str(self.mode.value), ()):
+            await m.initialized()
+            m.run_map_method("invalidateSize")
 
     def update(self, result: Result, scenario: str) -> None:
         self.result, self.scenario = result, scenario
@@ -524,9 +628,17 @@ class MapView:
         self.title_right.set_text(
             "Nachher" if self.scenario == "Ist" else f"Nachher: {SCENARIO_LABEL[self.scenario]}"
         )
+        diff = self.mode.value == "diff"
+        self.color_row.set_visibility(not diff)
+        self.title_diff.set_text(
+            f"Differenz: Ist gegen {SCENARIO_LABEL[self.scenario]}" if self.scenario != "Ist" else "Differenz"
+        )
         self.legend_box.clear()
         with self.legend_box:
-            legend(self.scenario, color_by, start_colors(relations(self.result, "Ist")))
+            if diff:
+                diff_legend(self.scenario)
+            else:
+                legend(self.scenario, color_by, start_colors(relations(self.result, "Ist")))
         if self.mode.value == "netz":
             for side, box in (("vorher", self.svg_left), ("nachher", self.svg_right)):
                 box.set_content(
@@ -542,11 +654,18 @@ class MapView:
             return
         pending: list[tuple[ui.leaflet, object, str, str]] = []
         labels: list[tuple[object, str, bool]] = []
-        for side, m in (("vorher", self.map_left), ("nachher", self.map_right)):
+        drawn = (
+            [("diff", self.map_diff, diff_specs(self.result, self.scenario, start, self.highlight))]
+            if diff
+            else [
+                (side, m, line_specs(self.result, self.scenario, side, color_by, start, self.highlight))
+                for side, m in (("vorher", self.map_left), ("nachher", self.map_right))
+            ]
+        )
+        for side, m, specs in drawn:
             for layer in self._layers[side]:
                 m.remove_layer(layer)  # type: ignore[arg-type]
             self._layers[side] = []
-            specs = line_specs(self.result, self.scenario, side, color_by, start, self.highlight)
             for coords, opts, popup, key in specs:
                 layer = m.generic_layer(name="polyline", args=[coords, opts])
                 self._layers[side].append(layer)
@@ -574,12 +693,12 @@ class MapView:
 
         async def bind() -> None:
             # Tooltips and clicks can only be bound once the layers exist in the browser (spike S14).
-            for m in (self.map_left, self.map_right):
+            for m in (self.map_left, self.map_right, self.map_diff):
                 await m.initialized()
             if not self._ready:
                 # Leaflet measures its container at creation; re-measure once the layout is final.
                 self._ready = True
-                for m in (self.map_left, self.map_right):
+                for m in (self.map_left, self.map_right, self.map_diff):
                     m.run_map_method("invalidateSize")
                     m.run_map_method("setView", list(self._view[0]), self._view[1])
             for _, layer, popup, key in pending:

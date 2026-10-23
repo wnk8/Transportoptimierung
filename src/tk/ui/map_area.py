@@ -569,9 +569,7 @@ class MapArea:
 
     async def settle(self) -> None:
         """Nach dem Einblenden des umgebenden Tabs alle sichtbaren Karten neu vermessen."""
-        if self.compare.mode.value != "netz":
-            for m in (self.compare.map_left, self.compare.map_right):
-                await _settle(m)
+        await self.compare.settle()
         await self._tab_changed(None)
 
     def update(self, result: Result, scenario: str) -> None:

@@ -193,3 +193,9 @@ Umsetzung: Linienfarbe je Startort (fünf Töne, Startorte alphabetisch), Bahn �
 Abweichung vom Plan: Leaflet.PolylineOffset und Leaflet.TextPath nicht eingebunden. Die Bögen trennen Lkw und Bahn bereits, und die Beschriftung leisten Leaflet-Tooltips; damit entfällt eine Abhängigkeit, und die Knoten-Kanten-Ansicht bleibt deckungsgleich.
 Gate: ruff und mypy grün, pytest 184 bestanden (neu: Farben Startorte und Auswahl mindestens 3 : 1 gegen Kachel und Weiß, Bogen beginnt und endet an den Knoten, Filter, Hervorhebung).
 Browserprüfung (1400 × 1000): M3 mit allen Startorten und nur Stuttgart, Knoten-Kanten und zurück zur Karte mit geladenen Kacheln, keine Konsolenfehler.
+
+## Karte Phase 3: Differenzansicht (23.10.2026)
+Auftrag: Vorher und Nachher auf einer Karte vergleichen, ohne die Nebeneinander-Ansicht zu ersetzen.
+Umsetzung: Umschalter "Nebeneinander | Differenz | Knoten-Kanten", Standard bleibt Nebeneinander. Differenz: eine Karte (520 px), je Relation ein heller Ist-Bogen (Breite Ist-Lkw-km), darüber der Plan-Bogen (Breite Plan-Lkw-km) in der Farbe seiner Veränderungsklasse: weniger km grün, unverändert grau gepunktet (Änderung unter 0,5 %), mehr km rot; Bahn blau gestrichelt mit der verlagerten Lkw-km als Breite. Startort-Filter und Hervorhebung wirken auch hier. Bei Ist erscheint ein Hinweis.
+Gate: ruff und mypy grün, pytest 186 bestanden (neu: Veränderungsklassen, Differenz mit 45 Ist-Bögen und je Bahnrelation einem Bahnbogen).
+Browserprüfung (1400 × 1000): Differenz bei M3 mit allen Startorten, Kacheln geladen.
